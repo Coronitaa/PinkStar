@@ -84,6 +84,8 @@ export interface Game {
   bannerUrl: string;
   iconUrl: string;
   tags?: Tag[]; // General tags for the game, e.g., "RPG", "Multiplayer"
+  createdAt?: string; // ISO date string
+  updatedAt?: string; // ISO date string
 }
 
 export interface GetResourcesParams {

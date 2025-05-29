@@ -215,18 +215,18 @@ export function CategoryPageContent({
       <main className={(availableFilterTags.versions.length > 0 || availableFilterTags.loaders.length > 0 || availableFilterTags.genres.length > 0 || availableFilterTags.misc.length > 0 || availableFilterTags.channels.length > 0) ? "md:col-span-9 lg:col-span-9" : "md:col-span-12"}>
         <div className="mb-6 p-4 border rounded-lg bg-card shadow">
           <div className="flex flex-col sm:flex-row gap-4 items-center">
-            <div className="relative flex-grow-0 sm:flex-grow"> {/* Adjusted for controlled width on smaller screens */}
+            <div className="relative flex-shrink-0"> {/* Changed: flex-grow-0 sm:flex-grow to flex-shrink-0 */}
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
                 type="search"
                 placeholder={`Search in ${categoryName}...`}
-                className="pl-10 w-full sm:max-w-md" // Control width
+                className="pl-10 w-auto min-w-[200px] max-w-xs sm:max-w-sm md:max-w-md" // Adjusted width classes
                 value={searchQueryInput}
                 onChange={handleSearchInputChange}
               />
             </div>
             <Select value={sortBy} onValueChange={handleSortChange}>
-              <SelectTrigger className="w-full sm:w-auto min-w-[160px]"> {/* Adjusted width */}
+              <SelectTrigger className="w-full sm:w-auto min-w-[160px]"> 
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
               <SelectContent>

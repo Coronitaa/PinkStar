@@ -1,5 +1,4 @@
 
-
 import type { Game, Category, Resource, Author, Tag, ResourceFile, GetResourcesParams, PaginatedResourcesResponse, ResourceLinks, ChangelogEntry } from './types';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -22,6 +21,16 @@ const commonTags: Record<string, Tag> = {
   channelRelease: { id: 'tag-ch-release', name: 'Release', type: 'channel', color: 'bg-green-500 border-green-500', textColor: 'text-green-50' },
   channelBeta: { id: 'tag-ch-beta', name: 'Beta', type: 'channel', color: 'bg-sky-500 border-sky-500', textColor: 'text-sky-50' },
   channelAlpha: { id: 'tag-ch-alpha', name: 'Alpha', type: 'channel', color: 'bg-orange-500 border-orange-500', textColor: 'text-orange-50' },
+  adventure: {id: 'tag-adventure', name: 'Adventure', type: 'genre'},
+  strategy: {id: 'tag-strategy', name: 'Strategy', type: 'genre'},
+  rpg: {id: 'tag-rpg', name: 'RPG', type: 'genre'},
+  simulation: {id: 'tag-simulation', name: 'Simulation', type: 'genre'},
+  multiplayer: {id: 'tag-multiplayer', name: 'Multiplayer', type: 'genre'},
+  singleplayer: {id: 'tag-singleplayer', name: 'Singleplayer', type: 'genre'},
+  sandbox: { id: 'tag-sandbox', name: 'Sandbox', type: 'genre' },
+  space: { id: 'tag-space', name: 'Space Sim', type: 'genre' },
+  rts: { id: 'tag-rts', name: 'RTS', type: 'genre' },
+  openWorld: { id: 'tag-openworld', name: 'Open World', type: 'genre' },
 };
 
 const baseGames: Game[] = [
@@ -33,7 +42,9 @@ const baseGames: Game[] = [
     longDescription: 'PixelVerse Adventures is a sprawling open-world sandbox game where creativity and exploration know no bounds. Build magnificent structures, embark on daring quests, discover hidden dungeons, and team up with friends in a vibrant, procedurally generated universe. With regular updates and a thriving community, there\'s always something new to discover in PixelVerse.',
     bannerUrl: 'https://placehold.co/800x450/D81B60/FFFFFF?text=PixelVerse+Banner',
     iconUrl: 'https://placehold.co/128x128/D81B60/FFFFFF?text=PV',
-    tags: [commonTags.pc, { id: 'tag-sandbox', name: 'Sandbox', type: 'genre' }, { id: 'tag-multiplayer', name: 'Multiplayer', type: 'genre' }],
+    tags: [commonTags.pc, commonTags.sandbox, commonTags.multiplayer, commonTags.adventure, commonTags.rpg],
+    createdAt: new Date('2023-01-15T10:00:00Z').toISOString(),
+    updatedAt: new Date('2024-03-10T12:00:00Z').toISOString(),
   },
   {
     id: 'game2',
@@ -43,7 +54,9 @@ const baseGames: Game[] = [
     longDescription: 'Galaxy Explorers invites you to chart your own course across a procedurally generated galaxy of trillions of stars. Mine resources, trade commodities, engage in thrilling dogfights, build your own starbases, and unravel the mysteries of ancient alien civilizations. Whether you choose to be a peaceful trader, a notorious pirate, or a renowned explorer, your saga is written in the stars.',
     bannerUrl: 'https://placehold.co/800x450/AD1457/FFFFFF?text=Galaxy+Banner',
     iconUrl: 'https://placehold.co/128x128/AD1457/FFFFFF?text=GE',
-    tags: [commonTags.pc, { id: 'tag-space', name: 'Space Sim', type: 'genre' }, { id: 'tag-openworld', name: 'Open World', type: 'genre' }],
+    tags: [commonTags.pc, commonTags.space, commonTags.openWorld, commonTags.simulation, commonTags.singleplayer],
+    createdAt: new Date('2022-11-20T14:30:00Z').toISOString(),
+    updatedAt: new Date('2024-02-28T10:00:00Z').toISOString(),
   },
   {
     id: 'game3',
@@ -53,7 +66,9 @@ const baseGames: Game[] = [
     longDescription: 'Kingdoms Collide is a real-time strategy game that blends classic RTS mechanics with deep tactical gameplay. Choose from unique factions, command vast armies, manage your economy, and outwit your opponents on diverse battlefields. Featuring a compelling single-player campaign and intense multiplayer matches, only the shrewdest commanders will prevail.',
     bannerUrl: 'https://placehold.co/800x450/F06292/FFFFFF?text=Kingdoms+Banner',
     iconUrl: 'https://placehold.co/128x128/F06292/FFFFFF?text=KC',
-    tags: [commonTags.pc, { id: 'tag-rts', name: 'RTS', type: 'genre' }, { id: 'tag-strategy', name: 'Strategy', type: 'genre' }],
+    tags: [commonTags.pc, commonTags.rts, commonTags.strategy, commonTags.multiplayer],
+    createdAt: new Date('2023-05-01T09:00:00Z').toISOString(),
+    updatedAt: new Date('2023-12-15T16:45:00Z').toISOString(),
   },
 ];
 
@@ -315,6 +330,14 @@ export const getResources = async (params: GetResourcesParams): Promise<Paginate
     paginatedResources = filteredResources; // No pagination, return all
   }
 
+  // Ensure changelog entries are sorted by date descending if they exist for each resource
+  paginatedResources.forEach(resource => {
+    if (resource.changelogEntries) {
+      resource.changelogEntries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    }
+  });
+
+
   return delayed({
     resources: paginatedResources,
     total,
@@ -381,19 +404,24 @@ export const getAvailableFilterTags = async (gameSlug: string, categorySlug?: st
   });
 
   return delayed({
-    versions: Array.from(versions.values()).sort((a,b) => b.name.localeCompare(a.name)),
+    versions: Array.from(versions.values()).sort((a,b) => b.name.localeCompare(a.name)), // Sort versions newest first by name (approx)
     loaders: Array.from(loaders.values()).sort((a,b) => a.name.localeCompare(b.name)),
     genres: Array.from(genres.values()).sort((a,b) => a.name.localeCompare(b.name)),
     misc: Array.from(misc.values()).sort((a,b) => a.name.localeCompare(b.name)),
-    channels: Array.from(channels.values()).sort((a,b) => a.name.localeCompare(b.name)), // Simple sort for channels
+    channels: Array.from(channels.values()).sort((a,b) => { // Custom sort for channels
+        const order = ['Release', 'Beta', 'Alpha']; // Desired order
+        return order.indexOf(a.name) - order.indexOf(b.name);
+    }),
   });
 };
 
 export const formatTimeAgo = (dateString: string | undefined) => {
   if (!dateString) return 'N/A';
   if (typeof window === 'undefined') {
+    // Consistent server-side rendering, e.g., simple date format
+    // This helps prevent mismatches if the client renders "time ago" immediately
     return new Date(dateString).toLocaleDateString(); 
   }
+  // Client-side will render "time ago"
   return formatDistanceToNow(new Date(dateString), { addSuffix: true });
 };
-
