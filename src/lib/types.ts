@@ -37,6 +37,8 @@ export interface Resource {
   description: string; // Short summary
   detailedDescription: string; // Markdown or rich text
   files: ResourceFile[];
+  requirements?: string; // For the new "Requirements" tab
+  changelog?: string; // For the new "Changelog" tab
 }
 
 export interface Category {
@@ -44,7 +46,7 @@ export interface Category {
   name: string;
   slug: string;
   description?: string;
-  // For simplicity, we'll query resources by categoryId instead of listing IDs here
+  gameSlug?: string; // To associate category with a game if needed for specific fetches
 }
 
 export interface Game {
@@ -56,5 +58,14 @@ export interface Game {
   bannerUrl: string;
   iconUrl: string;
   tags?: Tag[]; // General tags for the game, e.g., "RPG", "Multiplayer"
-  // Categories will be fetched or filtered for a game
+}
+
+export interface GetResourcesFilters {
+  gameSlug?: string;
+  categorySlug?: string;
+  tags?: string[];
+  searchQuery?: string;
+  sortBy?: 'relevance' | 'downloads' | 'updatedAt' | 'name';
+  page?: number;
+  limit?: number;
 }

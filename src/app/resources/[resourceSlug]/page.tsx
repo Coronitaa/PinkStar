@@ -1,23 +1,18 @@
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
 import { getResourceBySlug, getResources } from '@/lib/data';
+import type { Resource } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ResourceInfoSidebar } from '@/components/resource/ResourceInfoSidebar';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"; // Assuming this exists or will be created
-import Link from 'next/link';
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { TagBadge } from '@/components/shared/TagBadge';
 import { Carousel, CarouselItem } from '@/components/shared/Carousel';
 import { ResourceCard } from '@/components/resource/ResourceCard';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
-
-// Basic Breadcrumb components (can be moved to ui/breadcrumb.tsx if needed)
-const UIBreadcrumb = ({ children }: { children: React.ReactNode }) => <nav aria-label="breadcrumb"><ol className="flex items-center space-x-1.5 text-sm text-muted-foreground">{children}</ol></nav>;
-const UIBreadcrumbList = ({ children }: { children: React.ReactNode }) => <>{children}</>; // ol is already in UIBreadcrumb
-const UIBreadcrumbItem = ({ children }: { children: React.ReactNode }) => <li className="flex items-center">{children}</li>;
-const UIBreadcrumbLink = ({ href, children }: { href: string, children: React.ReactNode }) => <Link href={href} className="hover:text-primary transition-colors">{children}</Link>;
-const UIBreadcrumbPage = ({ children }: { children: React.ReactNode }) => <span className="font-medium text-foreground">{children}</span>;
-const UIBreadcrumbSeparator = () => <li role="presentation" aria-hidden="true" className="px-1">/</li>;
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FileText, BookOpen, ListChecks, MessageCircle, Eye } from 'lucide-react';
 
 
 interface ResourcePageProps {
@@ -30,26 +25,23 @@ export default async function ResourcePage({ params }: ResourcePageProps) {
     notFound();
   }
 
-  // Fetch related resources (e.g., by same author or in same category)
   const relatedResources = (await getResources({ gameSlug: resource.gameSlug, categorySlug: resource.categorySlug }))
     .filter(r => r.id !== resource.id)
     .slice(0, 5);
 
-
   return (
     <div className="space-y-8">
-      <UIBreadcrumb>
-        <UIBreadcrumbList>
-          <UIBreadcrumbItem><UIBreadcrumbLink href="/">Home</UIBreadcrumbLink></UIBreadcrumbItem>
-          <UIBreadcrumbSeparator />
-          <UIBreadcrumbItem><UIBreadcrumbLink href={`/games/${resource.gameSlug}`}>{resource.gameName}</UIBreadcrumbLink></UIBreadcrumbItem>
-          <UIBreadcrumbSeparator />
-          {/* Link to category listing page could be: /games/${resource.gameSlug}#category-${resource.categorySlug} or a dedicated category page */}
-          <UIBreadcrumbItem><UIBreadcrumbLink href={`/games/${resource.gameSlug}`}>{resource.categoryName}</UIBreadcrumbLink></UIBreadcrumbItem>
-          <UIBreadcrumbSeparator />
-          <UIBreadcrumbItem><UIBreadcrumbPage>{resource.name}</UIBreadcrumbPage></UIBreadcrumbItem>
-        </UIBreadcrumbList>
-      </UIBreadcrumb>
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem><BreadcrumbLink href="/">Home</BreadcrumbLink></BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem><BreadcrumbLink href={`/games/${resource.gameSlug}`}>{resource.gameName}</BreadcrumbLink></BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem><BreadcrumbLink href={`/games/${resource.gameSlug}/${resource.categorySlug}`}>{resource.categoryName}</BreadcrumbLink></BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem><BreadcrumbPage>{resource.name}</BreadcrumbPage></BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
 
       <div className="lg:grid lg:grid-cols-12 lg:gap-8">
         <main className="lg:col-span-8 space-y-6">
@@ -68,35 +60,57 @@ export default async function ResourcePage({ params }: ResourcePageProps) {
               <CardTitle className="text-3xl md:text-4xl font-bold mb-2">{resource.name}</CardTitle>
               <CardDescription className="text-base text-muted-foreground mb-4">{resource.description}</CardDescription>
               
-              <div className="prose prose-sm sm:prose lg:prose-lg xl:prose-xl dark:prose-invert max-w-none prose-headings:text-primary prose-a:text-accent hover:prose-a:text-accent/80"
-                dangerouslySetInnerHTML={{ __html: resource.detailedDescription.replace(/\n/g, '<br />') }} // Basic markdown-like rendering
-              />
+              <Tabs defaultValue="overview" className="w-full">
+                <TabsList className="grid w-full grid-cols-3 sm:grid-cols-5 mb-4">
+                  <TabsTrigger value="overview"><Eye className="w-4 h-4 mr-1 sm:mr-2" />Overview</TabsTrigger>
+                  <TabsTrigger value="files"><FileText className="w-4 h-4 mr-1 sm:mr-2" />Files</TabsTrigger>
+                  <TabsTrigger value="requirements"><ListChecks className="w-4 h-4 mr-1 sm:mr-2" />Requirements</TabsTrigger>
+                  <TabsTrigger value="changelog"><BookOpen className="w-4 h-4 mr-1 sm:mr-2" />Changelog</TabsTrigger>
+                  <TabsTrigger value="comments"><MessageCircle className="w-4 h-4 mr-1 sm:mr-2" />Comments</TabsTrigger>
+                </TabsList>
+                <TabsContent value="overview">
+                  <div 
+                    className="prose prose-sm sm:prose lg:prose-lg xl:prose-xl dark:prose-invert max-w-none prose-headings:text-primary prose-a:text-accent hover:prose-a:text-accent/80 whitespace-pre-line"
+                    dangerouslySetInnerHTML={{ __html: resource.detailedDescription.replace(/\n/g, '<br />') }}
+                  />
+                </TabsContent>
+                <TabsContent value="files">
+                   <ul className="space-y-2">
+                    {resource.files.map(file => (
+                      <li key={file.id} className="flex justify-between items-center p-3 border rounded-md bg-card-foreground/5">
+                        <div>
+                          <p className="font-medium text-card-foreground">{file.name}</p>
+                          <p className="text-xs text-muted-foreground">Version: {file.version} | Size: {file.size}</p>
+                        </div>
+                        <Link href={file.url} download>
+                          <Button variant="outline" size="sm">Download</Button>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                  {resource.files.length === 0 && <p className="text-muted-foreground">No files available for this resource.</p>}
+                </TabsContent>
+                <TabsContent value="requirements">
+                  {resource.requirements ? (
+                     <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-line" dangerouslySetInnerHTML={{ __html: resource.requirements.replace(/\n/g, '<br />') }}/>
+                  ) : (
+                    <p className="text-muted-foreground">No specific requirements listed for this resource.</p>
+                  )}
+                </TabsContent>
+                <TabsContent value="changelog">
+                  {resource.changelog ? (
+                     <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-line" dangerouslySetInnerHTML={{ __html: resource.changelog.replace(/\n/g, '<br />') }} />
+                  ) : (
+                    <p className="text-muted-foreground">No changelog available for this resource.</p>
+                  )}
+                </TabsContent>
+                <TabsContent value="comments">
+                  <p className="text-muted-foreground">Comments are coming soon! Share your thoughts and feedback in the future.</p>
+                  {/* Placeholder for comments section */}
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
-
-          {/* Could add sections for changelog, comments, etc. here */}
-           <Card>
-            <CardHeader>
-              <CardTitle>Files</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul>
-                {resource.files.map(file => (
-                  <li key={file.id} className="flex justify-between items-center p-2 border-b last:border-b-0">
-                    <div>
-                      <p className="font-medium">{file.name}</p>
-                      <p className="text-xs text-muted-foreground">Version: {file.version} | Size: {file.size}</p>
-                    </div>
-                    <Link href={file.url} download>
-                      <Button variant="outline" size="sm">Download</Button>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-
-
         </main>
 
         <aside className="lg:col-span-4 mt-8 lg:mt-0">
@@ -116,7 +130,6 @@ export default async function ResourcePage({ params }: ResourcePageProps) {
           </Carousel>
         </section>
       )}
-
     </div>
   );
 }

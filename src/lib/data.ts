@@ -1,4 +1,4 @@
-import type { Game, Category, Resource, Author, Tag, ResourceFile } from './types';
+import type { Game, Category, Resource, Author, Tag, ResourceFile, GetResourcesFilters } from './types';
 
 const authors: Author[] = [
   { id: 'author1', name: 'CreativeWorks', avatarUrl: 'https://placehold.co/40x40' },
@@ -26,7 +26,7 @@ const allResources: Resource[] = [
     gameSlug: 'pixelverse-adventures',
     categoryName: 'Visual Enhancements',
     categorySlug: 'visual-enhancements',
-    imageUrl: 'https://placehold.co/300x200',
+    imageUrl: 'https://placehold.co/300x200/E91E63/FFFFFF?text=UltraGFX',
     author: authors[0],
     tags: [commonTags.v1_20, commonTags.fabric, commonTags.texturePack, commonTags.pc],
     downloads: 15000,
@@ -48,6 +48,14 @@ Ultra Graphics Mod completely revamps the visual experience of PixelVerse Advent
       { id: 'file1_1', name: 'ultra-graphics-v2.1.0.jar', url: '#', size: '5.5 MB', version: '2.1.0' },
       { id: 'file1_2', name: 'ultra-graphics-v2.0.0.jar', url: '#', size: '5.2 MB', version: '2.0.0' },
     ],
+    requirements: 'Requires Fabric API. Recommended: 8GB RAM.',
+    changelog: `
+v2.1.0:
+- Added support for new biome lighting.
+- Fixed water transparency issues.
+v2.0.0:
+- Initial release for 1.20.X.
+    `,
   },
   {
     id: 'res2',
@@ -57,7 +65,7 @@ Ultra Graphics Mod completely revamps the visual experience of PixelVerse Advent
     gameSlug: 'pixelverse-adventures',
     categoryName: 'Utilities',
     categorySlug: 'utilities',
-    imageUrl: 'https://placehold.co/300x200',
+    imageUrl: 'https://placehold.co/300x200/4CAF50/FFFFFF?text=Minimap',
     author: authors[1],
     tags: [commonTags.v1_19, commonTags.v1_20, commonTags.fabric, commonTags.forge, commonTags.utility],
     downloads: 250000,
@@ -79,6 +87,12 @@ Supports both Fabric and Forge.
       { id: 'file2_1', name: 'advanced-minimap-v3.5.2-fabric.jar', url: '#', size: '1.2 MB', version: '3.5.2' },
       { id: 'file2_2', name: 'advanced-minimap-v3.5.2-forge.jar', url: '#', size: '1.3 MB', version: '3.5.2' },
     ],
+    requirements: 'None.',
+    changelog: `
+v3.5.2:
+- Performance improvements for entity radar.
+- Fixed waypoint sharing bug.
+    `,
   },
   {
     id: 'res3',
@@ -88,7 +102,7 @@ Supports both Fabric and Forge.
     gameSlug: 'pixelverse-adventures',
     categoryName: 'Maps & Worlds',
     categorySlug: 'maps-and-worlds',
-    imageUrl: 'https://placehold.co/300x200',
+    imageUrl: 'https://placehold.co/300x200/2196F3/FFFFFF?text=Skyblock',
     author: authors[2],
     tags: [commonTags.v1_20, commonTags.map],
     downloads: 7500,
@@ -117,7 +131,7 @@ Recommended for 1-4 players.
     gameSlug: 'galaxy-explorers',
     categoryName: 'Ship Customization',
     categorySlug: 'ship-customization',
-    imageUrl: 'https://placehold.co/300x200',
+    imageUrl: 'https://placehold.co/300x200/9C27B0/FFFFFF?text=CosmicPack',
     author: authors[0],
     tags: [commonTags.utility, commonTags.pc],
     downloads: 9200,
@@ -137,7 +151,48 @@ Easy to install and apply in-game.
     files: [
       { id: 'file4_1', name: 'cosmic-galaxy-pack-v1.5.0.pak', url: '#', size: '25.5 MB', version: '1.5.0' },
     ],
+    requirements: 'Base game Galaxy Explorers v1.2+.',
   },
+  {
+    id: 'res5',
+    name: 'Inventory Sorter',
+    slug: 'inventory-sorter',
+    gameName: 'PixelVerse Adventures',
+    gameSlug: 'pixelverse-adventures',
+    categoryName: 'Utilities',
+    categorySlug: 'utilities',
+    imageUrl: 'https://placehold.co/300x200/795548/FFFFFF?text=InvSort',
+    author: authors[1],
+    tags: [commonTags.v1_20, commonTags.fabric, commonTags.utility],
+    downloads: 120000,
+    createdAt: new Date('2023-03-15T00:00:00Z').toISOString(),
+    updatedAt: new Date('2023-09-10T00:00:00Z').toISOString(),
+    version: '1.8.0',
+    description: 'Automatically sorts your inventory and chests with a single click or keybind.',
+    detailedDescription: 'Tired of messy inventories? This mod adds smart sorting to keep everything organized. Highly configurable.',
+    files: [{ id: 'file5_1', name: 'inventory-sorter-v1.8.0.jar', url: '#', size: '0.5 MB', version: '1.8.0' }],
+    requirements: 'Fabric API.',
+    changelog: 'v1.8.0: Added compatibility with locked slots.\nv1.7.5: Improved sorting logic for tools.'
+  },
+  {
+    id: 'res6',
+    name: 'Realistic Textures HD',
+    slug: 'realistic-textures-hd',
+    gameName: 'PixelVerse Adventures',
+    gameSlug: 'pixelverse-adventures',
+    categoryName: 'Visual Enhancements',
+    categorySlug: 'visual-enhancements',
+    imageUrl: 'https://placehold.co/300x200/FF9800/FFFFFF?text=HDTextures',
+    author: authors[2],
+    tags: [commonTags.v1_20, commonTags.texturePack],
+    downloads: 50000,
+    createdAt: new Date('2023-02-01T00:00:00Z').toISOString(),
+    updatedAt: new Date('2023-07-20T00:00:00Z').toISOString(),
+    version: '4.2.0',
+    description: 'A complete high-definition texture overhaul for PixelVerse. Supports PBR.',
+    detailedDescription: 'Experience PixelVerse in stunning detail with these 128x resolution textures. Includes PBR maps for compatible shaders.',
+    files: [{ id: 'file6_1', name: 'realistic-textures-hd-v4.2.0.zip', url: '#', size: '150 MB', version: '4.2.0' }],
+  }
 ];
 
 const games: Game[] = [
@@ -147,8 +202,8 @@ const games: Game[] = [
     slug: 'pixelverse-adventures',
     description: 'An epic block-building adventure in a vast, procedurally generated world.',
     longDescription: 'Dive into PixelVerse Adventures, where creativity meets exploration. Build magnificent structures, battle fierce monsters, and uncover ancient secrets in a world limited only by your imagination. Features extensive modding support.',
-    bannerUrl: 'https://placehold.co/1200x400',
-    iconUrl: 'https://placehold.co/100x100',
+    bannerUrl: 'https://placehold.co/1200x400/E91E63/FFFFFF?text=PixelVerse',
+    iconUrl: 'https://placehold.co/100x100/E91E63/FFFFFF?text=PV',
     tags: [{id: 'gtag1', name: 'Sandbox', type: 'genre'}, {id: 'gtag2', name: 'Survival', type: 'genre'}, {id: 'gtag3', name: 'Building', type: 'genre'}],
   },
   {
@@ -157,8 +212,8 @@ const games: Game[] = [
     slug: 'galaxy-explorers',
     description: 'Command your starship and explore the vast unknown of space.',
     longDescription: 'Galaxy Explorers puts you in the captain\'s chair of an advanced starship. Chart unknown systems, trade with alien civilizations, engage in thrilling space combat, and customize your vessel to become a legend of the cosmos.',
-    bannerUrl: 'https://placehold.co/1200x400',
-    iconUrl: 'https://placehold.co/100x100',
+    bannerUrl: 'https://placehold.co/1200x400/9C27B0/FFFFFF?text=Galaxy+Explorers',
+    iconUrl: 'https://placehold.co/100x100/9C27B0/FFFFFF?text=GE',
     tags: [{id: 'gtag4', name: 'Space Sim', type: 'genre'}, {id: 'gtag5', name: 'Sci-Fi', type: 'genre'}, {id: 'gtag6', name: 'Exploration', type: 'genre'}],
   },
    {
@@ -167,15 +222,13 @@ const games: Game[] = [
     slug: 'kingdoms-collide',
     description: 'A real-time strategy game of medieval warfare and diplomacy.',
     longDescription: 'Forge your empire in Kingdoms Collide. Raise mighty armies, construct impenetrable fortresses, and outmaneuver your rivals on the battlefield and in the courts. Will you rule through conquest or cunning alliances?',
-    bannerUrl: 'https://placehold.co/1200x400',
-    iconUrl: 'https://placehold.co/100x100',
+    bannerUrl: 'https://placehold.co/1200x400/009688/FFFFFF?text=Kingdoms+Collide',
+    iconUrl: 'https://placehold.co/100x100/009688/FFFFFF?text=KC',
     tags: [{id: 'gtag7', name: 'RTS', type: 'genre'}, {id: 'gtag8', name: 'Medieval', type: 'genre'}, {id: 'gtag9', name: 'Strategy', type: 'genre'}],
   },
 ];
 
-// In a real app, categories would be associated with games, perhaps through a join table or nested.
-// For this mock, we'll define some global categories and then filter resources by gameId and categoryName/slug.
-const categories: Category[] = [
+const allCategories: Category[] = [
     { id: 'cat1', name: 'Visual Enhancements', slug: 'visual-enhancements', description: 'Mods that improve graphics, textures, and overall visual fidelity.' },
     { id: 'cat2', name: 'Utilities', slug: 'utilities', description: 'Helpful tools, UI improvements, and quality-of-life mods.' },
     { id: 'cat3', name: 'Maps & Worlds', slug: 'maps-and-worlds', description: 'Custom maps, adventure worlds, and new terrains to explore.' },
@@ -194,33 +247,78 @@ export const getGameBySlug = async (slug: string): Promise<Game | undefined> => 
 };
 
 export const getCategoriesForGame = async (gameSlug: string): Promise<Category[]> => {
-  // This is a simplified mock. In a real app, categories would be linked to games.
-  // Here, we'll return a subset of global categories relevant to the game.
+  const gameCategories: Category[] = [];
   if (gameSlug === 'pixelverse-adventures') {
-    return [categories[0], categories[1], categories[2], categories[4]];
+    gameCategories.push(...[allCategories[0], allCategories[1], allCategories[2], allCategories[4]].map(c => ({...c, gameSlug})));
   }
   if (gameSlug === 'galaxy-explorers') {
-    return [categories[3], categories[4], categories[5]];
+    gameCategories.push(...[allCategories[3], allCategories[4], allCategories[5]].map(c => ({...c, gameSlug})));
   }
   if (gameSlug === 'kingdoms-collide') {
-    return [categories[1], categories[4], categories[5]];
+    gameCategories.push(...[allCategories[1], allCategories[4], allCategories[5]].map(c => ({...c, gameSlug})));
   }
-  return [];
+  return gameCategories;
 };
 
-export const getResources = async (filters?: { gameSlug?: string; categorySlug?: string; tags?: string[] }): Promise<Resource[]> => {
+export const getCategoryDetails = async (gameSlug: string, categorySlug: string): Promise<Category | undefined> => {
+  const gameCategories = await getCategoriesForGame(gameSlug);
+  return gameCategories.find(c => c.slug === categorySlug);
+};
+
+
+export const getResources = async (filters?: GetResourcesFilters): Promise<Resource[]> => {
   let filteredResources = allResources;
+
   if (filters?.gameSlug) {
     filteredResources = filteredResources.filter(r => r.gameSlug === filters.gameSlug);
   }
   if (filters?.categorySlug) {
     filteredResources = filteredResources.filter(r => r.categorySlug === filters.categorySlug);
   }
+  
+  if (filters?.searchQuery) {
+    const query = filters.searchQuery.toLowerCase();
+    filteredResources = filteredResources.filter(r => 
+      r.name.toLowerCase().includes(query) || 
+      r.description.toLowerCase().includes(query) ||
+      r.author.name.toLowerCase().includes(query)
+    );
+  }
+
   if (filters?.tags && filters.tags.length > 0) {
     filteredResources = filteredResources.filter(r =>
       filters.tags!.every(tagId => r.tags.some(rt => rt.id === tagId))
     );
   }
+
+  if (filters?.sortBy) {
+    switch (filters.sortBy) {
+      case 'downloads':
+        filteredResources.sort((a, b) => b.downloads - a.downloads);
+        break;
+      case 'updatedAt':
+        filteredResources.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+        break;
+      case 'name':
+        filteredResources.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      // 'relevance' could be more complex, for now, it's the default order or could be download-based
+      case 'relevance':
+      default:
+         // Example: weight downloads heavily, then update date
+        filteredResources.sort((a,b) => (b.downloads / 1000) - (a.downloads / 1000) + (new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()));
+        break;
+    }
+  }
+  
+  // Pagination (simple slice)
+  // if (filters?.page && filters?.limit) {
+  //   const start = (filters.page - 1) * filters.limit;
+  //   const end = start + filters.limit;
+  //   filteredResources = filteredResources.slice(start, end);
+  // }
+
+
   return filteredResources;
 };
 
@@ -228,14 +326,13 @@ export const getResourceBySlug = async (slug: string): Promise<Resource | undefi
   return allResources.find(r => r.slug === slug);
 };
 
-export const getHighlightedResources = async (gameSlug: string, categorySlug: string, limit: number = 3): Promise<Resource[]> => {
+export const getHighlightedResources = async (gameSlug: string, categorySlug: string, limit: number = 5): Promise<Resource[]> => {
   const categoryResources = allResources.filter(r => r.gameSlug === gameSlug && r.categorySlug === categorySlug);
-  // Simple highlight: sort by downloads and take top `limit`
   return categoryResources.sort((a, b) => b.downloads - a.downloads).slice(0, limit);
 };
 
-// Helper to get all unique tags for filtering options (e.g., versions, loaders)
-export const getAvailableFilterTags = async (gameSlug: string, categorySlug: string): Promise<{ versions: Tag[], loaders: Tag[] }> => {
+export const getAvailableFilterTags = async (gameSlug: string, categorySlug?: string): Promise<{ versions: Tag[], loaders: Tag[] }> => {
+  // If categorySlug is provided, filter resources by that category first. Otherwise, use all resources for the game.
   const resources = await getResources({ gameSlug, categorySlug });
   const versions = new Map<string, Tag>();
   const loaders = new Map<string, Tag>();

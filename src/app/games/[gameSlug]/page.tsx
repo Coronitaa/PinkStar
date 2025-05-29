@@ -1,36 +1,27 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import { getGameBySlug, getCategoriesForGame, getHighlightedResources, getResources, getAvailableFilterTags } from '@/lib/data';
+import { getGameBySlug, getCategoriesForGame, getHighlightedResources } from '@/lib/data';
 import type { Category, Resource } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ResourceCard } from '@/components/resource/ResourceCard';
-import { ResourceListItem } from '@/components/resource/ResourceListItem';
-import { ResourceFilterControls } from '@/components/resource/ResourceFilterControls';
 import { Carousel, CarouselItem } from '@/components/shared/Carousel';
 import { TagBadge } from '@/components/shared/TagBadge';
 import { Separator } from '@/components/ui/separator';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Layers } from 'lucide-react';
 
 interface GamePageProps {
   params: { gameSlug: string };
-  searchParams: { [key: string]: string | string[] | undefined };
 }
 
-export default async function GamePage({ params, searchParams }: GamePageProps) {
+export default async function GamePage({ params }: GamePageProps) {
   const game = await getGameBySlug(params.gameSlug);
   if (!game) {
     notFound();
   }
 
   const categories = await getCategoriesForGame(params.gameSlug);
-
-  // Handle filtering from searchParams
-  const versionFilters = typeof searchParams.versions === 'string' ? searchParams.versions.split(',') : [];
-  const loaderFilters = typeof searchParams.loaders === 'string' ? searchParams.loaders.split(',') : [];
-  const activeTagFilters = [...versionFilters, ...loaderFilters].filter(Boolean);
-
 
   return (
     <div className="space-y-12">
@@ -79,63 +70,50 @@ export default async function GamePage({ params, searchParams }: GamePageProps) 
         </section>
       )}
 
+      {categories.length > 0 ? (
+        categories.map(async (category) => {
+          const highlightedResources = await getHighlightedResources(params.gameSlug, category.slug, 5);
+          const categoryPageLink = `/games/${params.gameSlug}/${category.slug}`;
 
-      {categories.map(async (category) => {
-        const highlightedResources = await getHighlightedResources(params.gameSlug, category.slug, 5);
-        const allCategoryResources = await getResources({ gameSlug: params.gameSlug, categorySlug: category.slug, tags: activeTagFilters });
-        const availableFilterTags = await getAvailableFilterTags(params.gameSlug, category.slug);
-        
-        const categoryPageLink = `/games/${params.gameSlug}/${category.slug}`;
-
-        return (
-          <section key={category.id} className="space-y-6 py-6 border-t border-border/40 first:border-t-0">
-            <div className="flex justify-between items-center">
-                <h2 className="text-3xl font-semibold">{category.name}</h2>
-                {/* <Button variant="link" asChild>
-                    <Link href={categoryPageLink}>View all <ChevronRight className="w-4 h-4 ml-1" /></Link>
-                </Button> */}
-            </div>
-            {category.description && <p className="text-muted-foreground">{category.description}</p>}
-
-            {highlightedResources.length > 0 && (
-              <div>
-                <h3 className="text-xl font-medium mb-3 text-accent">Highlights</h3>
-                <Carousel>
-                  {highlightedResources.map(resource => (
-                    <CarouselItem key={resource.id}>
-                      <ResourceCard resource={resource} compact />
-                    </CarouselItem>
-                  ))}
-                </Carousel>
-              </div>
-            )}
-            
-            <Separator className="my-8" />
-
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-              {(availableFilterTags.versions.length > 0 || availableFilterTags.loaders.length > 0) && (
-                <div className="md:col-span-3 lg:col-span-3">
-                   <ResourceFilterControls availableTags={availableFilterTags} />
+          return (
+            <section key={category.id} className="space-y-6 py-6 border-t border-border/40 first:border-t-0">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+                <div>
+                  <Link href={categoryPageLink} className="group">
+                    <h2 className="text-3xl font-semibold group-hover:text-primary transition-colors flex items-center">
+                      <Layers className="w-7 h-7 mr-3 text-accent group-hover:text-primary transition-colors" />
+                      {category.name}
+                    </h2>
+                  </Link>
+                  {category.description && <p className="text-muted-foreground mt-1 max-w-2xl">{category.description}</p>}
                 </div>
-              )}
-              
-              <div className={(availableFilterTags.versions.length > 0 || availableFilterTags.loaders.length > 0) ? "md:col-span-9 lg:col-span-9" : "md:col-span-12"}>
-                {allCategoryResources.length > 0 ? (
-                  <div className="space-y-4">
-                    {allCategoryResources.map(resource => (
-                      <ResourceListItem key={resource.id} resource={resource} />
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-muted-foreground text-center py-8">
-                    {activeTagFilters.length > 0 ? "No resources match the current filters." : "No resources in this category yet. Stay tuned!"}
-                  </p>
-                )}
+                <Button variant="outline" asChild className="mt-3 sm:mt-0">
+                    <Link href={categoryPageLink}>View all in {category.name} <ChevronRight className="w-4 h-4 ml-2" /></Link>
+                </Button>
               </div>
-            </div>
-          </section>
-        );
-      })}
+              
+
+              {highlightedResources.length > 0 ? (
+                <div className="mt-4">
+                  <Carousel>
+                    {highlightedResources.map(resource => (
+                      <CarouselItem key={resource.id}>
+                        <ResourceCard resource={resource} compact />
+                      </CarouselItem>
+                    ))}
+                  </Carousel>
+                </div>
+              ) : (
+                <p className="text-muted-foreground text-sm mt-2">No highlighted resources in this category yet.</p>
+              )}
+            </section>
+          );
+        })
+      ) : (
+        <section className="py-6 border-t border-border/40 first:border-t-0">
+            <p className="text-muted-foreground text-center">No categories available for this game yet.</p>
+        </section>
+      )}
     </div>
   );
 }
