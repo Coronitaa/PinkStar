@@ -1,4 +1,5 @@
 
+import * as React from 'react'; // Added this line
 import type { Resource, Tag } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
