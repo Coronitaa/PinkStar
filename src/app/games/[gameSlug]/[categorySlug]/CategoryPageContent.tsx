@@ -214,13 +214,13 @@ export function CategoryPageContent({
 
       <main className={(availableFilterTags.versions.length > 0 || availableFilterTags.loaders.length > 0 || availableFilterTags.genres.length > 0 || availableFilterTags.misc.length > 0 || availableFilterTags.channels.length > 0) ? "md:col-span-9 lg:col-span-9" : "md:col-span-12"}>
         <div className="mb-6 p-4 border rounded-lg bg-card shadow">
-          <div className="flex flex-col sm:flex-row gap-4 items-center">
-            <div className="relative flex-grow w-full"> {/* Reverted: Input takes available space */}
+          <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+            <div className="relative w-full sm:w-auto"> 
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
                 type="search"
-                placeholder={`Search in ${categoryName}... (try spaces at end!)`}
-                className="pl-10 w-full" // Input takes full width of its container
+                placeholder={`Search in ${categoryName}...`}
+                className="pl-10 w-full sm:min-w-[250px] md:min-w-[300px]"
                 value={searchQueryInput}
                 onChange={handleSearchInputChange}
               />
@@ -236,9 +236,6 @@ export function CategoryPageContent({
                 <SelectItem value="name">Name</SelectItem>
               </SelectContent>
             </Select>
-             <Button variant="outline" className="shrink-0"> {/* Reverted: No ml-auto here initially */}
-                <Upload className="w-4 h-4 mr-2" /> Upload
-            </Button>
           </div>
         </div>
         

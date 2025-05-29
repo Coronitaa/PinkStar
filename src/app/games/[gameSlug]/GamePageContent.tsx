@@ -74,18 +74,20 @@ export function GamePageContent({ game, categories, initialCategoryResources }: 
   return (
     <div className="space-y-8">
       <div className="mb-8 p-4 border rounded-lg bg-card shadow-md sticky top-16 z-40 backdrop-blur-sm bg-background/80">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 max-w-3xl mx-auto"> {/* Max width container */}
-          <div className="relative w-full sm:w-auto sm:flex-grow sm:max-w-[calc(100%/2.5)] md:max-w-[calc(100%/3-1rem)]"> {/* Adjusted width for search */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 max-w-3xl mx-auto">
+          {/* Search Input - Aligned Left, takes necessary width */}
+          <div className="relative w-full sm:w-auto">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
               ref={searchInputRef}
               type="search" 
               placeholder={`Search resources in ${game.name}...`}
-              className="pl-10 w-full text-base"
+              className="pl-10 text-base w-full sm:w-auto md:min-w-[300px]"
               value={globalSearchQuery}
               onChange={handleSearchInputChange}
             />
           </div>
+          {/* Upload Button - Aligned Right */}
           <Button variant="outline" className="shrink-0 w-full sm:w-auto">
             <Upload className="w-4 h-4 mr-2" /> Upload Resource
           </Button>
