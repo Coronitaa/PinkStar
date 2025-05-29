@@ -5,6 +5,7 @@ import type { Resource } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { TagBadge } from '@/components/shared/TagBadge';
 import { Download, Eye, User } from 'lucide-react';
+import { Badge } from '@/components/ui/badge'; // Added import
 
 interface ResourceCardProps {
   resource: Resource;
