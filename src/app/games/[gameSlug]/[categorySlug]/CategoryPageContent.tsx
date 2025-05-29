@@ -215,12 +215,12 @@ export function CategoryPageContent({
       <main className={(availableFilterTags.versions.length > 0 || availableFilterTags.loaders.length > 0 || availableFilterTags.genres.length > 0 || availableFilterTags.misc.length > 0 || availableFilterTags.channels.length > 0) ? "md:col-span-9 lg:col-span-9" : "md:col-span-12"}>
         <div className="mb-6 p-4 border rounded-lg bg-card shadow">
           <div className="flex flex-col sm:flex-row gap-4 items-center">
-            <div className="relative flex-shrink-0"> {/* Changed: flex-grow-0 sm:flex-grow to flex-shrink-0 */}
+            <div className="relative w-full sm:w-auto sm:max-w-[calc(100%/3-1rem)]"> {/* Adjusted width */}
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
                 type="search"
                 placeholder={`Search in ${categoryName}...`}
-                className="pl-10 w-auto min-w-[200px] max-w-xs sm:max-w-sm md:max-w-md" // Adjusted width classes
+                className="pl-10 w-full" // Input takes full width of its container
                 value={searchQueryInput}
                 onChange={handleSearchInputChange}
               />
@@ -258,7 +258,7 @@ export function CategoryPageContent({
         
         {!(isNavPending || isLoadingFirstPage) && resources.length === 0 && (
           <div className="text-center py-12">
-            <Image src="https://placehold.co/128x128/1f1f1f/F48FB1?text=:(" alt="No results" width={128} height={128} className="mx-auto mb-4 rounded-lg opacity-70" data-ai-hint="sad face emoji"/>
+            <Image src="https://placehold.co/128x128/1f1f1f/E64A8B?text=:(" alt="No results" width={128} height={128} className="mx-auto mb-4 rounded-lg opacity-70" data-ai-hint="sad face emoji"/>
             <p className="text-xl font-semibold text-foreground">No resources found</p>
             <p className="text-muted-foreground">
               {hasActiveFiltersOrSearch ? "Try adjusting your filters or search terms." : `No resources in ${categoryName} for ${gameName} yet.`}

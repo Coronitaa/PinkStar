@@ -10,7 +10,7 @@ import {
   ExternalLink, AlertTriangle, ShieldQuestion, Heart, Star, Users, GitBranch, ListChecks
 } from 'lucide-react';
 import { format } from 'date-fns';
-import Link from 'next/link';
+import Link from 'next/link'; // Added Link import
 import { TagBadge } from '../shared/TagBadge';
 import { Separator } from '@/components/ui/separator';
 import { formatTimeAgo } from '@/lib/data'; 
@@ -69,33 +69,41 @@ const RatingDisplay: React.FC<{ rating?: number }> = ({ rating }) => {
   );
 };
 
+interface ResourceInfoSidebarProps { // Defined props interface
+  resource: Resource;
+}
 
-export function ResourceInfoSidebar({ resource }: { resource: Resource }) {
+export function ResourceInfoSidebar({ resource }: ResourceInfoSidebarProps) {
   const latestFile = resource.files.length > 0 ? resource.files[0] : null;
   const [updatedAtFormatted, setUpdatedAtFormatted] = React.useState<string>(() => {
-    // For initial render on client, use a value that won't cause mismatch if server sent something else
-    // or use the server's typical output if we can predict it (e.g., toLocaleDateString).
-    // The useEffect will then update it to the "time ago" format.
-    // To be safe and ensure server/client match for the very first paint before JS takes over:
     if (typeof window === 'undefined') {
-      return new Date(resource.updatedAt).toLocaleDateString(); // What server renders via formatTimeAgo
+      return new Date(resource.updatedAt).toLocaleDateString(); 
     }
-    // For initial client render, to avoid mismatch with server's toLocaleDateString():
     return new Date(resource.updatedAt).toLocaleDateString(); 
   });
 
   React.useEffect(() => {
-    // This runs only on the client, after hydration.
-    // Now update to the desired client-side "time ago" format.
     setUpdatedAtFormatted(formatTimeAgo(resource.updatedAt));
   }, [resource.updatedAt]);
 
   const tagGroups = resource.tags.reduce((acc, tag) => {
-    const type = tag.type.charAt(0).toUpperCase() + tag.type.slice(1); // Capitalize type
+    const type = tag.type.charAt(0).toUpperCase() + tag.type.slice(1);
     if (!acc[type]) acc[type] = [];
     acc[type].push(tag);
     return acc;
   }, {} as Record<string, Tag[]>);
+
+  const getFilterQueryParamForTagType = (tagType: Tag['type']): string | null => {
+    switch (tagType) {
+      case 'version': return 'versions';
+      case 'loader': return 'loaders';
+      case 'genre': return 'genres';
+      case 'misc': return 'misc';
+      case 'channel': return 'channels'; // Assuming 'channels' is a filter type for category page
+      // 'platform' tags might not have a direct filter on the category page
+      default: return null;
+    }
+  };
 
   return (
     <div className="space-y-5 sticky top-20">
@@ -106,7 +114,7 @@ export function ResourceInfoSidebar({ resource }: { resource: Resource }) {
           </Button>
           {resource.files.length > 0 && ( 
             <Button variant="outline" size="sm" className="w-full button-outline-glow" asChild>
-              <Link href={`#files-tab`} scroll={false}> 
+              <Link href={`?tab=files`} scroll={false}> 
                 <FileText className="mr-2 h-4 w-4" /> View All Files ({resource.files.length})
               </Link>
             </Button>
@@ -146,7 +154,21 @@ export function ResourceInfoSidebar({ resource }: { resource: Resource }) {
                 <div key={type}>
                   <h5 className="text-xs font-semibold text-muted-foreground mb-1.5">{type}</h5>
                   <div className="flex flex-wrap gap-1.5">
-                    {tagsInGroup.map(tag => <TagBadge key={tag.id} tag={tag} />)}
+                    {tagsInGroup.map(tag => {
+                      const queryParam = getFilterQueryParamForTagType(tag.type);
+                      if (queryParam) {
+                        return (
+                          <Link 
+                            key={tag.id} 
+                            href={`/games/${resource.gameSlug}/${resource.categorySlug}?${queryParam}=${tag.id}`}
+                            className="hover:opacity-80 transition-opacity"
+                          >
+                            <TagBadge tag={tag} />
+                          </Link>
+                        );
+                      }
+                      return <TagBadge key={tag.id} tag={tag} />;
+                    })}
                   </div>
                 </div>
               )

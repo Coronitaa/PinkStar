@@ -54,6 +54,26 @@ export function GameCard({ game, categories, stats }: GameCardProps) {
           </div>
           <p className="text-sm text-muted-foreground mb-4 line-clamp-2 h-10">{game.description}</p>
           
+          {gameTags.length > 0 && (
+            <div className="mb-4">
+              <h4 className="text-xs font-semibold text-primary mb-1.5 flex items-center"><TagIcon className="w-3.5 h-3.5 mr-1.5" /> Game Tags</h4>
+              <div className="flex flex-wrap gap-1.5">
+                {gameTags.slice(0, MAX_TAGS_DISPLAY).map(tag => (
+                  <TagBadge 
+                    key={tag.id} 
+                    tag={tag} 
+                    className="text-[10px] px-1.5 py-0.5" // Smaller tag badges
+                  />
+                ))}
+                {gameTags.length > MAX_TAGS_DISPLAY && (
+                  <Badge variant="outline" className="text-[10px] px-1.5 py-0.5 border-accent/50 text-accent">
+                    +{gameTags.length - MAX_TAGS_DISPLAY} more
+                  </Badge>
+                )}
+              </div>
+            </div>
+          )}
+
           <div className="mb-4">
             <h4 className="text-xs font-semibold text-primary mb-1.5 flex items-center"><Layers className="w-3.5 h-3.5 mr-1.5" /> Categories</h4>
             {categories.length > 0 ? (
@@ -75,29 +95,8 @@ export function GameCard({ game, categories, stats }: GameCardProps) {
               <p className="text-xs text-muted-foreground italic">No categories yet.</p>
             )}
           </div>
-
-          {gameTags.length > 0 && (
-            <div className="mb-4">
-              <h4 className="text-xs font-semibold text-primary mb-1.5 flex items-center"><TagIcon className="w-3.5 h-3.5 mr-1.5" /> Tags</h4>
-              <div className="flex flex-wrap gap-1.5">
-                {gameTags.slice(0, MAX_TAGS_DISPLAY).map(tag => (
-                  <TagBadge 
-                    key={tag.id} 
-                    tag={tag} 
-                    className="text-[10px] px-1.5 py-0.5" // Smaller tag badges
-                  />
-                ))}
-                {gameTags.length > MAX_TAGS_DISPLAY && (
-                  <Badge variant="outline" className="text-[10px] px-1.5 py-0.5 border-accent/50 text-accent">
-                    +{gameTags.length - MAX_TAGS_DISPLAY} more
-                  </Badge>
-                )}
-              </div>
-            </div>
-          )}
-
         </CardContent>
-        <CardFooter className="p-5 pt-0 border-t border-border/20 mt-auto"> {/* Added mt-auto to push footer down */}
+        <CardFooter className="p-5 pt-0 border-t border-border/20 mt-auto">
           <div className="flex justify-between items-center w-full text-sm text-muted-foreground">
             <div className="flex items-center" title="Total Resources">
               <Package className="w-4 h-4 mr-1.5 text-accent" />
