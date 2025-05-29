@@ -56,7 +56,9 @@ export function CategoryPageContent({
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   const [searchQueryInput, setSearchQueryInput] = useState(searchParams.get('q') || '');
-  const [sortBy, setSortBy] = useState<SortByType>((searchParams.get('sort') as SortByType) || 'relevance');
+  const [sortBy, setSortBy] = useState<SortByType>(
+    (searchParams.get('sort') as SortByType) || (searchParams.get('q') ? 'relevance' : 'downloads')
+  );
   
   const activeTagFiltersRef = useRef<string[]>([]); // Ref to hold current tag filters derived from URL
 
@@ -69,7 +71,7 @@ export function CategoryPageContent({
     if (sortParam && ['relevance', 'downloads', 'updatedAt', 'name'].includes(sortParam)) {
       setSortBy(sortParam as SortByType);
     } else {
-      setSortBy(params?.searchQuery ? 'relevance' : 'downloads'); // Default to relevance if searching
+      setSortBy(q ? 'relevance' : 'downloads'); // Default to relevance if searching
     }
 
     const versionFilters = searchParams.get('versions')?.split(',').filter(Boolean) || [];
