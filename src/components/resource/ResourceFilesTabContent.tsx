@@ -13,6 +13,8 @@ interface ResourceFilesTabContentProps {
   files: ResourceFile[];
 }
 
+const CLEAR_FILTER_VALUE = "_ANY_"; // Sentinel value for "All" or "Any" option
+
 export function ResourceFilesTabContent({ files }: ResourceFilesTabContentProps) {
   const [selectedVersionId, setSelectedVersionId] = useState<string | undefined>(undefined);
   const [selectedLoaderId, setSelectedLoaderId] = useState<string | undefined>(undefined);
@@ -59,12 +61,17 @@ export function ResourceFilesTabContent({ files }: ResourceFilesTabContentProps)
           </div>
           {allAvailableVersions.length > 0 && (
             <div className="flex-1 min-w-[150px]">
-              <Select value={selectedVersionId} onValueChange={setSelectedVersionId}>
+              <Select 
+                value={selectedVersionId} 
+                onValueChange={(value) => {
+                  setSelectedVersionId(value === CLEAR_FILTER_VALUE ? undefined : value);
+                }}
+              >
                 <SelectTrigger className="w-full h-9 text-xs rounded-md">
                   <SelectValue placeholder="All Versions" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="" className="text-xs">All Versions</SelectItem>
+                  <SelectItem value={CLEAR_FILTER_VALUE} className="text-xs">All Versions</SelectItem>
                   {allAvailableVersions.map(vTag => (
                     <SelectItem key={vTag.id} value={vTag.id} className="text-xs">{vTag.name}</SelectItem>
                   ))}
@@ -74,12 +81,17 @@ export function ResourceFilesTabContent({ files }: ResourceFilesTabContentProps)
           )}
           {allAvailableLoaders.length > 0 && (
              <div className="flex-1 min-w-[150px]">
-              <Select value={selectedLoaderId} onValueChange={setSelectedLoaderId}>
+              <Select 
+                value={selectedLoaderId} 
+                onValueChange={(value) => {
+                  setSelectedLoaderId(value === CLEAR_FILTER_VALUE ? undefined : value);
+                }}
+              >
                 <SelectTrigger className="w-full h-9 text-xs rounded-md">
                   <SelectValue placeholder="All Loaders" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="" className="text-xs">All Loaders</SelectItem>
+                  <SelectItem value={CLEAR_FILTER_VALUE} className="text-xs">All Loaders</SelectItem>
                   {allAvailableLoaders.map(lTag => (
                     <SelectItem key={lTag.id} value={lTag.id} className="text-xs">{lTag.name}</SelectItem>
                   ))}
@@ -147,5 +159,4 @@ export function ResourceFilesTabContent({ files }: ResourceFilesTabContentProps)
     </div>
   );
 }
-
     
