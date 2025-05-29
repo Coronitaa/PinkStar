@@ -5,7 +5,7 @@ import type { Resource } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { TagBadge } from '@/components/shared/TagBadge';
-import { Download, ArrowRight, CalendarDays, User, ShieldCheck } from 'lucide-react';
+import { Download, ArrowRight, CalendarDays, User, ShieldCheck, Badge } from 'lucide-react'; // Added Badge import
 import { format, formatDistanceToNow } from 'date-fns';
 
 interface ResourceListItemProps {
@@ -47,7 +47,11 @@ export function ResourceListItem({ resource }: ResourceListItemProps) {
             <span className="flex items-center" title={`${resource.downloads.toLocaleString()} downloads`}>
                 <Download className="w-3.5 h-3.5 mr-1 text-accent" /> {resource.downloads.toLocaleString()}
             </span>
-            <span className="flex items-center" title={`Last updated: ${format(new Date(resource.updatedAt), 'PPP p')}`}>
+            <span 
+              className="flex items-center" 
+              title={`Last updated: ${format(new Date(resource.updatedAt), 'PPP p')}`}
+              suppressHydrationWarning={true} // Add this line
+            >
                 <CalendarDays className="w-3.5 h-3.5 mr-1 text-accent" /> {formatDistanceToNow(new Date(resource.updatedAt), { addSuffix: true })}
             </span>
             <span className="font-medium">v{resource.version}</span>
