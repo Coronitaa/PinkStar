@@ -5,107 +5,126 @@
 
 @layer base {
   :root {
-    --background: 270 5% 8%; /* Dark desaturated violet base #141315 */
-    --foreground: 0 0% 95%; /* Slightly brighter off-white #F2F2F2 */
+    /* Dark Violet Base & Core Text */
+    --background: 270 10% 10%; /* Slightly lighter dark violet #1A181C */
+    --foreground: 270 15% 95%; /* Brighter off-white for general text #F0EEF5 */
 
-    --card: 270 6% 12%; /* Darker violet for cards #1E1D20 */
-    --card-foreground: 0 0% 95%; /* #F2F2F2 */
+    /* Cards & Popovers - slightly differentiated from main background */
+    --card: 270 9% 14%; /* Darker violet for cards #211F25 */
+    --card-foreground: 270 15% 92%; /* Slightly softer white for card text #EBEAF2 */
 
-    --popover: 270 6% 10%; /* Slightly darker for popovers #1A181B */
-    --popover-foreground: 0 0% 95%; /* #F2F2F2 */
+    --popover: 270 8% 12%; /* Even darker for popovers for depth #1D1B20 */
+    --popover-foreground: 270 15% 95%; /* #F0EEF5 */
 
-    --primary: 337 79% 52%; /* #E51A69 - slightly adjusted for vibrancy */
-    --primary-foreground: 0 0% 100%; /* Pure white #FFFFFF */
+    /* Primary Color - Shifted to a deep, rich Teal/Aqua */
+    --primary: 180 70% 45%; /* #25A6A6 - Deep Teal */
+    --primary-foreground: 0 0% 100%; /* Pure white #FFFFFF for max contrast on primary */
 
-    --secondary: 270 5% 18%; /* Mid-tone violet for secondary elements #2D2B30 */
-    --secondary-foreground: 0 0% 90%; /* #E6E6E6 */
+    /* Secondary Elements - Muted Violet */
+    --secondary: 270 8% 20%; /* Mid-tone violet for secondary elements #2F2C35 */
+    --secondary-foreground: 270 10% 80%; /* #C7C3D1 */
 
-    --muted: 270 4% 15%; /* Muted violet #252427 */
-    --muted-foreground: 0 0% 65%; /* Softer muted text #A6A6A6 */
+    /* Muted States - Desaturated Violet */
+    --muted: 270 6% 25%; /* Softer violet for muted backgrounds/elements #3C3941 */
+    --muted-foreground: 270 8% 60%; /* #928DA0 - Muted text color */
 
-    --accent: 340 85% 78%; /* #F692B9 - slightly adjusted light pink */
-    --accent-foreground: 337 79% 20%; /* Darker pink for text on accent #580B27 */
+    /* Accent Colors - Pastel Palette */
+    --accent: 200 90% 75%; /* Pastel Sky Blue #A8D8F3 */
+    --accent-foreground: 200 50% 30%; /* Darker blue for text on accent #265D7B */
+    
+    --pastel-pink: 330 80% 85%; /* #F8C4D8 */
+    --pastel-green: 145 60% 80%; /* #B7E4C7 */
+    --pastel-yellow: 50 100% 80%; /* #FFE599 */
+    --pastel-lavender: 260 70% 88%; /* #D9D0F3 */
 
+    /* Destructive States - Standard Red */
     --destructive: 0 72% 51%; /* #E53E3E */
     --destructive-foreground: 0 0% 98%; /* #FAFAFA */
 
-    --border: 270 5% 25%; /* Violet-tinted border #3E3C42 */
-    --input: 270 5% 22%; /* Slightly darker input background #363439 */
-    --ring: 340 85% 70%; /* Accent color for focus rings (a bit deeper than accent itself) #F37BA7 */
+    /* Borders, Inputs, Rings */
+    --border: 270 8% 30%; /* Violet-tinted border #484450 */
+    --input: 270 7% 28%; /* Slightly lighter input background #43404A */
+    --ring: 180 70% 55%; /* Primary color for focus rings (Teal) #3CC8C8 */
 
-    --radius: 0.75rem; /* More rounded corners */
+    /* Corner Radius */
+    --radius: 0.85rem; /* Slightly more rounded corners */
 
-    --chart-1: 337 79% 52%; /* Primary */
-    --chart-2: 340 85% 78%; /* Accent */
-    --chart-3: 337 70% 60%;
-    --chart-4: 340 70% 80%;
-    --chart-5: 337 60% 70%;
+    /* Chart Colors - Using new pastels and primary */
+    --chart-1: hsl(var(--primary));      /* Deep Teal */
+    --chart-2: hsl(var(--accent));       /* Pastel Sky Blue */
+    --chart-3: hsl(var(--pastel-pink));  /* Pastel Pink */
+    --chart-4: hsl(var(--pastel-green)); /* Pastel Green */
+    --chart-5: hsl(var(--pastel-yellow));/* Pastel Yellow */
 
-    /* Specific sidebar colors, can inherit or be distinct */
-    --sidebar-background: 270 5% 10%; /* #1A181B */
-    --sidebar-foreground: 0 0% 88%; /* #E0E0E0 */
-    --sidebar-primary: 337 79% 52%; /* #E51A69 */
-    --sidebar-primary-foreground: 0 0% 100%; /* #FFFFFF */
-    --sidebar-accent: 340 85% 75%; /* #F588B3 */
-    --sidebar-accent-foreground: 337 79% 20%; /* #580B27 */
-    --sidebar-border: 270 5% 20%; /* #312F33 */
-    --sidebar-ring: 340 85% 70%; /* #F37BA7 */
+    /* Sidebar specific colors - can inherit or be distinct */
+    --sidebar-background: 270 8% 13%; /* #1F1D23 */
+    --sidebar-foreground: 270 12% 88%; /* #DCD8E6 */
+    --sidebar-primary: hsl(var(--primary)); /* Use main primary */
+    --sidebar-primary-foreground: hsl(var(--primary-foreground));
+    --sidebar-accent: hsl(var(--accent)); /* Use main accent */
+    --sidebar-accent-foreground: hsl(var(--accent-foreground));
+    --sidebar-border: 270 7% 25%; /* #3C3941 */
+    --sidebar-ring: hsl(var(--ring));
   }
 
   .dark {
     /* For PinkStar, :root IS the dark theme. .dark can be identical or offer slight variations if needed later. */
-    --background: 270 5% 8%;
-    --foreground: 0 0% 95%;
-    --card: 270 6% 12%;
-    --card-foreground: 0 0% 95%;
-    --popover: 270 6% 10%;
-    --popover-foreground: 0 0% 95%;
-    --primary: 337 79% 52%;
+    --background: 270 10% 10%;
+    --foreground: 270 15% 95%;
+    --card: 270 9% 14%;
+    --card-foreground: 270 15% 92%;
+    --popover: 270 8% 12%;
+    --popover-foreground: 270 15% 95%;
+    --primary: 180 70% 45%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 270 5% 18%;
-    --secondary-foreground: 0 0% 90%;
-    --muted: 270 4% 15%;
-    --muted-foreground: 0 0% 65%;
-    --accent: 340 85% 78%;
-    --accent-foreground: 337 79% 20%;
+    --secondary: 270 8% 20%;
+    --secondary-foreground: 270 10% 80%;
+    --muted: 270 6% 25%;
+    --muted-foreground: 270 8% 60%;
+    --accent: 200 90% 75%;
+    --accent-foreground: 200 50% 30%;
+    --pastel-pink: 330 80% 85%;
+    --pastel-green: 145 60% 80%;
+    --pastel-yellow: 50 100% 80%;
+    --pastel-lavender: 260 70% 88%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 98%;
-    --border: 270 5% 25%;
-    --input: 270 5% 22%;
-    --ring: 340 85% 70%;
+    --border: 270 8% 30%;
+    --input: 270 7% 28%;
+    --ring: 180 70% 55%;
     
-    --chart-1: 337 79% 52%;
-    --chart-2: 340 85% 78%;
-    --chart-3: 337 70% 60%;
-    --chart-4: 340 70% 80%;
-    --chart-5: 337 60% 70%;
+    --chart-1: hsl(var(--primary));
+    --chart-2: hsl(var(--accent));
+    --chart-3: hsl(var(--pastel-pink));
+    --chart-4: hsl(var(--pastel-green));
+    --chart-5: hsl(var(--pastel-yellow));
 
-    --sidebar-background: 270 5% 10%;
-    --sidebar-foreground: 0 0% 88%;
-    --sidebar-primary: 337 79% 52%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 340 85% 75%;
-    --sidebar-accent-foreground: 337 79% 20%;
-    --sidebar-border: 270 5% 20%;
-    --sidebar-ring: 340 85% 70%;
+    --sidebar-background: 270 8% 13%;
+    --sidebar-foreground: 270 12% 88%;
+    --sidebar-primary: hsl(var(--primary));
+    --sidebar-primary-foreground: hsl(var(--primary-foreground));
+    --sidebar-accent: hsl(var(--accent));
+    --sidebar-accent-foreground: hsl(var(--accent-foreground));
+    --sidebar-border: 270 7% 25%;
+    --sidebar-ring: hsl(var(--ring));
   }
 }
 
 @layer base {
   * {
-    @apply border-border transition-colors duration-200 ease-in-out; /* Add global transition for borders */
+    @apply border-border transition-colors duration-200 ease-in-out; 
   }
   body {
     @apply text-foreground antialiased;
     font-family: var(--font-geist-sans), sans-serif;
-    background-image: linear-gradient(160deg, hsl(270, 10%, 10%) 0%, hsl(265, 15%, 6%) 100%);
-    background-attachment: fixed; /* Makes gradient fixed during scroll */
+    background-image: linear-gradient(160deg, hsl(var(--background)) 0%, hsl(265, 12%, 7%) 100%); /* Darker violet gradient */
+    background-attachment: fixed;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
   }
 
-  /* Improve scrollbar aesthetics */
+  /* Improved scrollbar aesthetics */
   ::-webkit-scrollbar {
     width: 10px;
     height: 10px;
@@ -115,13 +134,13 @@
     border-radius: var(--radius);
   }
   ::-webkit-scrollbar-thumb {
-    background: hsl(var(--primary) / 0.6);
+    background: hsl(var(--primary) / 0.6); /* Teal scrollbar thumb */
     border-radius: var(--radius);
     border: 2px solid transparent;
     background-clip: content-box;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--primary));
+    background: hsl(var(--primary)); /* Brighter Teal on hover */
   }
 }
 
@@ -139,25 +158,25 @@
 
    /* Prose styles for markdown content */
     .prose {
-      h1, h2, h3, h4, h5, h6 { @apply text-primary; }
-      a { @apply text-accent hover:text-accent/80; }
+      h1, h2, h3, h4, h5, h6 { @apply text-primary; } /* Teal headings */
+      a { @apply text-accent hover:text-accent/80; } /* Pastel Blue links */
       strong { @apply text-foreground/90; }
       code { @apply bg-muted text-accent px-1 py-0.5 rounded-sm text-sm; }
       pre { @apply bg-muted p-4 rounded-md overflow-x-auto; }
-      blockquote { @apply border-l-4 border-primary pl-4 italic text-muted-foreground; }
+      blockquote { @apply border-l-4 border-primary pl-4 italic text-muted-foreground; } /* Teal border for blockquote */
     }
     .dark .prose-invert {
-      h1, h2, h3, h4, h5, h6 { @apply text-primary; } /* Ensure primary color stands out */
+      h1, h2, h3, h4, h5, h6 { @apply text-primary; } 
       a { @apply text-accent hover:text-accent/80; }
-      strong { @apply text-foreground; } /* Use main foreground */
-      code { @apply bg-secondary text-accent; } /* Adjust code block for dark theme */
+      strong { @apply text-foreground; } 
+      code { @apply bg-secondary text-accent; } 
       pre { @apply bg-secondary; }
       blockquote { @apply border-primary; }
     }
 
-  /* Sheen effect for Follow button */
+  /* Sheen effect for Follow button (and other buttons if class is applied) */
   .button-follow-sheen {
-    @apply relative overflow-hidden; /* Ensure these are applied for the pseudo-element to work */
+    @apply relative overflow-hidden;
   }
 
   .button-follow-sheen:hover::before {
@@ -168,15 +187,15 @@
     content: '';
     display: block;
     width: 0px;
-    height: 86%; /* From example */
+    height: 86%; 
     position: absolute;
-    top: 7%; /* From example */
+    top: 7%; 
     left: 0%;
     opacity: 0;
-    background: hsl(var(--primary-foreground)); /* White, good for contrast on pink hover */
-    box-shadow: 0 0 30px 15px hsl(var(--primary-foreground) / 0.7); /* Adjusted shadow */
+    background: hsl(var(--primary-foreground)); 
+    box-shadow: 0 0 30px 15px hsl(var(--primary-foreground) / 0.5); /* Softer sheen shadow */
     transform: skewX(-20deg);
-    pointer-events: none; /* Ensure it doesn't block clicks */
+    pointer-events: none; 
   }
 }
 
@@ -186,7 +205,7 @@
     left: 0%;
   }
   50% {
-    opacity: 0.5; /* Make sheen a bit subtle */
+    opacity: 0.4; /* More subtle sheen */
   }
   to {
     opacity: 0;

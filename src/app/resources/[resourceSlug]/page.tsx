@@ -1,5 +1,4 @@
 
-
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -11,7 +10,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ResourceFilesTabContent } from '@/components/resource/ResourceFilesTabContent'; 
-import { ResourceChangelogTabContent } from '@/components/resource/ResourceChangelogTabContent';
+// Removed ResourceChangelogTabContent import
 import { FileText, BookOpen, ListChecks, MessageCircle, Eye, Heart } from 'lucide-react'; 
 import { Carousel, CarouselItem } from '@/components/shared/Carousel';
 import { ResourceCard } from '@/components/resource/ResourceCard';
@@ -80,11 +79,11 @@ export default async function ResourcePage({ params, searchParams }: ResourcePag
               </div>
               
               <Tabs defaultValue={defaultTab} className="w-full">
-                <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-5 mb-4 bg-card-foreground/5 rounded-md">
+                <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 mb-4 bg-card-foreground/5 rounded-md"> {/* Adjusted grid cols */}
                   <TabsTrigger value="overview" id="overview-tab"><Eye className="w-4 h-4 mr-1 sm:mr-2" />Overview</TabsTrigger>
                   <TabsTrigger value="files" id="files-tab"><FileText className="w-4 h-4 mr-1 sm:mr-2" />Files</TabsTrigger>
                   <TabsTrigger value="requirements" id="requirements-tab"><ListChecks className="w-4 h-4 mr-1 sm:mr-2" />Requirements</TabsTrigger>
-                  <TabsTrigger value="changelog" id="changelog-tab"><BookOpen className="w-4 h-4 mr-1 sm:mr-2" />Changelog</TabsTrigger>
+                  {/* Removed Changelog TabTrigger */}
                   <TabsTrigger value="comments" id="comments-tab"><MessageCircle className="w-4 h-4 mr-1 sm:mr-2" />Comments</TabsTrigger>
                 </TabsList>
                 <TabsContent value="overview">
@@ -97,8 +96,7 @@ export default async function ResourcePage({ params, searchParams }: ResourcePag
                   {resource.files && resource.files.length > 0 ? (
                     <ResourceFilesTabContent 
                         files={resource.files} 
-                        resourceSlug={resource.slug}
-                        allChangelogEntries={resource.changelogEntries} 
+                        allChangelogEntries={resource.changelogEntries || []} // Pass changelog entries
                     />
                   ) : (
                     <p className="text-muted-foreground p-4 text-center">No files available for this resource.</p>
@@ -111,17 +109,7 @@ export default async function ResourcePage({ params, searchParams }: ResourcePag
                     <p className="text-muted-foreground p-4 text-center">No specific requirements listed for this resource.</p>
                   )}
                 </TabsContent>
-                <TabsContent value="changelog">
-                  {resource.changelogEntries && resource.changelogEntries.length > 0 ? (
-                     <ResourceChangelogTabContent 
-                        changelogEntries={resource.changelogEntries} 
-                        allResourceFiles={resource.files}
-                        resourceAuthor={resource.author}
-                      />
-                  ) : (
-                    <p className="text-muted-foreground p-4 text-center">No changelog available for this resource.</p>
-                  )}
-                </TabsContent>
+                {/* Removed Changelog TabContent */}
                 <TabsContent value="comments">
                   <p className="text-muted-foreground p-4 text-center">Comments are coming soon! Share your thoughts and feedback in the future.</p>
                 </TabsContent>
@@ -158,5 +146,3 @@ export default async function ResourcePage({ params, searchParams }: ResourcePag
 }
 
 export const revalidate = 3600;
-
-    

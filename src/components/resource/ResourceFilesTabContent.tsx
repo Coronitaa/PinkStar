@@ -1,29 +1,50 @@
 
-
 "use client";
 
 import React, { useState, useMemo } from 'react';
-import type { ResourceFile, Tag, ChangelogEntry } from '@/lib/types'; // Added ChangelogEntry
+import type { ResourceFile, Tag, ChangelogEntry } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { TagBadge } from '@/components/shared/TagBadge';
-import Link from 'next/link'; // Import Link
 import { Download, Filter, Info } from 'lucide-react';
-import { cn } from '@/lib/utils'; // For conditional class names
+import { cn } from '@/lib/utils'; 
+import { format } from 'date-fns';
 
 interface ResourceFilesTabContentProps {
   files: ResourceFile[];
-  resourceSlug: string; // To construct changelog link
-  allChangelogEntries?: ChangelogEntry[]; // To find related changelog entry
+  allChangelogEntries?: ChangelogEntry[];
 }
 
 const CLEAR_FILTER_VALUE = "_ANY_"; 
 
-export function ResourceFilesTabContent({ files, resourceSlug, allChangelogEntries = [] }: ResourceFilesTabContentProps) {
+// Helper to render markdown-like text (simple version for modal)
+const SimpleMarkdown: React.FC<{ text: string }> = ({ text }) => {
+  return (
+    <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-line text-popover-foreground">
+      {text.split('\n').map((line, index) => {
+        // Basic list item handling
+        if (line.match(/^(\s*-\s+)/)) {
+          return <li key={index} className="ml-4 list-disc">{line.replace(/^(\s*-\s+)/, '')}</li>;
+        }
+        // Basic bold handling (**text**)
+        line = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        // Basic italic handling (*text* or _text_)
+        line = line.replace(/(\*|_)(.*?)\1/g, '<em>$2</em>');
+        
+        return <p key={index} className="mb-1 last:mb-0" dangerouslySetInnerHTML={{ __html: line }} />;
+      })}
+    </div>
+  );
+};
+
+export function ResourceFilesTabContent({ files, allChangelogEntries = [] }: ResourceFilesTabContentProps) {
   const [selectedVersionId, setSelectedVersionId] = useState<string | undefined>(undefined);
   const [selectedLoaderId, setSelectedLoaderId] = useState<string | undefined>(undefined);
   const [selectedChannelId, setSelectedChannelId] = useState<string | undefined>(undefined);
 
+  const [isChangelogModalOpen, setIsChangelogModalOpen] = useState(false);
+  const [selectedEntryForModal, setSelectedEntryForModal] = useState<ChangelogEntry | null>(null);
 
   const allAvailableVersions = useMemo(() => {
     const versionsMap = new Map<string, Tag>();
@@ -57,12 +78,10 @@ export function ResourceFilesTabContent({ files, resourceSlug, allChangelogEntri
       }
     });
     return Array.from(channelsMap.values()).sort((a,b) => {
-        // Custom sort: Release, Beta, Alpha
         const order = ['Release', 'Beta', 'Alpha'];
         return order.indexOf(a.name) - order.indexOf(b.name);
     });
   }, [files]);
-
 
   const filteredFiles = useMemo(() => {
     return files.filter(file => {
@@ -71,7 +90,6 @@ export function ResourceFilesTabContent({ files, resourceSlug, allChangelogEntri
       const channelMatch = !selectedChannelId || (file.channel && file.channel.id === selectedChannelId);
       return versionMatch && loaderMatch && channelMatch;
     }).sort((a, b) => {
-      // Optional: sort files, e.g., by channel then by name
       const order = ['Release', 'Beta', 'Alpha'];
       const aChannelIndex = a.channel ? order.indexOf(a.channel.name) : order.length;
       const bChannelIndex = b.channel ? order.indexOf(b.channel.name) : order.length;
@@ -83,19 +101,23 @@ export function ResourceFilesTabContent({ files, resourceSlug, allChangelogEntri
   const hasActiveFilters = selectedVersionId || selectedLoaderId || selectedChannelId;
 
   const getChannelSpecificClasses = (channel?: Tag) => {
-    if (!channel) return { bubble: '', border: 'border-border/30' };
+    if (!channel) return { bubble: '', border: 'border-border/30', text: 'text-muted-foreground' };
     switch (channel.name.toLowerCase()) {
       case 'release':
-        return { bubble: 'bg-green-500 text-green-50', border: 'border-green-500' };
+        return { bubble: 'bg-green-500 text-green-50', border: 'border-green-500/70', text: 'text-green-700 dark:text-green-400' };
       case 'beta':
-        return { bubble: 'bg-sky-500 text-sky-50', border: 'border-sky-500' };
+        return { bubble: 'bg-sky-500 text-sky-50', border: 'border-sky-500/70', text: 'text-sky-700 dark:text-sky-400' };
       case 'alpha':
-        return { bubble: 'bg-orange-500 text-orange-50', border: 'border-orange-500' };
+        return { bubble: 'bg-orange-500 text-orange-50', border: 'border-orange-500/70', text: 'text-orange-700 dark:text-orange-400' };
       default:
-        return { bubble: 'bg-muted text-muted-foreground', border: 'border-border/50' };
+        return { bubble: 'bg-muted text-muted-foreground', border: 'border-border/50', text: 'text-muted-foreground' };
     }
   };
 
+  const handleOpenChangelogModal = (entry: ChangelogEntry) => {
+    setSelectedEntryForModal(entry);
+    setIsChangelogModalOpen(true);
+  };
 
   return (
     <div className="space-y-6">
@@ -109,9 +131,7 @@ export function ResourceFilesTabContent({ files, resourceSlug, allChangelogEntri
             <div className="flex-none"> 
               <Select 
                 value={selectedVersionId} 
-                onValueChange={(value) => {
-                  setSelectedVersionId(value === CLEAR_FILTER_VALUE ? undefined : value);
-                }}
+                onValueChange={(value) => setSelectedVersionId(value === CLEAR_FILTER_VALUE ? undefined : value)}
               >
                 <SelectTrigger className="w-auto h-9 text-xs rounded-md min-w-[130px]"> 
                   <SelectValue placeholder="All Versions" />
@@ -129,9 +149,7 @@ export function ResourceFilesTabContent({ files, resourceSlug, allChangelogEntri
              <div className="flex-none"> 
               <Select 
                 value={selectedLoaderId} 
-                onValueChange={(value) => {
-                  setSelectedLoaderId(value === CLEAR_FILTER_VALUE ? undefined : value);
-                }}
+                onValueChange={(value) => setSelectedLoaderId(value === CLEAR_FILTER_VALUE ? undefined : value)}
               >
                 <SelectTrigger className="w-auto h-9 text-xs rounded-md min-w-[130px]"> 
                   <SelectValue placeholder="All Loaders" />
@@ -149,9 +167,7 @@ export function ResourceFilesTabContent({ files, resourceSlug, allChangelogEntri
              <div className="flex-none">
               <Select 
                 value={selectedChannelId} 
-                onValueChange={(value) => {
-                  setSelectedChannelId(value === CLEAR_FILTER_VALUE ? undefined : value);
-                }}
+                onValueChange={(value) => setSelectedChannelId(value === CLEAR_FILTER_VALUE ? undefined : value)}
               >
                 <SelectTrigger className="w-auto h-9 text-xs rounded-md min-w-[130px]"> 
                   <SelectValue placeholder="All Channels" />
@@ -189,7 +205,7 @@ export function ResourceFilesTabContent({ files, resourceSlug, allChangelogEntri
                 key={file.id} 
                 className={cn(
                     "p-4 border rounded-md bg-card-foreground/10 hover:bg-card-foreground/15 transition-colors shadow-sm",
-                    "border-l-4", // Add left border for channel color
+                    "border-l-4", 
                     channelClasses.border
                 )}
             >
@@ -197,7 +213,7 @@ export function ResourceFilesTabContent({ files, resourceSlug, allChangelogEntri
                 <div className="flex-grow">
                   <div className="flex items-center mb-1">
                     {file.channel && (
-                      <span className={cn("mr-2 px-2 py-0.5 text-xs font-semibold rounded-full", channelClasses.bubble)}>
+                      <span className={cn("mr-2 px-2 py-0.5 text-xs font-semibold rounded-full whitespace-nowrap", channelClasses.bubble)}>
                         {file.channel.name}
                       </span>
                     )}
@@ -228,17 +244,37 @@ export function ResourceFilesTabContent({ files, resourceSlug, allChangelogEntri
                 </div>
                 <div className="shrink-0 self-start sm:self-center mt-2 sm:mt-0 flex items-center gap-2">
                   {relatedChangelogEntry && (
-                    <Button variant="outline" size="icon" className="h-9 w-9 border-accent/50 hover:bg-accent/10" asChild>
-                       <Link href={`/resources/${resourceSlug}?tab=changelog#changelog-entry-${relatedChangelogEntry.id}`} scroll={false} title="View Changelog Entry">
-                        <Info className="w-4 h-4 text-accent" />
-                      </Link>
-                    </Button>
+                     <Dialog open={isChangelogModalOpen && selectedEntryForModal?.id === relatedChangelogEntry.id} onOpenChange={(isOpen) => {
+                        if (!isOpen) {
+                            setSelectedEntryForModal(null);
+                        }
+                        setIsChangelogModalOpen(isOpen);
+                     }}>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" size="icon" className="h-9 w-9 border-accent/50 hover:bg-accent/10" onClick={() => handleOpenChangelogModal(relatedChangelogEntry)} title="View Changelog Entry">
+                          <Info className="w-4 h-4 text-accent" />
+                        </Button>
+                      </DialogTrigger>
+                       {selectedEntryForModal?.id === relatedChangelogEntry.id && (
+                        <DialogContent className="sm:max-w-lg bg-popover text-popover-foreground">
+                            <DialogHeader>
+                            <DialogTitle className="text-primary">Changelog: {selectedEntryForModal.versionName}</DialogTitle>
+                            <DialogDescription className="text-xs text-muted-foreground">
+                                Released on {format(new Date(selectedEntryForModal.date), 'MMM d, yyyy')}
+                            </DialogDescription>
+                            </DialogHeader>
+                            <div className="mt-4 max-h-[60vh] overflow-y-auto pr-2">
+                                <SimpleMarkdown text={selectedEntryForModal.notes} />
+                            </div>
+                        </DialogContent>
+                        )}
+                    </Dialog>
                   )}
-                  <Link href={file.url} download>
+                  <a href={file.url} download>
                     <Button variant="outline" size="sm" className="button-outline-glow h-9">
                       <Download className="w-4 h-4 mr-2" /> Download
                     </Button>
-                  </Link>
+                  </a>
                 </div>
               </div>
             </li>
@@ -252,4 +288,3 @@ export function ResourceFilesTabContent({ files, resourceSlug, allChangelogEntri
     </div>
   );
 }
-    
