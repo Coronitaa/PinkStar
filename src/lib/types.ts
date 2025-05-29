@@ -20,6 +20,13 @@ export interface ResourceFile {
   version: string;
 }
 
+export interface ResourceLinks {
+  discord?: string;
+  wiki?: string;
+  issues?: string;
+  source?: string; // Example: GitHub, GitLab
+}
+
 export interface Resource {
   id: string;
   name: string;
@@ -41,6 +48,9 @@ export interface Resource {
   requirements?: string; // For the new "Requirements" tab
   changelog?: string; // For the new "Changelog" tab
   searchScore?: number; // Optional score for search relevance
+  rating?: number; // Optional: 0-5 stars
+  followers?: number; // Optional: count of followers
+  links?: ResourceLinks; // Optional: links provided by author
 }
 
 export interface Category {

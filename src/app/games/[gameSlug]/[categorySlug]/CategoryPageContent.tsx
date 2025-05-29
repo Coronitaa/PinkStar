@@ -11,7 +11,7 @@ import { ResourceFilterControls } from '@/components/resource/ResourceFilterCont
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Loader2, Search } from 'lucide-react';
+import { Loader2, Search, ListFilter, Info } from 'lucide-react';
 import { fetchPaginatedResourcesAction } from '@/app/actions/resourceActions';
 
 const RESOURCES_PER_PAGE = 20;
@@ -25,7 +25,7 @@ interface CategoryPageContentProps {
   initialTotal: number;
   gameSlug: string;
   categorySlug: string;
-  availableFilterTags: { versions: Tag[]; loaders: Tag[] };
+  availableFilterTags: { versions: Tag[]; loaders: Tag[]; genres: Tag[]; misc: Tag[] };
   gameName: string;
   categoryName: string;
 }
@@ -56,9 +56,9 @@ export function CategoryPageContent({
 
   const [searchQueryInput, setSearchQueryInput] = useState(searchParams.get('q') || '');
   const [sortBy, setSortBy] = useState<SortByType>(() => {
-    const q = searchParams.get('q') || '';
+    const qFromUrl = searchParams.get('q') || '';
     const sortParam = searchParams.get('sort') as SortByType;
-    return sortParam || (q ? 'relevance' : 'downloads');
+    return sortParam || (qFromUrl ? 'relevance' : 'downloads');
   });
   
   const activeTagFiltersRef = useRef<string[]>([]);
@@ -66,67 +66,68 @@ export function CategoryPageContent({
   // Sync controlled inputs with URL on initial load or direct URL change
   useEffect(() => {
     const qFromUrl = searchParams.get('q') || '';
-    // Do not trim qFromUrl here, respect spaces
-    setSearchQueryInput(qFromUrl);
+    setSearchQueryInput(qFromUrl); // Respect spaces
 
     const sortParam = searchParams.get('sort');
     if (sortParam && ['relevance', 'downloads', 'updatedAt', 'name'].includes(sortParam)) {
       setSortBy(sortParam as SortByType);
     } else {
-      // Default to relevance if searching (even with spaces), otherwise downloads
       setSortBy(qFromUrl ? 'relevance' : 'downloads');
     }
 
     const versionFilters = searchParams.get('versions')?.split(',').filter(Boolean) || [];
     const loaderFilters = searchParams.get('loaders')?.split(',').filter(Boolean) || [];
-    activeTagFiltersRef.current = [...versionFilters, ...loaderFilters];
+    const genreFilters = searchParams.get('genres')?.split(',').filter(Boolean) || [];
+    const miscFilters = searchParams.get('misc')?.split(',').filter(Boolean) || [];
+    activeTagFiltersRef.current = [...versionFilters, ...loaderFilters, ...genreFilters, ...miscFilters];
+
   }, [searchParams]);
 
 
-  const fetchAndSetResources = useCallback(async (page: number, queryOverride?: string, sortOverride?: SortByType, tagsOverride?: { versions?: string; loaders?: string }) => {
+  const fetchAndSetResources = useCallback(async (page: number, options?: { isNewSearchOrFilter?: boolean }) => {
     startDataTransition(async () => {
-      const currentQ = queryOverride !== undefined ? queryOverride : (searchParams.get('q') || '');
-      const currentSort = sortOverride || (searchParams.get('sort') as SortByType) || (currentQ ? 'relevance' : 'downloads');
-      const currentVersions = (tagsOverride?.versions || searchParams.get('versions'))?.split(',').filter(Boolean) || [];
-      const currentLoaders = (tagsOverride?.loaders || searchParams.get('loaders'))?.split(',').filter(Boolean) || [];
-      const currentTags = [...currentVersions, ...currentLoaders];
+      const currentQ = searchParams.get('q') || '';
+      const currentSort = (searchParams.get('sort') as SortByType) || (currentQ ? 'relevance' : 'downloads');
+      
+      const versionFilters = searchParams.get('versions')?.split(',').filter(Boolean) || [];
+      const loaderFilters = searchParams.get('loaders')?.split(',').filter(Boolean) || [];
+      const genreFilters = searchParams.get('genres')?.split(',').filter(Boolean) || [];
+      const miscFilters = searchParams.get('misc')?.split(',').filter(Boolean) || [];
+      const currentTags = [...versionFilters, ...loaderFilters, ...genreFilters, ...miscFilters];
 
       const params: GetResourcesParams = {
         gameSlug,
         categorySlug,
         page,
         limit: RESOURCES_PER_PAGE,
-        searchQuery: currentQ || undefined, // Send raw query
+        searchQuery: currentQ || undefined,
         sortBy: currentSort,
         tags: currentTags.length > 0 ? currentTags : undefined,
       };
       
       try {
         const data = await fetchPaginatedResourcesAction(params);
-        if (page === 1) {
+        if (page === 1 || options?.isNewSearchOrFilter) {
           setResources(data.resources);
+          setCurrentPage(1); // Reset current page if it's a new search/filter
         } else {
-          // Append for infinite scroll
           setResources((prev) => [...prev, ...data.resources]);
+          setCurrentPage(page);
         }
         setHasMore(data.hasMore);
         setTotalResources(data.total);
-        setCurrentPage(page);
       } catch (error) {
         console.error("Failed to fetch resources:", error);
-        // Potentially set an error state here
       }
     });
-  }, [gameSlug, categorySlug, searchParams, startDataTransition]); // Removed fetchAndSetResources from its own deps
+  }, [gameSlug, categorySlug, searchParams, startDataTransition]);
 
 
-  // Effect to fetch page 1 when URL parameters (filters, sort, query) change
    useEffect(() => {
-    // This effect fetches page 1 if any relevant searchParam changes.
-    // The initial load is handled by props from the server.
-    // This ensures that client-side navigations or direct URL changes trigger a refresh.
-    fetchAndSetResources(1);
-  }, [searchParams, fetchAndSetResources]); // Only depends on searchParams and the memoized fetcher
+    // Fetch page 1 when URL parameters (filters, sort, query) change.
+    // This handles client-side navigation updates.
+    fetchAndSetResources(1, { isNewSearchOrFilter: true });
+  }, [searchParams, fetchAndSetResources]);
 
 
   const loadMoreResources = useCallback(() => {
@@ -158,20 +159,20 @@ export function CategoryPageContent({
       if (value !== undefined && value !== null && value.length > 0) {
         current.set(key, value);
       } else {
-        current.delete(key); // Remove param if value is empty, null, or undefined
+        current.delete(key);
       }
     });
-    current.set('page', '1'); // Reset page to 1 whenever filters/search/sort change
+    // Page will be reset by the effect listening to searchParams if it's not already 1
+    // Or, we can explicitly set it here to ensure immediate effect.
+    // current.set('page', '1'); // Usually not needed here as the effect handles it
 
     startNavTransition(() => {
       router.push(`${pathname}?${current.toString()}`, { scroll: false });
     });
   }, [searchParams, pathname, router]);
 
-  // Debounce search query input before updating URL
   useEffect(() => {
     const handler = setTimeout(() => {
-      // Pass searchQueryInput as is, without trimming
       if (searchQueryInput !== (searchParams.get('q') || '')) {
          updateUrlParams({ q: searchQueryInput });
       }
@@ -181,7 +182,6 @@ export function CategoryPageContent({
 
 
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Do not trim here, allow user to type spaces if they intend to search with them
     setSearchQueryInput(e.target.value);
   };
 
@@ -189,16 +189,24 @@ export function CategoryPageContent({
     updateUrlParams({ sort: value });
   };
 
-  const handleFilterChange = useCallback((tags: { versions?: string; loaders?: string; }) => {
-    updateUrlParams({ versions: tags.versions, loaders: tags.loaders });
+  const handleFilterChange = useCallback((tags: { versions?: string; loaders?: string; genres?: string; misc?: string; }) => {
+    updateUrlParams({ 
+      versions: tags.versions, 
+      loaders: tags.loaders,
+      genres: tags.genres,
+      misc: tags.misc
+    });
   }, [updateUrlParams]);
   
   const isLoadingFirstPage = isDataLoading && currentPage === 1;
   const isLoadingMore = isDataLoading && currentPage > 1;
+  const totalPages = Math.ceil(totalResources / RESOURCES_PER_PAGE) || 1;
+
+  const hasActiveFiltersOrSearch = activeTagFiltersRef.current.length > 0 || (searchParams.get('q') || '');
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-      {(availableFilterTags.versions.length > 0 || availableFilterTags.loaders.length > 0) && (
+      {(availableFilterTags.versions.length > 0 || availableFilterTags.loaders.length > 0 || availableFilterTags.genres.length > 0 || availableFilterTags.misc.length > 0) && (
         <aside className="md:col-span-3 lg:col-span-3 space-y-6">
           <ResourceFilterControls 
             availableTags={availableFilterTags} 
@@ -207,16 +215,16 @@ export function CategoryPageContent({
         </aside>
       )}
 
-      <main className={(availableFilterTags.versions.length > 0 || availableFilterTags.loaders.length > 0) ? "md:col-span-9 lg:col-span-9" : "md:col-span-12"}>
+      <main className={(availableFilterTags.versions.length > 0 || availableFilterTags.loaders.length > 0 || availableFilterTags.genres.length > 0 || availableFilterTags.misc.length > 0) ? "md:col-span-9 lg:col-span-9" : "md:col-span-12"}>
         <div className="mb-6 p-4 border rounded-lg bg-card shadow">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-grow">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
                 type="search"
-                placeholder={`Search in ${categoryName}... (try "mod  " with spaces)`}
+                placeholder={`Search in ${categoryName}... (e.g., "mod  " or "utility")`}
                 className="pl-10 w-full"
-                value={searchQueryInput} // Controlled component, respects spaces
+                value={searchQueryInput}
                 onChange={handleSearchInputChange}
               />
             </div>
@@ -250,10 +258,10 @@ export function CategoryPageContent({
         
         {!(isNavPending || isLoadingFirstPage) && resources.length === 0 && (
           <div className="text-center py-12">
-            <Image src="https://placehold.co/128x128/1f1f1f/4a4a4a?text=:(" alt="No results" width={128} height={128} className="mx-auto mb-4 rounded-lg" data-ai-hint="sad face emoji"/>
+            <Image src="https://placehold.co/128x128/1f1f1f/F48FB1?text=:(" alt="No results" width={128} height={128} className="mx-auto mb-4 rounded-lg opacity-70" data-ai-hint="sad face emoji"/>
             <p className="text-xl font-semibold text-foreground">No resources found</p>
             <p className="text-muted-foreground">
-              {activeTagFiltersRef.current.length > 0 || (searchParams.get('q') || '') ? "Try adjusting your filters or search terms." : `No resources in ${categoryName} for ${gameName} yet.`}
+              {hasActiveFiltersOrSearch ? "Try adjusting your filters or search terms." : `No resources in ${categoryName} for ${gameName} yet.`}
             </p>
           </div>
         )}
@@ -266,8 +274,15 @@ export function CategoryPageContent({
 
         <div ref={loadMoreRef} className="h-10" /> 
 
-        {!(isDataLoading || isNavPending) && !hasMore && resources.length > 0 && (
-          <p className="text-center text-muted-foreground py-6">You've reached the end of the list.</p>
+        {!(isDataLoading || isNavPending) && resources.length > 0 && (
+          <div className="py-6 text-center text-muted-foreground">
+            {hasMore ? (
+              <p>Loading more...</p>
+            ) : (
+              <p>You've reached the end of the list.</p>
+            )}
+            <p className="text-sm mt-1">Page {currentPage} of {totalPages} ({totalResources} resources total)</p>
+          </div>
         )}
       </main>
     </div>
