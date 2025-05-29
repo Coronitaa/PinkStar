@@ -16,8 +16,8 @@
     --popover: 270 8% 12%; /* Even darker for popovers for depth #1D1B20 */
     --popover-foreground: 270 15% 95%; /* #F0EEF5 */
 
-    /* Primary Color - Shifted to a deep, rich Teal/Aqua */
-    --primary: 180 70% 45%; /* #25A6A6 - Deep Teal */
+    /* Primary Color - Magenta/Pink */
+    --primary: 330 80% 55%; /* Magenta/Pink #E64A8B */
     --primary-foreground: 0 0% 100%; /* Pure white #FFFFFF for max contrast on primary */
 
     /* Secondary Elements - Muted Violet */
@@ -28,9 +28,9 @@
     --muted: 270 6% 25%; /* Softer violet for muted backgrounds/elements #3C3941 */
     --muted-foreground: 270 8% 60%; /* #928DA0 - Muted text color */
 
-    /* Accent Colors - Pastel Palette */
-    --accent: 200 90% 75%; /* Pastel Sky Blue #A8D8F3 */
-    --accent-foreground: 200 50% 30%; /* Darker blue for text on accent #265D7B */
+    /* Accent Colors - Vibrant Pink (Magenta family) */
+    --accent: 325 85% 60%; /* Vivid Pink #F252A2 */
+    --accent-foreground: 325 60% 25%; /* Darker Pink/Magenta for text on accent #8C2A5C */
     
     --pastel-pink: 330 80% 85%; /* #F8C4D8 */
     --pastel-green: 145 60% 80%; /* #B7E4C7 */
@@ -44,14 +44,14 @@
     /* Borders, Inputs, Rings */
     --border: 270 8% 30%; /* Violet-tinted border #484450 */
     --input: 270 7% 28%; /* Slightly lighter input background #43404A */
-    --ring: 180 70% 55%; /* Primary color for focus rings (Teal) #3CC8C8 */
+    --ring: hsl(var(--primary)); /* Primary color for focus rings (Magenta/Pink) */
 
     /* Corner Radius */
     --radius: 0.85rem; /* Slightly more rounded corners */
 
-    /* Chart Colors - Using new pastels and primary */
-    --chart-1: hsl(var(--primary));      /* Deep Teal */
-    --chart-2: hsl(var(--accent));       /* Pastel Sky Blue */
+    /* Chart Colors - Using new primary, accent, and pastels */
+    --chart-1: hsl(var(--primary));      /* Magenta/Pink */
+    --chart-2: hsl(var(--accent));       /* Vivid Pink */
     --chart-3: hsl(var(--pastel-pink));  /* Pastel Pink */
     --chart-4: hsl(var(--pastel-green)); /* Pastel Green */
     --chart-5: hsl(var(--pastel-yellow));/* Pastel Yellow */
@@ -75,14 +75,14 @@
     --card-foreground: 270 15% 92%;
     --popover: 270 8% 12%;
     --popover-foreground: 270 15% 95%;
-    --primary: 180 70% 45%;
+    --primary: 330 80% 55%; /* Magenta/Pink */
     --primary-foreground: 0 0% 100%;
     --secondary: 270 8% 20%;
     --secondary-foreground: 270 10% 80%;
     --muted: 270 6% 25%;
     --muted-foreground: 270 8% 60%;
-    --accent: 200 90% 75%;
-    --accent-foreground: 200 50% 30%;
+    --accent: 325 85% 60%; /* Vivid Pink */
+    --accent-foreground: 325 60% 25%;
     --pastel-pink: 330 80% 85%;
     --pastel-green: 145 60% 80%;
     --pastel-yellow: 50 100% 80%;
@@ -91,7 +91,7 @@
     --destructive-foreground: 0 0% 98%;
     --border: 270 8% 30%;
     --input: 270 7% 28%;
-    --ring: 180 70% 55%;
+    --ring: hsl(var(--primary)); /* Magenta/Pink */
     
     --chart-1: hsl(var(--primary));
     --chart-2: hsl(var(--accent));
@@ -134,13 +134,13 @@
     border-radius: var(--radius);
   }
   ::-webkit-scrollbar-thumb {
-    background: hsl(var(--primary) / 0.6); /* Teal scrollbar thumb */
+    background: hsl(var(--primary) / 0.6); /* Primary color scrollbar thumb */
     border-radius: var(--radius);
     border: 2px solid transparent;
     background-clip: content-box;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--primary)); /* Brighter Teal on hover */
+    background: hsl(var(--primary)); /* Brighter primary on hover */
   }
 }
 
@@ -158,12 +158,12 @@
 
    /* Prose styles for markdown content */
     .prose {
-      h1, h2, h3, h4, h5, h6 { @apply text-primary; } /* Teal headings */
-      a { @apply text-accent hover:text-accent/80; } /* Pastel Blue links */
+      h1, h2, h3, h4, h5, h6 { @apply text-primary; } /* Primary headings */
+      a { @apply text-accent hover:text-accent/80; } /* Accent links */
       strong { @apply text-foreground/90; }
       code { @apply bg-muted text-accent px-1 py-0.5 rounded-sm text-sm; }
       pre { @apply bg-muted p-4 rounded-md overflow-x-auto; }
-      blockquote { @apply border-l-4 border-primary pl-4 italic text-muted-foreground; } /* Teal border for blockquote */
+      blockquote { @apply border-l-4 border-primary pl-4 italic text-muted-foreground; } /* Primary border for blockquote */
     }
     .dark .prose-invert {
       h1, h2, h3, h4, h5, h6 { @apply text-primary; } 
