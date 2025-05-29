@@ -1,5 +1,5 @@
 
-"use client"; // Added "use client" directive
+"use client"; 
 
 import * as React from 'react';
 import type { Resource, Tag } from '@/lib/types';
@@ -13,14 +13,12 @@ import { format } from 'date-fns';
 import Link from 'next/link';
 import { TagBadge } from '../shared/TagBadge';
 import { Separator } from '@/components/ui/separator';
-import { formatTimeAgo } from '@/lib/data'; // Import the client-safe formatter
+import { formatTimeAgo } from '@/lib/data'; 
 import { cn } from '@/lib/utils';
 
-interface ResourceInfoSidebarProps {
-  resource: Resource;
-}
+interface SidebarCardProps extends React.PropsWithChildren<{ title?: string; icon?: React.ElementType; className?: string }> {}
 
-const SidebarCard: React.FC<React.PropsWithChildren<{ title?: string; icon?: React.ElementType; className?: string }>> = ({ title, icon: Icon, children, className }) => (
+const SidebarCard: React.FC<SidebarCardProps> = ({ title, icon: Icon, children, className }) => (
   <Card className={cn("shadow-lg bg-card/80 backdrop-blur-sm border-border/40", className)}>
     {title && (
       <CardHeader className="pb-3 pt-4 px-4">
@@ -36,13 +34,23 @@ const SidebarCard: React.FC<React.PropsWithChildren<{ title?: string; icon?: Rea
   </Card>
 );
 
-const InfoItem: React.FC<{ label: string; value: React.ReactNode; icon?: React.ElementType, className?: string }> = ({ label, value, icon: Icon, className }) => (
+interface InfoItemProps {
+  label: string;
+  value: React.ReactNode;
+  icon?: React.ElementType;
+  className?: string;
+  suppressHydrationWarning?: boolean;
+}
+
+const InfoItem: React.FC<InfoItemProps> = ({ label, value, icon: Icon, className, suppressHydrationWarning }) => (
   <div className={cn("flex justify-between items-center py-1.5", className)}>
     <span className="text-muted-foreground flex items-center">
       {Icon && <Icon className="w-3.5 h-3.5 mr-2 text-accent" />}
       {label}
     </span>
-    <span className="text-foreground font-medium text-right">{value}</span>
+    <span className="text-foreground font-medium text-right" suppressHydrationWarning={suppressHydrationWarning}>
+      {value}
+    </span>
   </div>
 );
 
@@ -62,12 +70,23 @@ const RatingDisplay: React.FC<{ rating?: number }> = ({ rating }) => {
 };
 
 
-export function ResourceInfoSidebar({ resource }: ResourceInfoSidebarProps) {
+export function ResourceInfoSidebar({ resource }: { resource: Resource }) {
   const latestFile = resource.files.length > 0 ? resource.files[0] : null;
-  const [updatedAtFormatted, setUpdatedAtFormatted] = React.useState<string>(formatTimeAgo(resource.updatedAt));
+  const [updatedAtFormatted, setUpdatedAtFormatted] = React.useState<string>(() => {
+    // For initial render on client, use a value that won't cause mismatch if server sent something else
+    // or use the server's typical output if we can predict it (e.g., toLocaleDateString).
+    // The useEffect will then update it to the "time ago" format.
+    // To be safe and ensure server/client match for the very first paint before JS takes over:
+    if (typeof window === 'undefined') {
+      return new Date(resource.updatedAt).toLocaleDateString(); // What server renders via formatTimeAgo
+    }
+    // For initial client render, to avoid mismatch with server's toLocaleDateString():
+    return new Date(resource.updatedAt).toLocaleDateString(); 
+  });
 
   React.useEffect(() => {
-    // Ensure formatTimeAgo is called on client after hydration
+    // This runs only on the client, after hydration.
+    // Now update to the desired client-side "time ago" format.
     setUpdatedAtFormatted(formatTimeAgo(resource.updatedAt));
   }, [resource.updatedAt]);
 
@@ -85,9 +104,9 @@ export function ResourceInfoSidebar({ resource }: ResourceInfoSidebarProps) {
           <Button size="lg" className="w-full button-primary-glow text-base py-3 h-auto">
             <Download className="mr-2 h-5 w-5" /> Download Latest {latestFile ? `(${latestFile.size})` : ''}
           </Button>
-          {resource.files.length > 0 && ( // Show only if there are files
+          {resource.files.length > 0 && ( 
             <Button variant="outline" size="sm" className="w-full button-outline-glow" asChild>
-              <Link href={`#files-tab`} scroll={false}> {/* Updated this link */}
+              <Link href={`#files-tab`} scroll={false}> 
                 <FileText className="mr-2 h-4 w-4" /> View All Files ({resource.files.length})
               </Link>
             </Button>
@@ -102,7 +121,7 @@ export function ResourceInfoSidebar({ resource }: ResourceInfoSidebarProps) {
           )}
           <div>
             <p className="font-semibold text-foreground">{resource.author.name}</p>
-            {/* Add link to author profile if available later */}
+            
             <p className="text-xs text-muted-foreground">Creator of this resource</p>
           </div>
         </div>
