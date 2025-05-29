@@ -1,8 +1,9 @@
+
 "use client";
 
 import type { Tag } from '@/lib/types';
-import { useState, useEffect } from 'react';
-import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import { useState, useEffect, useTransition } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -14,12 +15,12 @@ interface ResourceFilterControlsProps {
     versions: Tag[];
     loaders: Tag[];
   };
+  onFilterChangeCallback: (tags: { versions?: string; loaders?: string; }) => void;
 }
 
-export function ResourceFilterControls({ availableTags }: ResourceFilterControlsProps) {
-  const router = useRouter();
-  const pathname = usePathname();
+export function ResourceFilterControls({ availableTags, onFilterChangeCallback }: ResourceFilterControlsProps) {
   const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
 
   const [selectedVersions, setSelectedVersions] = useState<string[]>([]);
   const [selectedLoaders, setSelectedLoaders] = useState<string[]>([]);
@@ -31,25 +32,29 @@ export function ResourceFilterControls({ availableTags }: ResourceFilterControls
     setSelectedLoaders(loaderParams.filter(l => l));
   }, [searchParams]);
 
-  const handleFilterChange = () => {
-    const params = new URLSearchParams(searchParams.toString());
-    if (selectedVersions.length > 0) {
-      params.set('versions', selectedVersions.join(','));
-    } else {
-      params.delete('versions');
-    }
-    if (selectedLoaders.length > 0) {
-      params.set('loaders', selectedLoaders.join(','));
-    } else {
-      params.delete('loaders');
-    }
-    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  const handleApplyFilters = () => {
+    startTransition(() => {
+      const paramsToUpdate: { versions?: string; loaders?: string; } = {};
+      if (selectedVersions.length > 0) {
+        paramsToUpdate.versions = selectedVersions.join(',');
+      } else {
+        paramsToUpdate.versions = undefined; // explicitly remove if empty
+      }
+      if (selectedLoaders.length > 0) {
+        paramsToUpdate.loaders = selectedLoaders.join(',');
+      } else {
+        paramsToUpdate.loaders = undefined; // explicitly remove if empty
+      }
+      onFilterChangeCallback(paramsToUpdate);
+    });
   };
   
   const handleResetFilters = () => {
-    setSelectedVersions([]);
-    setSelectedLoaders([]);
-    router.push(pathname, { scroll: false });
+    startTransition(() => {
+      setSelectedVersions([]);
+      setSelectedLoaders([]);
+      onFilterChangeCallback({ versions: undefined, loaders: undefined });
+    });
   };
 
   const toggleTagSelection = (tagId: string, type: 'version' | 'loader') => {
@@ -65,6 +70,11 @@ export function ResourceFilterControls({ availableTags }: ResourceFilterControls
   };
 
   const hasActiveFilters = selectedVersions.length > 0 || selectedLoaders.length > 0;
+  const hasPendingChanges = (
+    JSON.stringify(selectedVersions.sort()) !== JSON.stringify((searchParams.get('versions')?.split(',') || []).filter(Boolean).sort()) ||
+    JSON.stringify(selectedLoaders.sort()) !== JSON.stringify((searchParams.get('loaders')?.split(',') || []).filter(Boolean).sort())
+  );
+
 
   return (
     <Card className="shadow-md">
@@ -75,13 +85,14 @@ export function ResourceFilterControls({ availableTags }: ResourceFilterControls
         {availableTags.versions.length > 0 && (
           <div>
             <h4 className="font-semibold mb-2 text-foreground/90">Version</h4>
-            <div className="space-y-2">
+            <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
               {availableTags.versions.map(tag => (
                 <div key={tag.id} className="flex items-center space-x-2">
                   <Checkbox
                     id={`version-${tag.id}`}
                     checked={selectedVersions.includes(tag.id)}
                     onCheckedChange={() => toggleTagSelection(tag.id, 'version')}
+                    disabled={isPending}
                   />
                   <Label htmlFor={`version-${tag.id}`} className="text-sm font-normal cursor-pointer">
                     {tag.name}
@@ -95,13 +106,14 @@ export function ResourceFilterControls({ availableTags }: ResourceFilterControls
         {availableTags.loaders.length > 0 && (
           <div>
             <h4 className="font-semibold mb-2 text-foreground/90">Loader</h4>
-            <div className="space-y-2">
+            <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
               {availableTags.loaders.map(tag => (
                 <div key={tag.id} className="flex items-center space-x-2">
                   <Checkbox
                     id={`loader-${tag.id}`}
                     checked={selectedLoaders.includes(tag.id)}
                     onCheckedChange={() => toggleTagSelection(tag.id, 'loader')}
+                    disabled={isPending}
                   />
                   <Label htmlFor={`loader-${tag.id}`} className="text-sm font-normal cursor-pointer">
                     {tag.name}
@@ -112,9 +124,11 @@ export function ResourceFilterControls({ availableTags }: ResourceFilterControls
           </div>
         )}
         <div className="flex flex-col sm:flex-row gap-2 pt-4">
-          <Button onClick={handleFilterChange} className="w-full sm:w-auto">Apply Filters</Button>
+          <Button onClick={handleApplyFilters} className="w-full sm:w-auto" disabled={isPending || !hasPendingChanges}>
+            {isPending ? 'Applying...' : 'Apply Filters'}
+          </Button>
           {hasActiveFilters && (
-             <Button onClick={handleResetFilters} variant="outline" className="w-full sm:w-auto">
+             <Button onClick={handleResetFilters} variant="outline" className="w-full sm:w-auto" disabled={isPending}>
                 <X className="w-4 h-4 mr-2" /> Reset
             </Button>
           )}

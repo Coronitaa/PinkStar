@@ -1,15 +1,12 @@
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { getGameBySlug, getCategoriesForGame, getHighlightedResources } from '@/lib/data';
-import type { Category, Resource } from '@/lib/types';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ResourceCard } from '@/components/resource/ResourceCard';
-import { Carousel, CarouselItem } from '@/components/shared/Carousel';
+import type { Category, Game, Resource } from '@/lib/types';
 import { TagBadge } from '@/components/shared/TagBadge';
-import { Separator } from '@/components/ui/separator';
-import { ChevronRight, Layers } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { GamePageContent } from './GamePageContent'; // New client component
 
 interface GamePageProps {
   params: { gameSlug: string };
@@ -23,6 +20,12 @@ export default async function GamePage({ params }: GamePageProps) {
 
   const categories = await getCategoriesForGame(params.gameSlug);
 
+  // Fetch initial highlighted resources for each category
+  const initialCategoryResources: Record<string, Resource[]> = {};
+  for (const category of categories) {
+    initialCategoryResources[category.slug] = await getHighlightedResources(params.gameSlug, category.slug, 5);
+  }
+
   return (
     <div className="space-y-12">
       <section className="relative -mx-4 -mt-8"> {/* Stretch banner */}
@@ -30,8 +33,8 @@ export default async function GamePage({ params }: GamePageProps) {
           <Image
             src={game.bannerUrl}
             alt={`${game.name} banner`}
-            layout="fill"
-            objectFit="cover"
+            fill // Changed from layout="fill"
+            style={{objectFit:"cover"}} // Changed from objectFit="cover"
             priority
             data-ai-hint="game wallpaper"
           />
@@ -69,51 +72,13 @@ export default async function GamePage({ params }: GamePageProps) {
             </Card>
         </section>
       )}
+      
+      <GamePageContent 
+        game={game} 
+        categories={categories} 
+        initialCategoryResources={initialCategoryResources} 
+      />
 
-      {categories.length > 0 ? (
-        categories.map(async (category) => {
-          const highlightedResources = await getHighlightedResources(params.gameSlug, category.slug, 5);
-          const categoryPageLink = `/games/${params.gameSlug}/${category.slug}`;
-
-          return (
-            <section key={category.id} className="space-y-6 py-6 border-t border-border/40 first:border-t-0">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
-                <div>
-                  <Link href={categoryPageLink} className="group">
-                    <h2 className="text-3xl font-semibold group-hover:text-primary transition-colors flex items-center">
-                      <Layers className="w-7 h-7 mr-3 text-accent group-hover:text-primary transition-colors" />
-                      {category.name}
-                    </h2>
-                  </Link>
-                  {category.description && <p className="text-muted-foreground mt-1 max-w-2xl">{category.description}</p>}
-                </div>
-                <Button variant="outline" asChild className="mt-3 sm:mt-0">
-                    <Link href={categoryPageLink}>View all in {category.name} <ChevronRight className="w-4 h-4 ml-2" /></Link>
-                </Button>
-              </div>
-              
-
-              {highlightedResources.length > 0 ? (
-                <div className="mt-4">
-                  <Carousel>
-                    {highlightedResources.map(resource => (
-                      <CarouselItem key={resource.id}>
-                        <ResourceCard resource={resource} compact />
-                      </CarouselItem>
-                    ))}
-                  </Carousel>
-                </div>
-              ) : (
-                <p className="text-muted-foreground text-sm mt-2">No highlighted resources in this category yet.</p>
-              )}
-            </section>
-          );
-        })
-      ) : (
-        <section className="py-6 border-t border-border/40 first:border-t-0">
-            <p className="text-muted-foreground text-center">No categories available for this game yet.</p>
-        </section>
-      )}
     </div>
   );
 }

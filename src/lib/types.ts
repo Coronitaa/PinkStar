@@ -1,3 +1,4 @@
+
 export interface Author {
   id: string;
   name: string;
@@ -12,7 +13,7 @@ export interface Tag {
 }
 
 export interface ResourceFile {
-  id: string;
+  id:string;
   name: string;
   url: string;
   size: string; // e.g., "1.2 MB"
@@ -39,6 +40,7 @@ export interface Resource {
   files: ResourceFile[];
   requirements?: string; // For the new "Requirements" tab
   changelog?: string; // For the new "Changelog" tab
+  searchScore?: number; // Optional score for search relevance
 }
 
 export interface Category {
@@ -65,9 +67,10 @@ export interface GetResourcesParams {
   categorySlug?: string;
   tags?: string[];
   searchQuery?: string;
-  sortBy?: 'relevance' | 'downloads' | 'updatedAt' | 'name';
+  sortBy?: 'relevance' | 'downloads' | 'updatedAt' | 'name'; // 'relevance' will now use scoring
   page?: number;
   limit?: number;
+  minScore?: number; // Minimum search score to be included
 }
 
 export interface PaginatedResourcesResponse {
