@@ -1,5 +1,7 @@
 
-import * as React from 'react'; // Added this line
+"use client"; // Added "use client" directive
+
+import * as React from 'react'; 
 import type { Resource, Tag } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
