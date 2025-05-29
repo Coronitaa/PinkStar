@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { Download, Filter, GitMerge, CalendarDays, Tag as TagIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge'; // For displaying loader tags
+import { TagBadge } from '@/components/shared/TagBadge';
 
 const CLEAR_FILTER_VALUE = "_ANY_";
 
@@ -184,3 +185,4 @@ export function ResourceChangelogTabContent({ changelogEntries, allResourceFiles
     </div>
   );
 }
+
