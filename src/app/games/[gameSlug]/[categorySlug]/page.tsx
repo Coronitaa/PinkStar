@@ -4,14 +4,14 @@ import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { getGameBySlug, getCategoryDetails, getResources, getAvailableFilterTags } from '@/lib/data';
 import type { Game, Category, Resource, Tag } from '@/lib/types';
-import { Button } from '@/components/ui/button';
+// Button is not used directly here anymore, it's inside the render prop's content
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ResourceListItem } from '@/components/resource/ResourceListItem';
 import { ResourceFilterControls } from '@/components/resource/ResourceFilterControls';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
-import { Search, ListFilter, Layers } from 'lucide-react';
+import { Search, Layers } from 'lucide-react'; 
 import { CategoryPageClientControls } from './CategoryPageClientControls';
 
 
@@ -19,6 +19,8 @@ interface CategoryPageProps {
   params: { gameSlug: string; categorySlug: string };
   searchParams: { [key: string]: string | string[] | undefined };
 }
+
+type SortByType = 'relevance' | 'downloads' | 'updatedAt' | 'name';
 
 export default async function CategoryPage({ params, searchParams }: CategoryPageProps) {
   const game = await getGameBySlug(params.gameSlug);
@@ -33,7 +35,7 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
   const activeTagFilters = [...versionFilters, ...loaderFilters].filter(Boolean);
   
   const searchQuery = typeof searchParams.q === 'string' ? searchParams.q : undefined;
-  const sortBy = (typeof searchParams.sort === 'string' ? searchParams.sort : 'relevance') as 'relevance' | 'downloads' | 'updatedAt' | 'name';
+  const sortBy = (typeof searchParams.sort === 'string' ? searchParams.sort : 'relevance') as SortByType;
 
   const resources = await getResources({ 
     gameSlug: params.gameSlug, 
@@ -67,8 +69,7 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
       <CategoryPageClientControls
         initialSearchQuery={searchQuery}
         initialSortBy={sortBy}
-      >
-        {(currentSearchQuery, currentSortBy, handleSearchChange, handleSortChange) => (
+        renderControls={(currentSearchQuery, currentSortBy, handleSearchChange, handleSortChange) => (
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
             {(availableFilterTags.versions.length > 0 || availableFilterTags.loaders.length > 0) && (
               <aside className="md:col-span-3 lg:col-span-3 space-y-6">
@@ -89,7 +90,7 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
                       onChange={(e) => handleSearchChange(e.target.value)}
                     />
                   </div>
-                  <Select value={currentSortBy} onValueChange={(value) => handleSortChange(value as typeof sortBy)}>
+                  <Select value={currentSortBy} onValueChange={(value) => handleSortChange(value as SortByType)}>
                     <SelectTrigger className="w-full sm:w-[180px]">
                       <SelectValue placeholder="Sort by" />
                     </SelectTrigger>
@@ -122,10 +123,9 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
             </main>
           </div>
         )}
-      </CategoryPageClientControls>
+      />
     </div>
   );
 }
 
 export const revalidate = 3600; // Revalidate data every hour
-

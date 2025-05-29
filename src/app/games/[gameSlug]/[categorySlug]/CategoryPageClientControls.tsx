@@ -1,40 +1,41 @@
 
 "use client";
 
+import type React from 'react';
 import { useState, useEffect, useTransition } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import type React from 'react';
+
+type SortByType = 'relevance' | 'downloads' | 'updatedAt' | 'name';
 
 interface CategoryPageClientControlsProps {
   initialSearchQuery?: string;
-  initialSortBy?: 'relevance' | 'downloads' | 'updatedAt' | 'name';
-  children: (
+  initialSortBy?: SortByType;
+  renderControls: (
     currentSearchQuery: string,
-    currentSortBy: 'relevance' | 'downloads' | 'updatedAt' | 'name',
+    currentSortBy: SortByType,
     handleSearchChange: (query: string) => void,
-    handleSortChange: (sort: 'relevance' | 'downloads' | 'updatedAt' | 'name') => void
+    handleSortChange: (sort: SortByType) => void
   ) => React.ReactNode;
 }
 
 export function CategoryPageClientControls({ 
   initialSearchQuery = '', 
   initialSortBy = 'relevance',
-  children 
+  renderControls // Changed from 'children'
 }: CategoryPageClientControlsProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [_isPending, startTransition] = useTransition(); // Renamed to avoid conflict if isPending is passed by children
+  const [_isPending, startTransition] = useTransition();
 
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
-  const [sortBy, setSortBy] = useState<'relevance' | 'downloads' | 'updatedAt' | 'name'>(initialSortBy);
+  const [sortBy, setSortBy] = useState<SortByType>(initialSortBy);
 
-  // Sync state with URL search params on initial load or when URL changes
   useEffect(() => {
     setSearchQuery(searchParams.get('q') || '');
     const sortParam = searchParams.get('sort');
     if (sortParam && ['relevance', 'downloads', 'updatedAt', 'name'].includes(sortParam)) {
-      setSortBy(sortParam as typeof sortBy);
+      setSortBy(sortParam as SortByType);
     } else {
       setSortBy('relevance');
     }
@@ -62,7 +63,7 @@ export function CategoryPageClientControls({
     setSearchQuery(query);
   };
 
-  const handleSortChange = (sortValue: 'relevance' | 'downloads' | 'updatedAt' | 'name') => {
+  const handleSortChange = (sortValue: SortByType) => {
     setSortBy(sortValue);
     updateQueryParams(searchQuery, sortValue); 
   };
@@ -74,10 +75,10 @@ export function CategoryPageClientControls({
       }
     }, 500); 
     return () => clearTimeout(handler);
-  }, [searchQuery, sortBy, searchParams, pathname, router]);
+  }, [searchQuery, sortBy, searchParams, pathname, router]); 
 
-
-  const content = children(searchQuery, sortBy, searchSetterAdapter, handleSortChange);
+  // Call the renamed render prop
+  const content = renderControls(searchQuery, sortBy, searchSetterAdapter, handleSortChange);
 
   return (
     <>
