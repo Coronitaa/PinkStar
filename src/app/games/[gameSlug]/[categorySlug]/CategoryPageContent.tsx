@@ -43,9 +43,8 @@ export function CategoryPageContent({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [isNavPending, startNavTransition] = useTransition(); // For URL updates
-  const [isDataLoading, startDataTransition] = useTransition(); // For data fetching operations
-
+  const [isNavPending, startNavTransition] = useTransition();
+  const [isDataLoading, startDataTransition] = useTransition();
 
   const [resources, setResources] = useState<Resource[]>(initialResources);
   const [currentPage, setCurrentPage] = useState(1);
@@ -56,37 +55,40 @@ export function CategoryPageContent({
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   const [searchQueryInput, setSearchQueryInput] = useState(searchParams.get('q') || '');
-  const [sortBy, setSortBy] = useState<SortByType>(
-    (searchParams.get('sort') as SortByType) || (searchParams.get('q') ? 'relevance' : 'downloads')
-  );
+  const [sortBy, setSortBy] = useState<SortByType>(() => {
+    const q = searchParams.get('q') || '';
+    const sortParam = searchParams.get('sort') as SortByType;
+    return sortParam || (q ? 'relevance' : 'downloads');
+  });
   
-  const activeTagFiltersRef = useRef<string[]>([]); // Ref to hold current tag filters derived from URL
+  const activeTagFiltersRef = useRef<string[]>([]);
 
   // Sync controlled inputs with URL on initial load or direct URL change
   useEffect(() => {
-    const q = searchParams.get('q') || '';
-    setSearchQueryInput(q);
+    const qFromUrl = searchParams.get('q') || '';
+    // Do not trim qFromUrl here, respect spaces
+    setSearchQueryInput(qFromUrl);
 
     const sortParam = searchParams.get('sort');
     if (sortParam && ['relevance', 'downloads', 'updatedAt', 'name'].includes(sortParam)) {
       setSortBy(sortParam as SortByType);
     } else {
-      setSortBy(q ? 'relevance' : 'downloads'); // Default to relevance if searching
+      // Default to relevance if searching (even with spaces), otherwise downloads
+      setSortBy(qFromUrl ? 'relevance' : 'downloads');
     }
 
     const versionFilters = searchParams.get('versions')?.split(',').filter(Boolean) || [];
     const loaderFilters = searchParams.get('loaders')?.split(',').filter(Boolean) || [];
     activeTagFiltersRef.current = [...versionFilters, ...loaderFilters];
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
 
-  const fetchAndSetResources = useCallback(async (page: number, queryOverride?: string) => {
+  const fetchAndSetResources = useCallback(async (page: number, queryOverride?: string, sortOverride?: SortByType, tagsOverride?: { versions?: string; loaders?: string }) => {
     startDataTransition(async () => {
-      const currentQ = queryOverride !== undefined ? queryOverride : searchParams.get('q') || '';
-      const currentSort = (searchParams.get('sort') as SortByType) || (currentQ ? 'relevance' : 'downloads');
-      const currentVersions = searchParams.get('versions')?.split(',').filter(Boolean) || [];
-      const currentLoaders = searchParams.get('loaders')?.split(',').filter(Boolean) || [];
+      const currentQ = queryOverride !== undefined ? queryOverride : (searchParams.get('q') || '');
+      const currentSort = sortOverride || (searchParams.get('sort') as SortByType) || (currentQ ? 'relevance' : 'downloads');
+      const currentVersions = (tagsOverride?.versions || searchParams.get('versions'))?.split(',').filter(Boolean) || [];
+      const currentLoaders = (tagsOverride?.loaders || searchParams.get('loaders'))?.split(',').filter(Boolean) || [];
       const currentTags = [...currentVersions, ...currentLoaders];
 
       const params: GetResourcesParams = {
@@ -94,7 +96,7 @@ export function CategoryPageContent({
         categorySlug,
         page,
         limit: RESOURCES_PER_PAGE,
-        searchQuery: currentQ || undefined,
+        searchQuery: currentQ || undefined, // Send raw query
         sortBy: currentSort,
         tags: currentTags.length > 0 ? currentTags : undefined,
       };
@@ -104,6 +106,7 @@ export function CategoryPageContent({
         if (page === 1) {
           setResources(data.resources);
         } else {
+          // Append for infinite scroll
           setResources((prev) => [...prev, ...data.resources]);
         }
         setHasMore(data.hasMore);
@@ -111,32 +114,19 @@ export function CategoryPageContent({
         setCurrentPage(page);
       } catch (error) {
         console.error("Failed to fetch resources:", error);
+        // Potentially set an error state here
       }
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gameSlug, categorySlug, searchParams]); // searchParams covers q, sort, tags from URL
+  }, [gameSlug, categorySlug, searchParams, startDataTransition]); // Removed fetchAndSetResources from its own deps
 
 
   // Effect to fetch page 1 when URL parameters (filters, sort, query) change
-  useEffect(() => {
-    // This effect should only run when searchParams changes, NOT on initial mount if props are sufficient.
-    // The initial props (initialResources, etc.) are from the server render with current searchParams.
-    // We only need to re-fetch page 1 if the searchParams *actually change* after the initial load.
-    
-    // A way to check if it's not the initial server-rendered state causing this:
-    // Compare current resources with initialResources. If they are different, it means client-side changes happened.
-    // Or, more simply, only trigger if not the first page.
-    // For the first page, the server already fetched the data.
-     if (initialResources !== resources || currentPage !==1 || initialHasMore !== hasMore || initialTotal !== totalResources) {
-        // This condition implies that the state has diverged from initial props,
-        // or we are already past page 1. This means a client-side change (filter, sort, search) has occurred.
-        fetchAndSetResources(1);
-     }
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams, fetchAndSetResources]);
-   // Removed initialResources, initialHasMore, initialTotal from deps to avoid re-fetch on initial load
-   // fetchAndSetResources is memoized and depends on searchParams, so this should be safe.
+   useEffect(() => {
+    // This effect fetches page 1 if any relevant searchParam changes.
+    // The initial load is handled by props from the server.
+    // This ensures that client-side navigations or direct URL changes trigger a refresh.
+    fetchAndSetResources(1);
+  }, [searchParams, fetchAndSetResources]); // Only depends on searchParams and the memoized fetcher
 
 
   const loadMoreResources = useCallback(() => {
@@ -165,14 +155,13 @@ export function CategoryPageContent({
   const updateUrlParams = useCallback((newParams: Record<string, string | undefined | null>) => {
     const current = new URLSearchParams(Array.from(searchParams.entries()));
     Object.entries(newParams).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== (key === 'sort' ? (searchParams.get('q') ? 'relevance' : 'downloads') : '') && value.length > 0) {
+      if (value !== undefined && value !== null && value.length > 0) {
         current.set(key, value);
       } else {
-        current.delete(key);
+        current.delete(key); // Remove param if value is empty, null, or undefined
       }
     });
-     // Reset page to 1 whenever filters/search/sort change
-    current.set('page', '1');
+    current.set('page', '1'); // Reset page to 1 whenever filters/search/sort change
 
     startNavTransition(() => {
       router.push(`${pathname}?${current.toString()}`, { scroll: false });
@@ -182,6 +171,7 @@ export function CategoryPageContent({
   // Debounce search query input before updating URL
   useEffect(() => {
     const handler = setTimeout(() => {
+      // Pass searchQueryInput as is, without trimming
       if (searchQueryInput !== (searchParams.get('q') || '')) {
          updateUrlParams({ q: searchQueryInput });
       }
@@ -191,13 +181,17 @@ export function CategoryPageContent({
 
 
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Do not trim here, allow user to type spaces if they intend to search with them
     setSearchQueryInput(e.target.value);
   };
 
   const handleSortChange = (value: SortByType) => {
-    // setSortBy(value); // State will be updated by useEffect watching searchParams
     updateUrlParams({ sort: value });
   };
+
+  const handleFilterChange = useCallback((tags: { versions?: string; loaders?: string; }) => {
+    updateUrlParams({ versions: tags.versions, loaders: tags.loaders });
+  }, [updateUrlParams]);
   
   const isLoadingFirstPage = isDataLoading && currentPage === 1;
   const isLoadingMore = isDataLoading && currentPage > 1;
@@ -205,10 +199,10 @@ export function CategoryPageContent({
   return (
     <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
       {(availableFilterTags.versions.length > 0 || availableFilterTags.loaders.length > 0) && (
-        <aside className="md:col-span-3 lg:col-span-3 space-y-6 md:sticky md:top-24 h-max">
+        <aside className="md:col-span-3 lg:col-span-3 space-y-6">
           <ResourceFilterControls 
             availableTags={availableFilterTags} 
-            onFilterChangeCallback={(tags) => updateUrlParams(tags)} // Pass callback to update URL
+            onFilterChangeCallback={handleFilterChange}
           />
         </aside>
       )}
@@ -220,9 +214,9 @@ export function CategoryPageContent({
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
                 type="search"
-                placeholder={`Search in ${categoryName}...`}
+                placeholder={`Search in ${categoryName}... (try "mod  " with spaces)`}
                 className="pl-10 w-full"
-                value={searchQueryInput}
+                value={searchQueryInput} // Controlled component, respects spaces
                 onChange={handleSearchInputChange}
               />
             </div>

@@ -1,12 +1,6 @@
 
 import type { Game, Category, Resource, Author, Tag, ResourceFile, GetResourcesParams, PaginatedResourcesResponse } from './types';
 
-const authors: Author[] = [
-  { id: 'author1', name: 'CreativeWorks', avatarUrl: 'https://placehold.co/40x40' },
-  { id: 'author2', name: 'ModMaster', avatarUrl: 'https://placehold.co/40x40' },
-  { id: 'author3', name: 'PixelPerfect', avatarUrl: 'https://placehold.co/40x40' },
-];
-
 const commonTags: Record<string, Tag> = {
   v1_19: { id: 'tag1', name: '1.19.X', type: 'version', color: 'bg-blue-500' },
   v1_20: { id: 'tag2', name: '1.20.X', type: 'version', color: 'bg-green-500' },
@@ -19,6 +13,55 @@ const commonTags: Record<string, Tag> = {
   pc: { id: 'tag8', name: 'PC', type: 'platform' },
   datapack: { id: 'tag9', name: 'Datapack', type: 'genre' },
 };
+
+const baseGames: Game[] = [
+  {
+    id: 'game1',
+    name: 'PixelVerse Adventures',
+    slug: 'pixelverse-adventures',
+    description: 'An epic sandbox adventure in a blocky world.',
+    longDescription: 'PixelVerse Adventures is a sprawling open-world sandbox game where creativity and exploration know no bounds. Build magnificent structures, embark on daring quests, discover hidden dungeons, and team up with friends in a vibrant, procedurally generated universe. With regular updates and a thriving community, there\'s always something new to discover in PixelVerse.',
+    bannerUrl: 'https://placehold.co/800x450/E91E63/FFFFFF?text=PixelVerse+Banner',
+    iconUrl: 'https://placehold.co/128x128/E91E63/FFFFFF?text=PV',
+    tags: [commonTags.pc, { id: 'tag-sandbox', name: 'Sandbox', type: 'genre' }, { id: 'tag-multiplayer', name: 'Multiplayer', type: 'genre' }],
+  },
+  {
+    id: 'game2',
+    name: 'Galaxy Explorers',
+    slug: 'galaxy-explorers',
+    description: 'Conquer the stars in this vast space simulation.',
+    longDescription: 'Galaxy Explorers invites you to chart your own course across a procedurally generated galaxy of trillions of stars. Mine resources, trade commodities, engage in thrilling dogfights, build your own starbases, and unravel the mysteries of ancient alien civilizations. Whether you choose to be a peaceful trader, a notorious pirate, or a renowned explorer, your saga is written in the stars.',
+    bannerUrl: 'https://placehold.co/800x450/9C27B0/FFFFFF?text=Galaxy+Banner',
+    iconUrl: 'https://placehold.co/128x128/9C27B0/FFFFFF?text=GE',
+    tags: [commonTags.pc, { id: 'tag-space', name: 'Space Sim', type: 'genre' }, { id: 'tag-openworld', name: 'Open World', type: 'genre' }],
+  },
+  {
+    id: 'game3',
+    name: 'Kingdoms Collide',
+    slug: 'kingdoms-collide',
+    description: 'Lead your armies to victory in this epic RTS.',
+    longDescription: 'Kingdoms Collide is a real-time strategy game that blends classic RTS mechanics with deep tactical gameplay. Choose from unique factions, command vast armies, manage your economy, and outwit your opponents on diverse battlefields. Featuring a compelling single-player campaign and intense multiplayer matches, only the shrewdest commanders will prevail.',
+    bannerUrl: 'https://placehold.co/800x450/009688/FFFFFF?text=Kingdoms+Banner',
+    iconUrl: 'https://placehold.co/128x128/009688/FFFFFF?text=KC',
+    tags: [commonTags.pc, { id: 'tag-rts', name: 'RTS', type: 'genre' }, { id: 'tag-strategy', name: 'Strategy', type: 'genre' }],
+  },
+];
+
+const allCategories: Category[] = [
+  { id: 'cat1', name: 'Visual Enhancements', slug: 'visual-enhancements', description: 'Mods that improve graphics, textures, and overall visual appeal.' },
+  { id: 'cat2', name: 'Utilities', slug: 'utilities', description: 'Helpful tools and utilities to enhance gameplay convenience.' },
+  { id: 'cat3', name: 'Maps & Worlds', slug: 'maps-and-worlds', description: 'Custom maps, adventure worlds, and new terrains to explore.' },
+  { id: 'cat4', name: 'Ship Customization', slug: 'ship-customization', description: 'Skins, parts, and modifications for your starships.' },
+  { id: 'cat5', name: 'Gameplay Mechanics', slug: 'gameplay-mechanics', description: 'Mods that alter or add new gameplay features and systems.' },
+  { id: 'cat6', name: 'AI & NPCs', slug: 'ai-and-npcs', description: 'Improvements and changes to artificial intelligence and non-player characters.' },
+];
+
+
+const authors: Author[] = [
+  { id: 'author1', name: 'CreativeWorks', avatarUrl: 'https://placehold.co/40x40' },
+  { id: 'author2', name: 'ModMaster', avatarUrl: 'https://placehold.co/40x40' },
+  { id: 'author3', name: 'PixelPerfect', avatarUrl: 'https://placehold.co/40x40' },
+];
 
 const allResources: Resource[] = [
   {
@@ -73,44 +116,33 @@ const allResources: Resource[] = [
   },
 ];
 
-const baseGames: Game[] = [
-  {
-    id: 'game1', name: 'PixelVerse Adventures', slug: 'pixelverse-adventures', description: 'An epic block-building adventure where creativity knows no bounds.', longDescription: 'Dive into PixelVerse Adventures, a sprawling sandbox world where you can build, explore, and survive. Gather resources, craft tools, construct magnificent structures, and battle strange creatures. Whether you prefer peaceful farming or daring dungeon crawls, PixelVerse offers endless possibilities. Regular updates bring new biomes, blocks, and challenges to keep your adventures fresh and exciting.', bannerUrl: 'https://placehold.co/1200x400/D81B60/FFFFFF?text=PixelVerse', iconUrl: 'https://placehold.co/128x128/D81B60/FFFFFF?text=PV', tags: [{id: 'gtag1', name: 'Sandbox', type: 'genre'}, {id: 'gtag2', name: 'Survival', type: 'genre'}, {id: 'gtag3', name: 'Building', type: 'genre'}],
-  },
-  {
-    id: 'game2', name: 'Galaxy Explorers', slug: 'galaxy-explorers', description: 'Command your starship and chart the vast unknown of space.', longDescription: 'Become a legendary captain in Galaxy Explorers! Customize your starship, recruit a loyal crew, and embark on missions across a procedurally generated universe. Engage in thrilling space combat, trade valuable goods, explore mysterious planets, and uncover ancient alien secrets. The galaxy is yours to discover, but beware of pirates and other dangers lurking in the void.', bannerUrl: 'https://placehold.co/1200x400/9C27B0/FFFFFF?text=Galaxy+Explorers', iconUrl: 'https://placehold.co/128x128/9C27B0/FFFFFF?text=GE', tags: [{id: 'gtag4', name: 'Space Sim', type: 'genre'}, {id: 'gtag5', name: 'Exploration', type: 'genre'}, {id: 'gtag6', name: 'Sci-Fi', type: 'genre'}],
-  },
-   {
-    id: 'game3', name: 'Kingdoms Collide', slug: 'kingdoms-collide', description: 'Lead your faction to victory in this epic real-time strategy game.', longDescription: 'Kingdoms Collide is a fast-paced RTS where you command one of several unique factions, each with distinct units, abilities, and playstyles. Gather resources, build your base, amass a powerful army, and outmaneuver your opponents on diverse battlefields. Featuring a single-player campaign, skirmish modes, and competitive multiplayer, strategic depth and quick thinking are key to ruling the lands.', bannerUrl: 'https://placehold.co/1200x400/009688/FFFFFF?text=Kingdoms+Collide', iconUrl: 'https://placehold.co/128x128/009688/FFFFFF?text=KC', tags: [{id: 'gtag7', name: 'RTS', type: 'genre'}, {id: 'gtag8', name: 'Fantasy', type: 'genre'}, {id: 'gtag9', name: 'Multiplayer', type: 'genre'}],
-  },
-];
-
-const allCategories: Category[] = [
-    { id: 'cat1', name: 'Visual Enhancements', slug: 'visual-enhancements', description: 'Mods that improve graphics, textures, and overall visual fidelity.' },
-    { id: 'cat2', name: 'Utilities', slug: 'utilities', description: 'Helpful tools, UI improvements, and quality-of-life mods.' },
-    { id: 'cat3', name: 'Maps & Worlds', slug: 'maps-and-worlds', description: 'Custom maps, adventure worlds, and new terrains to explore.' },
-    { id: 'cat4', name: 'Ship Customization', slug: 'ship-customization', description: 'Skins, parts, and visual upgrades for your starships.' },
-    { id: 'cat5', name: 'Gameplay Mechanics', slug: 'gameplay-mechanics', description: 'Mods that alter or add new gameplay features, rules, or systems.' },
-    { id: 'cat6', name: 'AI & NPCs', slug: 'ai-and-npcs', description: 'Improvements to enemy AI, new companions, or enhanced NPC interactions.' },
-];
-
-const MOCK_DELAY = 50;
+const MOCK_DELAY = 50; // Reduced delay for quicker local testing, can be 0
 const delayed = <T>(data: T): Promise<T> => new Promise(resolve => setTimeout(() => resolve(data), MOCK_DELAY));
 
 const calculateSearchScore = (resource: Resource, query: string): number => {
   let score = 0;
-  const lowerQuery = query.toLowerCase();
+  // Do not trim the query here, allow for searches with trailing spaces if intended
+  const lowerQuery = query.toLowerCase(); 
 
   if (resource.name.toLowerCase().includes(lowerQuery)) {
-    score += 10; // Higher weight for title match
+    score += 10;
+    if (resource.name.toLowerCase().startsWith(lowerQuery)) score += 5; // Bonus for prefix match
   }
   if (resource.description.toLowerCase().includes(lowerQuery)) {
-    score += 5; // Medium weight for short description
+    score += 5;
   }
   if (resource.detailedDescription.toLowerCase().includes(lowerQuery)) {
-    score += 2; // Lower weight for detailed description
+    score += 2;
   }
-  // Bonus for exact phrase match in title (simple version)
+  if (resource.author.name.toLowerCase().includes(lowerQuery)) {
+    score +=3;
+  }
+  resource.tags.forEach(tag => {
+    if (tag.name.toLowerCase().includes(lowerQuery)) {
+      score += 1;
+    }
+  });
+  // Bonus for exact phrase match in title
   if (resource.name.toLowerCase() === lowerQuery) {
     score += 5;
   }
@@ -127,7 +159,6 @@ export const getGameBySlug = async (slug: string): Promise<Game | undefined> => 
 };
 
 export const getGameStats = async (gameSlug: string): Promise<{ totalResources: number; totalDownloads: number }> => {
-  // Use getResources without pagination/limit to get all resources for the game
   const { resources } = await getResources({ gameSlug, limit: Infinity }); // Fetch all
   const totalResources = resources.length;
   const totalDownloads = resources.reduce((sum, resource) => sum + resource.downloads, 0);
@@ -148,9 +179,9 @@ export const getGamesWithDetails = async (): Promise<(Game & { categories: Categ
 
 export const getCategoriesForGame = async (gameSlug: string): Promise<Category[]> => {
   let gameCategoriesConfig: { [key: string]: string[] } = {
-    'pixelverse-adventures': ['cat1', 'cat2', 'cat3', 'cat5'],
-    'galaxy-explorers': ['cat4', 'cat5', 'cat6'],
-    'kingdoms-collide': ['cat2', 'cat5', 'cat6'],
+    'pixelverse-adventures': ['cat1', 'cat2', 'cat3', 'cat5'], // Visuals, Utilities, Maps, Gameplay
+    'galaxy-explorers': ['cat4', 'cat5', 'cat6'], // Ship Customization, Gameplay, AI
+    'kingdoms-collide': ['cat2', 'cat5', 'cat6'], // Utilities, Gameplay, AI
   };
 
   const categoryIds = gameCategoriesConfig[gameSlug] || [];
@@ -168,7 +199,7 @@ export const getCategoryDetails = async (gameSlug: string, categorySlug: string)
 };
 
 export const getResources = async (params: GetResourcesParams): Promise<PaginatedResourcesResponse> => {
-  let filteredResources = [...allResources].map(r => ({...r, searchScore: 0})); // Work with copies, add searchScore
+  let filteredResources = [...allResources].map(r => ({...r, searchScore: 0}));
 
   if (params?.gameSlug) {
     filteredResources = filteredResources.filter(r => r.gameSlug === params.gameSlug);
@@ -177,12 +208,13 @@ export const getResources = async (params: GetResourcesParams): Promise<Paginate
     filteredResources = filteredResources.filter(r => r.categorySlug === params.categorySlug);
   }
   
-  if (params?.searchQuery) {
-    const query = params.searchQuery.toLowerCase();
+  // Use the searchQuery as is, without trimming here, to respect potential trailing spaces.
+  if (params?.searchQuery && params.searchQuery.length > 0) { 
+    const query = params.searchQuery; // No .trim() here
     filteredResources = filteredResources.map(r => {
       r.searchScore = calculateSearchScore(r, query);
       return r;
-    }).filter(r => r.searchScore! > (params.minScore || 0)); // Use minScore, default to 0 if not provided
+    }).filter(r => r.searchScore! > (params.minScore || 0));
   }
 
   if (params?.tags && params.tags.length > 0) {
@@ -191,19 +223,17 @@ export const getResources = async (params: GetResourcesParams): Promise<Paginate
     );
   }
   
-  const sortBy = params?.sortBy || (params?.searchQuery ? 'relevance' : 'downloads'); // Default to relevance if searching
+  const sortBy = params?.sortBy || (params?.searchQuery && params.searchQuery.length > 0 ? 'relevance' : 'downloads');
 
   switch (sortBy) {
     case 'relevance':
-      // This now relies on searchScore calculated above if searchQuery is present.
-      // If no searchQuery, this will effectively be unsorted or rely on original order + other sorts.
-      // We should ensure that if sortBy is 'relevance' but no query, it falls back to something sensible.
-      if (params?.searchQuery) {
+      if (params?.searchQuery && params.searchQuery.length > 0) {
         filteredResources.sort((a, b) => (b.searchScore || 0) - (a.searchScore || 0));
       } else {
-        // Fallback for relevance without search: combination of downloads and recency
+        // Default "relevance" without search query could be a mix of downloads and recency
         filteredResources.sort((a,b) => {
-            const scoreA = (a.downloads / 1000) + (new Date(a.updatedAt).getTime() / (1000 * 60 * 60 * 24 * 30));
+            // Example: Simple scoring based on downloads and update recency
+            const scoreA = (a.downloads / 1000) + (new Date(a.updatedAt).getTime() / (1000 * 60 * 60 * 24 * 30)); // downloads weight + recency weight
             const scoreB = (b.downloads / 1000) + (new Date(b.updatedAt).getTime() / (1000 * 60 * 60 * 24 * 30));
             return scoreB - scoreA;
         });
@@ -224,16 +254,16 @@ export const getResources = async (params: GetResourcesParams): Promise<Paginate
   let paginatedResources = filteredResources;
 
   const page = params?.page || 1;
-  const limit = params?.limit; // Can be undefined if we want all results
+  const limit = params?.limit;
 
   if (limit && limit !== Infinity) {
     const start = (page - 1) * limit;
     const end = start + limit;
     paginatedResources = filteredResources.slice(start, end);
   } else if (limit === Infinity) {
-    paginatedResources = filteredResources; // Return all if limit is Infinity
+    // If limit is Infinity, return all resources (no pagination applied)
+    paginatedResources = filteredResources;
   }
-
 
   return delayed({
     resources: paginatedResources,
@@ -242,18 +272,21 @@ export const getResources = async (params: GetResourcesParams): Promise<Paginate
   });
 };
 
-export const getBestMatchResourcesForCategory = async (gameSlug: string, categorySlug: string, searchQuery: string, limit: number = 3): Promise<Resource[]> => {
-  if (!searchQuery.trim()) return [];
+export const getBestMatchResourcesData = async (gameSlug: string, categorySlug: string, searchQuery: string, limit: number = 3): Promise<Resource[]> => {
+  // No .trim() here, respect the query from client
+  if (!searchQuery || searchQuery.length === 0) return []; 
+  
   const { resources } = await getResources({
     gameSlug,
     categorySlug,
-    searchQuery,
+    searchQuery, // Pass raw query
     sortBy: 'relevance',
     limit,
-    minScore: 1, // Only return if score is at least 1 (e.g. some match in detailed description)
+    minScore: 1, // Only return if score is at least 1 (basic match)
   });
   return delayed(resources);
 };
+
 
 export const getResourceBySlug = async (slug: string): Promise<Resource | undefined> => {
   const resource = allResources.find(r => r.slug === slug);
@@ -266,6 +299,7 @@ export const getHighlightedResources = async (gameSlug: string, categorySlug: st
 };
 
 export const getAvailableFilterTags = async (gameSlug: string, categorySlug?: string): Promise<{ versions: Tag[], loaders: Tag[] }> => {
+  // Fetch all resources for the given game/category to determine available tags
   const { resources: allFilteredResources } = await getResources({ gameSlug, categorySlug, limit: Infinity }); 
   const versions = new Map<string, Tag>();
   const loaders = new Map<string, Tag>();
