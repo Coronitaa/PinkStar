@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React, { useState, useMemo } from 'react';
@@ -13,11 +14,13 @@ interface ResourceFilesTabContentProps {
   files: ResourceFile[];
 }
 
-const CLEAR_FILTER_VALUE = "_ANY_"; // Sentinel value for "All" or "Any" option
+const CLEAR_FILTER_VALUE = "_ANY_"; 
 
 export function ResourceFilesTabContent({ files }: ResourceFilesTabContentProps) {
   const [selectedVersionId, setSelectedVersionId] = useState<string | undefined>(undefined);
   const [selectedLoaderId, setSelectedLoaderId] = useState<string | undefined>(undefined);
+  const [selectedChannelId, setSelectedChannelId] = useState<string | undefined>(undefined);
+
 
   const allAvailableVersions = useMemo(() => {
     const versionsMap = new Map<string, Tag>();
@@ -28,7 +31,7 @@ export function ResourceFilesTabContent({ files }: ResourceFilesTabContentProps)
         }
       });
     });
-    return Array.from(versionsMap.values()).sort((a,b) => b.name.localeCompare(a.name)); // Sort newer first potentially
+    return Array.from(versionsMap.values()).sort((a,b) => b.name.localeCompare(a.name)); 
   }, [files]);
 
   const allAvailableLoaders = useMemo(() => {
@@ -43,31 +46,45 @@ export function ResourceFilesTabContent({ files }: ResourceFilesTabContentProps)
     return Array.from(loadersMap.values()).sort((a,b) => a.name.localeCompare(b.name));
   }, [files]);
 
+  const allAvailableChannels = useMemo(() => {
+    const channelsMap = new Map<string, Tag>();
+    files.forEach(file => {
+      if (file.channel && !channelsMap.has(file.channel.id)) {
+        channelsMap.set(file.channel.id, file.channel);
+      }
+    });
+    return Array.from(channelsMap.values()).sort((a,b) => a.name.localeCompare(b.name)); // Basic sort
+  }, [files]);
+
+
   const filteredFiles = useMemo(() => {
     return files.filter(file => {
       const versionMatch = !selectedVersionId || file.supportedVersions.some(v => v.id === selectedVersionId);
       const loaderMatch = !selectedLoaderId || file.supportedLoaders.some(l => l.id === selectedLoaderId);
-      return versionMatch && loaderMatch;
+      const channelMatch = !selectedChannelId || (file.channel && file.channel.id === selectedChannelId);
+      return versionMatch && loaderMatch && channelMatch;
     });
-  }, [files, selectedVersionId, selectedLoaderId]);
+  }, [files, selectedVersionId, selectedLoaderId, selectedChannelId]);
+  
+  const hasActiveFilters = selectedVersionId || selectedLoaderId || selectedChannelId;
 
   return (
     <div className="space-y-6">
-      {(allAvailableVersions.length > 0 || allAvailableLoaders.length > 0) && (
-        <div className="p-4 border rounded-md bg-card-foreground/5 shadow-sm space-y-3 sm:space-y-0 sm:flex sm:flex-row sm:items-center sm:gap-4">
+      {(allAvailableVersions.length > 0 || allAvailableLoaders.length > 0 || allAvailableChannels.length > 0) && (
+        <div className="p-4 border rounded-md bg-card-foreground/5 shadow-sm space-y-3 sm:flex sm:flex-row sm:items-center sm:gap-4 sm:flex-wrap">
           <div className="flex items-center text-sm font-medium text-muted-foreground shrink-0">
             <Filter className="w-4 h-4 mr-2 text-primary" />
             Filter files by:
           </div>
           {allAvailableVersions.length > 0 && (
-            <div className="flex-1 min-w-[150px]">
+            <div className="flex-none"> {/* Changed from flex-1 */}
               <Select 
                 value={selectedVersionId} 
                 onValueChange={(value) => {
                   setSelectedVersionId(value === CLEAR_FILTER_VALUE ? undefined : value);
                 }}
               >
-                <SelectTrigger className="w-full h-9 text-xs rounded-md">
+                <SelectTrigger className="w-auto h-9 text-xs rounded-md min-w-[130px]"> {/* Added w-auto */}
                   <SelectValue placeholder="All Versions" />
                 </SelectTrigger>
                 <SelectContent>
@@ -80,14 +97,14 @@ export function ResourceFilesTabContent({ files }: ResourceFilesTabContentProps)
             </div>
           )}
           {allAvailableLoaders.length > 0 && (
-             <div className="flex-1 min-w-[150px]">
+             <div className="flex-none">  {/* Changed from flex-1 */}
               <Select 
                 value={selectedLoaderId} 
                 onValueChange={(value) => {
                   setSelectedLoaderId(value === CLEAR_FILTER_VALUE ? undefined : value);
                 }}
               >
-                <SelectTrigger className="w-full h-9 text-xs rounded-md">
+                <SelectTrigger className="w-auto h-9 text-xs rounded-md min-w-[130px]"> {/* Added w-auto */}
                   <SelectValue placeholder="All Loaders" />
                 </SelectTrigger>
                 <SelectContent>
@@ -99,11 +116,31 @@ export function ResourceFilesTabContent({ files }: ResourceFilesTabContentProps)
               </Select>
             </div>
           )}
-           {(selectedVersionId || selectedLoaderId) && (
+          {allAvailableChannels.length > 0 && (
+             <div className="flex-none">
+              <Select 
+                value={selectedChannelId} 
+                onValueChange={(value) => {
+                  setSelectedChannelId(value === CLEAR_FILTER_VALUE ? undefined : value);
+                }}
+              >
+                <SelectTrigger className="w-auto h-9 text-xs rounded-md min-w-[130px]"> {/* Added w-auto */}
+                  <SelectValue placeholder="All Channels" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={CLEAR_FILTER_VALUE} className="text-xs">All Channels</SelectItem>
+                  {allAvailableChannels.map(cTag => (
+                    <SelectItem key={cTag.id} value={cTag.id} className="text-xs">{cTag.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+           {hasActiveFilters && (
             <Button 
               variant="ghost" 
               size="sm" 
-              onClick={() => { setSelectedVersionId(undefined); setSelectedLoaderId(undefined);}}
+              onClick={() => { setSelectedVersionId(undefined); setSelectedLoaderId(undefined); setSelectedChannelId(undefined);}}
               className="text-xs h-9 text-muted-foreground hover:text-primary"
             >
               Clear Filters
@@ -121,8 +158,16 @@ export function ResourceFilesTabContent({ files }: ResourceFilesTabContentProps)
                   <p className="font-medium text-foreground">{file.name}</p>
                   <p className="text-xs text-muted-foreground mb-2">Size: {file.size}</p>
                   
-                  {(file.supportedVersions.length > 0 || file.supportedLoaders.length > 0) && (
+                  {(file.supportedVersions.length > 0 || file.supportedLoaders.length > 0 || file.channel) && (
                     <div className="mt-2 space-y-2">
+                      {file.channel && (
+                         <div>
+                          <span className="text-xs text-muted-foreground block mb-1">Channel:</span>
+                           <div className="flex flex-wrap gap-1.5">
+                            <TagBadge tag={file.channel} className="text-[10px] px-1.5 py-0.5" />
+                          </div>
+                        </div>
+                      )}
                       {file.supportedVersions.length > 0 && (
                         <div>
                           <span className="text-xs text-muted-foreground block mb-1">Compatible Versions:</span>

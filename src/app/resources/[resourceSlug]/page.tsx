@@ -1,4 +1,5 @@
 
+
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -9,8 +10,9 @@ import { ResourceInfoSidebar } from '@/components/resource/ResourceInfoSidebar';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ResourceFilesTabContent } from '@/components/resource/ResourceFilesTabContent'; // Import new component
-import { FileText, BookOpen, ListChecks, MessageCircle, Eye, Heart } from 'lucide-react'; // Removed AlertTriangle if not used elsewhere, Select related imports moved
+import { ResourceFilesTabContent } from '@/components/resource/ResourceFilesTabContent'; 
+import { ResourceChangelogTabContent } from '@/components/resource/ResourceChangelogTabContent'; // New component for changelog
+import { FileText, BookOpen, ListChecks, MessageCircle, Eye, Heart } from 'lucide-react'; 
 import { Carousel, CarouselItem } from '@/components/shared/Carousel';
 import { ResourceCard } from '@/components/resource/ResourceCard';
 
@@ -106,8 +108,12 @@ export default async function ResourcePage({ params, searchParams }: ResourcePag
                   )}
                 </TabsContent>
                 <TabsContent value="changelog">
-                  {resource.changelog ? (
-                     <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-line leading-relaxed" dangerouslySetInnerHTML={{ __html: resource.changelog.replace(/\n/g, '<br />') }} />
+                  {resource.changelogEntries && resource.changelogEntries.length > 0 ? (
+                     <ResourceChangelogTabContent 
+                        changelogEntries={resource.changelogEntries} 
+                        allResourceFiles={resource.files}
+                        resourceAuthor={resource.author}
+                      />
                   ) : (
                     <p className="text-muted-foreground p-4 text-center">No changelog available for this resource.</p>
                   )}

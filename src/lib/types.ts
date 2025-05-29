@@ -1,4 +1,5 @@
 
+
 export interface Author {
   id: string;
   name: string;
@@ -8,7 +9,7 @@ export interface Author {
 export interface Tag {
   id: string;
   name: string;
-  type: 'version' | 'loader' | 'genre' | 'platform' | 'misc';
+  type: 'version' | 'loader' | 'genre' | 'platform' | 'misc' | 'channel';
   color?: string; // Hex color for badge background, if needed
 }
 
@@ -17,9 +18,9 @@ export interface ResourceFile {
   name: string;
   url: string;
   size: string; // e.g., "1.2 MB"
-  // version: string; // Replaced by supportedVersions
   supportedVersions: Tag[];
   supportedLoaders: Tag[];
+  channel?: Tag; // Added for Release, Beta, Alpha
 }
 
 export interface ResourceLinks {
@@ -27,6 +28,17 @@ export interface ResourceLinks {
   wiki?: string;
   issues?: string;
   source?: string; // Example: GitHub, GitLab
+}
+
+export interface ChangelogEntry {
+  id: string;
+  versionName: string; // e.g., "Sodium 0.6.13 for NeoForge 1.21.5"
+  date: string; // ISO date string
+  notes: string; // Markdown content for the entry
+  relatedFileId?: string; // ID of the ResourceFile this changelog entry refers to for download
+  gameVersionTag?: Tag; // Specific game version for this entry (e.g., 1.21.5)
+  channelTag?: Tag; // e.g., Release, Beta, Alpha
+  loaderTags?: Tag[]; // e.g., Fabric, Forge
 }
 
 export interface Resource {
@@ -48,7 +60,7 @@ export interface Resource {
   detailedDescription: string; // Markdown or rich text
   files: ResourceFile[];
   requirements?: string; // For the new "Requirements" tab
-  changelog?: string; // For the new "Changelog" tab
+  changelogEntries?: ChangelogEntry[]; // Changed from changelog?: string
   searchScore?: number; // Optional score for search relevance
   rating?: number; // Optional: 0-5 stars
   followers?: number; // Optional: count of followers
@@ -90,3 +102,4 @@ export interface PaginatedResourcesResponse {
   total: number; // Total number of resources matching filters (before pagination)
   hasMore: boolean; // Indicates if there are more resources to load
 }
+
