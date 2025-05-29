@@ -60,7 +60,7 @@ export interface Game {
   tags?: Tag[]; // General tags for the game, e.g., "RPG", "Multiplayer"
 }
 
-export interface GetResourcesFilters {
+export interface GetResourcesParams {
   gameSlug?: string;
   categorySlug?: string;
   tags?: string[];
@@ -68,4 +68,10 @@ export interface GetResourcesFilters {
   sortBy?: 'relevance' | 'downloads' | 'updatedAt' | 'name';
   page?: number;
   limit?: number;
+}
+
+export interface PaginatedResourcesResponse {
+  resources: Resource[];
+  total: number; // Total number of resources matching filters (before pagination)
+  hasMore: boolean; // Indicates if there are more resources to load
 }

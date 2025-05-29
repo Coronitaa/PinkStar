@@ -1,19 +1,15 @@
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import { getGameBySlug, getCategoryDetails, getResources, getAvailableFilterTags } from '@/lib/data';
+import { getGameBySlug, getCategoryDetails, getResources, getAvailableFilterTags, getCategoriesForGame } from '@/lib/data';
 import type { Game, Category, Resource, Tag } from '@/lib/types';
-// Button is not used directly here anymore, it's inside the render prop's content
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ResourceListItem } from '@/components/resource/ResourceListItem';
-import { ResourceFilterControls } from '@/components/resource/ResourceFilterControls';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
-import { Search, Layers } from 'lucide-react'; 
-import { CategoryPageClientControls } from './CategoryPageClientControls';
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Layers } from 'lucide-react';
+import { CategoryPageContent } from './CategoryPageContent';
 
+const RESOURCES_PER_PAGE = 20;
 
 interface CategoryPageProps {
   params: { gameSlug: string; categorySlug: string };
@@ -24,9 +20,10 @@ type SortByType = 'relevance' | 'downloads' | 'updatedAt' | 'name';
 
 export default async function CategoryPage({ params, searchParams }: CategoryPageProps) {
   const game = await getGameBySlug(params.gameSlug);
-  const category = await getCategoryDetails(params.gameSlug, params.categorySlug);
+  const currentCategory = await getCategoryDetails(params.gameSlug, params.categorySlug);
+  const allGameCategories = await getCategoriesForGame(params.gameSlug);
 
-  if (!game || !category) {
+  if (!game || !currentCategory) {
     notFound();
   }
 
@@ -37,92 +34,66 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
   const searchQuery = typeof searchParams.q === 'string' ? searchParams.q : undefined;
   const sortBy = (typeof searchParams.sort === 'string' ? searchParams.sort : 'relevance') as SortByType;
 
-  const resources = await getResources({ 
+  const { resources: initialResources, total: initialTotal, hasMore: initialHasMore } = await getResources({ 
     gameSlug: params.gameSlug, 
     categorySlug: params.categorySlug, 
     tags: activeTagFilters,
     searchQuery,
     sortBy,
+    page: 1,
+    limit: RESOURCES_PER_PAGE,
   });
+
   const availableFilterTags = await getAvailableFilterTags(params.gameSlug, params.categorySlug);
 
   return (
     <div className="space-y-8">
       <Breadcrumb>
         <BreadcrumbList>
-          <BreadcrumbItem><Link href="/" className="hover:text-primary">Home</Link></BreadcrumbItem>
+          <BreadcrumbItem><BreadcrumbLink href="/">Home</BreadcrumbLink></BreadcrumbItem>
           <BreadcrumbSeparator />
-          <BreadcrumbItem><Link href={`/games/${game.slug}`} className="hover:text-primary">{game.name}</Link></BreadcrumbItem>
+          <BreadcrumbItem><BreadcrumbLink href={`/games/${game.slug}`}>{game.name}</BreadcrumbLink></BreadcrumbItem>
           <BreadcrumbSeparator />
-          <BreadcrumbItem><BreadcrumbPage>{category.name}</BreadcrumbPage></BreadcrumbItem>
+          <BreadcrumbItem><BreadcrumbPage>{currentCategory.name}</BreadcrumbPage></BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
-      <header className="pb-4 border-b">
+      <header className="pb-4">
         <div className="flex items-center space-x-3">
             <Layers className="w-8 h-8 text-primary" />
-            <h1 className="text-4xl font-bold text-foreground">{category.name}</h1>
+            <h1 className="text-4xl font-bold text-foreground">{currentCategory.name}</h1>
         </div>
-        {category.description && <p className="mt-2 text-lg text-muted-foreground">{category.description}</p>}
+        {currentCategory.description && <p className="mt-2 text-lg text-muted-foreground">{currentCategory.description}</p>}
       </header>
 
-      <CategoryPageClientControls
-        initialSearchQuery={searchQuery}
-        initialSortBy={sortBy}
-        renderControls={(currentSearchQuery, currentSortBy, handleSearchChange, handleSortChange) => (
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-            {(availableFilterTags.versions.length > 0 || availableFilterTags.loaders.length > 0) && (
-              <aside className="md:col-span-3 lg:col-span-3 space-y-6">
-                <ResourceFilterControls availableTags={availableFilterTags} />
-              </aside>
-            )}
-            
-            <main className={(availableFilterTags.versions.length > 0 || availableFilterTags.loaders.length > 0) ? "md:col-span-9 lg:col-span-9" : "md:col-span-12"}>
-              <div className="mb-6 p-4 border rounded-lg bg-card">
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <div className="relative flex-grow">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                    <Input
-                      type="search"
-                      placeholder={`Search in ${category.name}...`}
-                      className="pl-10 w-full"
-                      value={currentSearchQuery}
-                      onChange={(e) => handleSearchChange(e.target.value)}
-                    />
-                  </div>
-                  <Select value={currentSortBy} onValueChange={(value) => handleSortChange(value as SortByType)}>
-                    <SelectTrigger className="w-full sm:w-[180px]">
-                      <SelectValue placeholder="Sort by" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="relevance">Relevance</SelectItem>
-                      <SelectItem value="downloads">Downloads</SelectItem>
-                      <SelectItem value="updatedAt">Last Updated</SelectItem>
-                      <SelectItem value="name">Name</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {resources.length > 0 ? (
-                <div className="space-y-4">
-                  {resources.map(resource => (
-                    <ResourceListItem key={resource.id} resource={resource} />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                    <Image src="https://placehold.co/128x128/1f1f1f/4a4a4a?text=:(" alt="No results" width={128} height={128} className="mx-auto mb-4 rounded-lg" data-ai-hint="sad face emoji" />
-                    <p className="text-xl font-semibold text-foreground">No resources found</p>
-                    <p className="text-muted-foreground">
-                        {activeTagFilters.length > 0 || searchQuery ? "Try adjusting your filters or search terms." : `No resources in ${category.name} for ${game.name} yet. Stay tuned!`}
-                    </p>
-                </div>
-              )}
-              {/* TODO: Pagination controls */}
-            </main>
-          </div>
-        )}
+      {allGameCategories.length > 1 && (
+        <div className="mb-6 border-b">
+          <Tabs defaultValue={currentCategory.slug} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-auto gap-1 bg-transparent p-0">
+              {allGameCategories.map(cat => (
+                <TabsTrigger 
+                  key={cat.id} 
+                  value={cat.slug} 
+                  asChild
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md hover:bg-muted/50"
+                >
+                  <Link href={`/games/${game.slug}/${cat.slug}`}>{cat.name}</Link>
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+        </div>
+      )}
+      
+      <CategoryPageContent
+        initialResources={initialResources}
+        initialHasMore={initialHasMore}
+        initialTotal={initialTotal}
+        gameSlug={params.gameSlug}
+        categorySlug={params.categorySlug}
+        availableFilterTags={availableFilterTags}
+        gameName={game.name}
+        categoryName={currentCategory.name}
       />
     </div>
   );
