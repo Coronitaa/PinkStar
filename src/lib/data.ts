@@ -19,9 +19,9 @@ const commonTags: Record<string, Tag> = {
   neoForge: { id: 'tag13', name: 'NeoForge', type: 'loader', color: 'bg-red-500' },
   v1_20_1: { id: 'tag14', name: '1.20.1', type: 'version', color: 'bg-green-600' },
   v1_20_4: { id: 'tag15', name: '1.20.4', type: 'version', color: 'bg-green-700' },
-  channelRelease: { id: 'tag-ch-release', name: 'Release', type: 'channel', color: 'bg-emerald-500' },
-  channelBeta: { id: 'tag-ch-beta', name: 'Beta', type: 'channel', color: 'bg-yellow-500' },
-  channelAlpha: { id: 'tag-ch-alpha', name: 'Alpha', type: 'channel', color: 'bg-red-500' },
+  channelRelease: { id: 'tag-ch-release', name: 'Release', type: 'channel', color: 'bg-green-500 border-green-500', textColor: 'text-green-50' },
+  channelBeta: { id: 'tag-ch-beta', name: 'Beta', type: 'channel', color: 'bg-sky-500 border-sky-500', textColor: 'text-sky-50' },
+  channelAlpha: { id: 'tag-ch-alpha', name: 'Alpha', type: 'channel', color: 'bg-orange-500 border-orange-500', textColor: 'text-orange-50' },
 };
 
 const baseGames: Game[] = [
@@ -78,13 +78,13 @@ const allResources: Resource[] = [
     id: 'res1', name: 'Ultra Graphics Mod', slug: 'ultra-graphics-mod', gameName: 'PixelVerse Adventures', gameSlug: 'pixelverse-adventures', categoryName: 'Visual Enhancements', categorySlug: 'visual-enhancements', imageUrl: 'https://placehold.co/600x400/D81B60/FFFFFF?text=UltraGFX', author: authors[0], tags: [commonTags.v1_20, commonTags.fabric, commonTags.texturePack, commonTags.pc, commonTags.enhancement], downloads: 15000, createdAt: new Date('2023-05-10T10:00:00Z').toISOString(), updatedAt: new Date('2023-08-15T14:30:00Z').toISOString(), version: '2.1.0', description: 'Breathtaking visual overhaul for PixelVerse. Experience the world like never before with this amazing mod.', detailedDescription: `Ultra Graphics Mod transforms your PixelVerse experience with stunning high-resolution textures, advanced lighting effects, and realistic weather systems. Explore familiar landscapes with a newfound sense of awe and immersion. This mod is optimized for performance while delivering top-tier visuals.\n\nFeatures:\n- 4K Texture Support\n- Dynamic Global Illumination\n- Volumetric Clouds & Fog\n- Enhanced Water Shaders\n- Particle Effect Overhaul\n\nThis is a must have graphics mod for any PixelVerse player seeking ultimate immersion. Our team spent months crafting these visuals.`, 
     files: [
       { id: 'file1_1', name: 'ultra-graphics-v2.1.0-fabric-1.20.jar', url: '#', size: '5.5 MB', supportedVersions: [commonTags.v1_20], supportedLoaders: [commonTags.fabric], channel: commonTags.channelRelease },
-      { id: 'file1_2', name: 'ultra-graphics-v2.0.0-fabric-1.19.jar', url: '#', size: '5.3 MB', supportedVersions: [commonTags.v1_19], supportedLoaders: [commonTags.fabric], channel: commonTags.channelRelease }
+      { id: 'file1_2', name: 'ultra-graphics-v2.0.0-fabric-1.19.jar', url: '#', size: '5.3 MB', supportedVersions: [commonTags.v1_19], supportedLoaders: [commonTags.fabric], channel: commonTags.channelBeta }
     ], 
     requirements: 'Requires Fabric API and a compatible graphics card (GTX 1060 or equivalent recommended). Ensure you have at least 8GB of RAM allocated to the game.', 
     changelogEntries: [
       { id: 'cl1-1', versionName: 'Ultra Graphics v2.1.0', date: '2023-08-15T14:30:00Z', notes: 'Added support for PixelVerse v1.20.X.\nFixed water rendering artifacts.\nImproved shadow quality on distant objects.', relatedFileId: 'file1_1', gameVersionTag: commonTags.v1_20, channelTag: commonTags.channelRelease, loaderTags: [commonTags.fabric] },
-      { id: 'cl1-2', versionName: 'Ultra Graphics v2.0.0', date: '2023-07-01T10:00:00Z', notes: 'Major visual overhaul, new lighting engine implemented.\nPerformance optimizations for mid-range GPUs.\nAdded experimental volumetric fog (can be toggled in settings).', relatedFileId: 'file1_2', gameVersionTag: commonTags.v1_19, channelTag: commonTags.channelRelease, loaderTags: [commonTags.fabric] },
-      { id: 'cl1-3', versionName: 'Ultra Graphics v2.0.0 Beta 1', date: '2023-06-15T10:00:00Z', notes: 'Beta release of v2.0.0. Includes new lighting engine.\nPlease report any bugs found.', gameVersionTag: commonTags.v1_19, channelTag: commonTags.channelBeta, loaderTags: [commonTags.fabric] }
+      { id: 'cl1-2', versionName: 'Ultra Graphics v2.0.0', date: '2023-07-01T10:00:00Z', notes: 'Major visual overhaul, new lighting engine implemented.\nPerformance optimizations for mid-range GPUs.\nAdded experimental volumetric fog (can be toggled in settings).', relatedFileId: 'file1_2', gameVersionTag: commonTags.v1_19, channelTag: commonTags.channelBeta, loaderTags: [commonTags.fabric] },
+      { id: 'cl1-3', versionName: 'Ultra Graphics v2.0.0 Alpha 1', date: '2023-06-15T10:00:00Z', notes: 'Alpha release of v2.0.0. Includes new lighting engine.\nPlease report any bugs found.', gameVersionTag: commonTags.v1_19, channelTag: commonTags.channelAlpha, loaderTags: [commonTags.fabric] }
     ], rating: 4.8, followers: 1250, links: { discord: 'https://discord.gg/example', wiki: 'https://wiki.example.com/ultragfx', issues: 'https://github.com/example/ultragfx/issues', source: 'https://github.com/example/ultragfx' }
   },
   {
@@ -118,7 +118,7 @@ const allResources: Resource[] = [
     requirements: 'Fabric API.', 
     changelogEntries: [
       { id: 'cl5-1', versionName: 'Inventory Sorter v1.8.0', date: '2023-09-10T00:00:00Z', notes: 'Added support for PixelVerse 1.21.X. Improved sorting algorithm.', relatedFileId: 'file5_1', gameVersionTag: commonTags.v1_21, channelTag: commonTags.channelRelease, loaderTags: [commonTags.fabric]},
-      { id: 'cl5-2', versionName: 'Inventory Sorter v1.7.5', date: '2023-08-01T00:00:00Z', notes: 'Fixed minor bugs with modded items.', gameVersionTag: commonTags.v1_20, channelTag: commonTags.channelRelease, loaderTags: [commonTags.fabric]}
+      { id: 'cl5-2', versionName: 'Inventory Sorter v1.7.5 Alpha', date: '2023-08-01T00:00:00Z', notes: 'Fixed minor bugs with modded items.', gameVersionTag: commonTags.v1_20, channelTag: commonTags.channelAlpha, loaderTags: [commonTags.fabric]}
     ], rating: 5.0, followers: 9800
   },
   {
@@ -150,9 +150,9 @@ const allResources: Resource[] = [
     version: `1.${i % 5}.0`,
     description: `A handy utility mod number ${i + 1} for everyday tasks in PixelVerse. This item helps with various overview tasks.`,
     detailedDescription: `This is Utility Mod ${i + 1}. It helps with various things like item management, information display, or minor gameplay tweaks. It is designed to be lightweight and compatible with most other mods. Essential utility for players. This is part of the detailed overview.`,
-    files: [{ id: `file-pv-util-${i+7}`, name: `utility-mod-${i+1}.jar`, url: '#', size: '0.2MB', supportedVersions: [commonTags.v1_20], supportedLoaders: [(i % 2 === 0 ? commonTags.fabric : commonTags.forge)], channel: commonTags.channelRelease }],
+    files: [{ id: `file-pv-util-${i+7}`, name: `utility-mod-${i+1}.jar`, url: '#', size: '0.2MB', supportedVersions: [commonTags.v1_20], supportedLoaders: [(i % 2 === 0 ? commonTags.fabric : commonTags.forge)], channel: i % 3 === 0 ? commonTags.channelRelease : (i % 3 === 1 ? commonTags.channelBeta : commonTags.channelAlpha) }],
     requirements: (i % 2 === 0 ? 'Fabric API' : 'Forge Mod Loader'),
-    changelogEntries: [{id: `cl-pv-util-${i+7}`, versionName: `Utility Mod 1.${i%5}.0`, date: new Date(Date.now() - Math.random() * 1000 * 60 * 60 * 24 * 7 * (i + 1)).toISOString(), notes: `Initial release or minor update for Utility Mod ${i+1}.`, relatedFileId: `file-pv-util-${i+7}`, gameVersionTag: commonTags.v1_20, channelTag: commonTags.channelRelease, loaderTags: [(i % 2 === 0 ? commonTags.fabric : commonTags.forge)]}],
+    changelogEntries: [{id: `cl-pv-util-${i+7}`, versionName: `Utility Mod 1.${i%5}.0`, date: new Date(Date.now() - Math.random() * 1000 * 60 * 60 * 24 * 7 * (i + 1)).toISOString(), notes: `Initial release or minor update for Utility Mod ${i+1}.`, relatedFileId: `file-pv-util-${i+7}`, gameVersionTag: commonTags.v1_20, channelTag: i % 3 === 0 ? commonTags.channelRelease : (i % 3 === 1 ? commonTags.channelBeta : commonTags.channelAlpha), loaderTags: [(i % 2 === 0 ? commonTags.fabric : commonTags.forge)]}],
     rating: Math.round((3.5 + Math.random() * 1.5) * 10) / 10, 
     followers: Math.floor(Math.random() * 500) + 10,
   })),
@@ -170,9 +170,9 @@ const allResources: Resource[] = [
   },
   {
     id: 'res-kc-ai', name: 'Enhanced Tactical AI Mod', slug: 'kc-tactical-ai', gameName: 'Kingdoms Collide', gameSlug: 'kingdoms-collide', categoryName: 'AI & NPCs', categorySlug: 'ai-and-npcs', imageUrl: 'https://placehold.co/600x400/E91E63/FFFFFF?text=TacticalAI', author: authors[2], tags: [commonTags.pc, commonTags.utility], downloads: 5500, createdAt: new Date('2023-05-20T00:00:00Z').toISOString(), updatedAt: new Date('2023-08-10T00:00:00Z').toISOString(), version: '1.3.0', description: 'Makes enemy and allied AI smarter and more challenging in Kingdoms Collide.', detailedDescription: 'Experience more dynamic battles in Kingdoms Collide with the Enhanced Tactical AI mod. Enemy commanders will use more complex strategies, respond better to player actions, and manage their economies more efficiently. Allied AI will also show improved coordination and unit control. This mod improves AI significantly.', 
-    files: [{ id: 'file-kc-ai-1', name: 'kc-eta-v1.3.0.mod', url: '#', size: '3.5 MB', supportedVersions: [], supportedLoaders: [], channel: commonTags.channelRelease }], 
+    files: [{ id: 'file-kc-ai-1', name: 'kc-eta-v1.3.0.mod', url: '#', size: '3.5 MB', supportedVersions: [], supportedLoaders: [], channel: commonTags.channelAlpha }], 
     requirements: 'Kingdoms Collide v1.8 or newer.', 
-    changelogEntries: [{ id: 'cl-kc-ai', versionName: 'ETA v1.3.0', date: '2023-08-10T00:00:00Z', notes: 'AI now utilizes flanking maneuvers more effectively.\nImproved resource management logic for AI opponents.', relatedFileId: 'file-kc-ai-1', channelTag: commonTags.channelRelease }], rating: 4.3, followers: 280
+    changelogEntries: [{ id: 'cl-kc-ai', versionName: 'ETA v1.3.0', date: '2023-08-10T00:00:00Z', notes: 'AI now utilizes flanking maneuvers more effectively.\nImproved resource management logic for AI opponents.', relatedFileId: 'file-kc-ai-1', channelTag: commonTags.channelAlpha }], rating: 4.3, followers: 280
   },
 ];
 
@@ -340,7 +340,12 @@ export const getBestMatchResourcesData = async (gameSlug: string, categorySlug: 
 export const getResourceBySlug = async (slug: string): Promise<Resource | undefined> => {
   const resource = allResources.find(r => r.slug === slug);
   if (resource) {
-    return delayed({ ...resource });
+    // Ensure changelog entries are sorted by date descending if they exist
+    const resourceCopy = { ...resource };
+    if (resourceCopy.changelogEntries) {
+      resourceCopy.changelogEntries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    }
+    return delayed(resourceCopy);
   }
   return delayed(undefined);
 };
@@ -367,7 +372,7 @@ export const getAvailableFilterTags = async (gameSlug: string, categorySlug?: st
       else if (tag.type === 'genre' && !genres.has(tag.id)) genres.set(tag.id, tag);
       else if (tag.type === 'misc' && !misc.has(tag.id)) misc.set(tag.id, tag);
     });
-    // Also check file-specific channels for resource-level filter availability
+    
     resource.files.forEach(file => {
       if (file.channel && !channels.has(file.channel.id)) {
         channels.set(file.channel.id, file.channel);

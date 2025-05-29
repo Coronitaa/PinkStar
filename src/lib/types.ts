@@ -10,7 +10,8 @@ export interface Tag {
   id: string;
   name: string;
   type: 'version' | 'loader' | 'genre' | 'platform' | 'misc' | 'channel';
-  color?: string; // Hex color for badge background, if needed
+  color?: string; // Hex color or Tailwind class for badge background
+  textColor?: string; // Optional: Tailwind class for text color if contrast is needed
 }
 
 export interface ResourceFile {
@@ -20,7 +21,7 @@ export interface ResourceFile {
   size: string; // e.g., "1.2 MB"
   supportedVersions: Tag[];
   supportedLoaders: Tag[];
-  channel?: Tag; // Added for Release, Beta, Alpha
+  channel?: Tag; // Release, Beta, Alpha etc.
 }
 
 export interface ResourceLinks {
@@ -60,7 +61,7 @@ export interface Resource {
   detailedDescription: string; // Markdown or rich text
   files: ResourceFile[];
   requirements?: string; // For the new "Requirements" tab
-  changelogEntries?: ChangelogEntry[]; // Changed from changelog?: string
+  changelogEntries?: ChangelogEntry[];
   searchScore?: number; // Optional score for search relevance
   rating?: number; // Optional: 0-5 stars
   followers?: number; // Optional: count of followers
@@ -102,4 +103,3 @@ export interface PaginatedResourcesResponse {
   total: number; // Total number of resources matching filters (before pagination)
   hasMore: boolean; // Indicates if there are more resources to load
 }
-

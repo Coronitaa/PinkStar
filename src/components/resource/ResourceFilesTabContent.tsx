@@ -3,20 +3,23 @@
 "use client";
 
 import React, { useState, useMemo } from 'react';
-import type { ResourceFile, Tag } from '@/lib/types';
+import type { ResourceFile, Tag, ChangelogEntry } from '@/lib/types'; // Added ChangelogEntry
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TagBadge } from '@/components/shared/TagBadge';
-import Link from 'next/link';
-import { Download, Filter } from 'lucide-react';
+import Link from 'next/link'; // Import Link
+import { Download, Filter, Info } from 'lucide-react';
+import { cn } from '@/lib/utils'; // For conditional class names
 
 interface ResourceFilesTabContentProps {
   files: ResourceFile[];
+  resourceSlug: string; // To construct changelog link
+  allChangelogEntries?: ChangelogEntry[]; // To find related changelog entry
 }
 
 const CLEAR_FILTER_VALUE = "_ANY_"; 
 
-export function ResourceFilesTabContent({ files }: ResourceFilesTabContentProps) {
+export function ResourceFilesTabContent({ files, resourceSlug, allChangelogEntries = [] }: ResourceFilesTabContentProps) {
   const [selectedVersionId, setSelectedVersionId] = useState<string | undefined>(undefined);
   const [selectedLoaderId, setSelectedLoaderId] = useState<string | undefined>(undefined);
   const [selectedChannelId, setSelectedChannelId] = useState<string | undefined>(undefined);
@@ -53,7 +56,11 @@ export function ResourceFilesTabContent({ files }: ResourceFilesTabContentProps)
         channelsMap.set(file.channel.id, file.channel);
       }
     });
-    return Array.from(channelsMap.values()).sort((a,b) => a.name.localeCompare(b.name)); // Basic sort
+    return Array.from(channelsMap.values()).sort((a,b) => {
+        // Custom sort: Release, Beta, Alpha
+        const order = ['Release', 'Beta', 'Alpha'];
+        return order.indexOf(a.name) - order.indexOf(b.name);
+    });
   }, [files]);
 
 
@@ -63,10 +70,32 @@ export function ResourceFilesTabContent({ files }: ResourceFilesTabContentProps)
       const loaderMatch = !selectedLoaderId || file.supportedLoaders.some(l => l.id === selectedLoaderId);
       const channelMatch = !selectedChannelId || (file.channel && file.channel.id === selectedChannelId);
       return versionMatch && loaderMatch && channelMatch;
+    }).sort((a, b) => {
+      // Optional: sort files, e.g., by channel then by name
+      const order = ['Release', 'Beta', 'Alpha'];
+      const aChannelIndex = a.channel ? order.indexOf(a.channel.name) : order.length;
+      const bChannelIndex = b.channel ? order.indexOf(b.channel.name) : order.length;
+      if (aChannelIndex !== bChannelIndex) return aChannelIndex - bChannelIndex;
+      return a.name.localeCompare(b.name);
     });
   }, [files, selectedVersionId, selectedLoaderId, selectedChannelId]);
   
   const hasActiveFilters = selectedVersionId || selectedLoaderId || selectedChannelId;
+
+  const getChannelSpecificClasses = (channel?: Tag) => {
+    if (!channel) return { bubble: '', border: 'border-border/30' };
+    switch (channel.name.toLowerCase()) {
+      case 'release':
+        return { bubble: 'bg-green-500 text-green-50', border: 'border-green-500' };
+      case 'beta':
+        return { bubble: 'bg-sky-500 text-sky-50', border: 'border-sky-500' };
+      case 'alpha':
+        return { bubble: 'bg-orange-500 text-orange-50', border: 'border-orange-500' };
+      default:
+        return { bubble: 'bg-muted text-muted-foreground', border: 'border-border/50' };
+    }
+  };
+
 
   return (
     <div className="space-y-6">
@@ -77,14 +106,14 @@ export function ResourceFilesTabContent({ files }: ResourceFilesTabContentProps)
             Filter files by:
           </div>
           {allAvailableVersions.length > 0 && (
-            <div className="flex-none"> {/* Changed from flex-1 */}
+            <div className="flex-none"> 
               <Select 
                 value={selectedVersionId} 
                 onValueChange={(value) => {
                   setSelectedVersionId(value === CLEAR_FILTER_VALUE ? undefined : value);
                 }}
               >
-                <SelectTrigger className="w-auto h-9 text-xs rounded-md min-w-[130px]"> {/* Added w-auto */}
+                <SelectTrigger className="w-auto h-9 text-xs rounded-md min-w-[130px]"> 
                   <SelectValue placeholder="All Versions" />
                 </SelectTrigger>
                 <SelectContent>
@@ -97,14 +126,14 @@ export function ResourceFilesTabContent({ files }: ResourceFilesTabContentProps)
             </div>
           )}
           {allAvailableLoaders.length > 0 && (
-             <div className="flex-none">  {/* Changed from flex-1 */}
+             <div className="flex-none"> 
               <Select 
                 value={selectedLoaderId} 
                 onValueChange={(value) => {
                   setSelectedLoaderId(value === CLEAR_FILTER_VALUE ? undefined : value);
                 }}
               >
-                <SelectTrigger className="w-auto h-9 text-xs rounded-md min-w-[130px]"> {/* Added w-auto */}
+                <SelectTrigger className="w-auto h-9 text-xs rounded-md min-w-[130px]"> 
                   <SelectValue placeholder="All Loaders" />
                 </SelectTrigger>
                 <SelectContent>
@@ -124,7 +153,7 @@ export function ResourceFilesTabContent({ files }: ResourceFilesTabContentProps)
                   setSelectedChannelId(value === CLEAR_FILTER_VALUE ? undefined : value);
                 }}
               >
-                <SelectTrigger className="w-auto h-9 text-xs rounded-md min-w-[130px]"> {/* Added w-auto */}
+                <SelectTrigger className="w-auto h-9 text-xs rounded-md min-w-[130px]"> 
                   <SelectValue placeholder="All Channels" />
                 </SelectTrigger>
                 <SelectContent>
@@ -151,23 +180,33 @@ export function ResourceFilesTabContent({ files }: ResourceFilesTabContentProps)
 
       {filteredFiles.length > 0 ? (
         <ul className="space-y-4">
-          {filteredFiles.map(file => (
-            <li key={file.id} className="p-4 border rounded-md bg-card-foreground/10 hover:bg-card-foreground/15 transition-colors shadow-sm">
+          {filteredFiles.map(file => {
+            const channelClasses = getChannelSpecificClasses(file.channel);
+            const relatedChangelogEntry = allChangelogEntries.find(entry => entry.relatedFileId === file.id);
+
+            return (
+            <li 
+                key={file.id} 
+                className={cn(
+                    "p-4 border rounded-md bg-card-foreground/10 hover:bg-card-foreground/15 transition-colors shadow-sm",
+                    "border-l-4", // Add left border for channel color
+                    channelClasses.border
+                )}
+            >
               <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-4">
                 <div className="flex-grow">
-                  <p className="font-medium text-foreground">{file.name}</p>
-                  <p className="text-xs text-muted-foreground mb-2">Size: {file.size}</p>
+                  <div className="flex items-center mb-1">
+                    {file.channel && (
+                      <span className={cn("mr-2 px-2 py-0.5 text-xs font-semibold rounded-full", channelClasses.bubble)}>
+                        {file.channel.name}
+                      </span>
+                    )}
+                    <p className="font-medium text-foreground">{file.name}</p>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-2 ml-1">Size: {file.size}</p>
                   
-                  {(file.supportedVersions.length > 0 || file.supportedLoaders.length > 0 || file.channel) && (
-                    <div className="mt-2 space-y-2">
-                      {file.channel && (
-                         <div>
-                          <span className="text-xs text-muted-foreground block mb-1">Channel:</span>
-                           <div className="flex flex-wrap gap-1.5">
-                            <TagBadge tag={file.channel} className="text-[10px] px-1.5 py-0.5" />
-                          </div>
-                        </div>
-                      )}
+                  {(file.supportedVersions.length > 0 || file.supportedLoaders.length > 0) && (
+                    <div className="mt-2 space-y-2 ml-1">
                       {file.supportedVersions.length > 0 && (
                         <div>
                           <span className="text-xs text-muted-foreground block mb-1">Compatible Versions:</span>
@@ -187,14 +226,23 @@ export function ResourceFilesTabContent({ files }: ResourceFilesTabContentProps)
                     </div>
                   )}
                 </div>
-                <Link href={file.url} download className="shrink-0 self-start sm:self-center mt-2 sm:mt-0">
-                  <Button variant="outline" size="sm" className="button-outline-glow w-full sm:w-auto">
-                    <Download className="w-4 h-4 mr-2" /> Download
-                  </Button>
-                </Link>
+                <div className="shrink-0 self-start sm:self-center mt-2 sm:mt-0 flex items-center gap-2">
+                  {relatedChangelogEntry && (
+                    <Button variant="outline" size="icon" className="h-9 w-9 border-accent/50 hover:bg-accent/10" asChild>
+                       <Link href={`/resources/${resourceSlug}?tab=changelog#changelog-entry-${relatedChangelogEntry.id}`} scroll={false} title="View Changelog Entry">
+                        <Info className="w-4 h-4 text-accent" />
+                      </Link>
+                    </Button>
+                  )}
+                  <Link href={file.url} download>
+                    <Button variant="outline" size="sm" className="button-outline-glow h-9">
+                      <Download className="w-4 h-4 mr-2" /> Download
+                    </Button>
+                  </Link>
+                </div>
               </div>
             </li>
-          ))}
+          )})}
         </ul>
       ) : (
         <p className="text-muted-foreground p-4 text-center">

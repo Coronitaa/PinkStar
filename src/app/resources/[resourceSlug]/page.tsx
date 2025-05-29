@@ -11,7 +11,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ResourceFilesTabContent } from '@/components/resource/ResourceFilesTabContent'; 
-import { ResourceChangelogTabContent } from '@/components/resource/ResourceChangelogTabContent'; // New component for changelog
+import { ResourceChangelogTabContent } from '@/components/resource/ResourceChangelogTabContent';
 import { FileText, BookOpen, ListChecks, MessageCircle, Eye, Heart } from 'lucide-react'; 
 import { Carousel, CarouselItem } from '@/components/shared/Carousel';
 import { ResourceCard } from '@/components/resource/ResourceCard';
@@ -95,7 +95,11 @@ export default async function ResourcePage({ params, searchParams }: ResourcePag
                 </TabsContent>
                 <TabsContent value="files">
                   {resource.files && resource.files.length > 0 ? (
-                    <ResourceFilesTabContent files={resource.files} />
+                    <ResourceFilesTabContent 
+                        files={resource.files} 
+                        resourceSlug={resource.slug}
+                        allChangelogEntries={resource.changelogEntries} 
+                    />
                   ) : (
                     <p className="text-muted-foreground p-4 text-center">No files available for this resource.</p>
                   )}
