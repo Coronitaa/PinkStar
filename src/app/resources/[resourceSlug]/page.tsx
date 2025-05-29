@@ -9,6 +9,7 @@ import { TagBadge } from '@/components/shared/TagBadge';
 import { Carousel, CarouselItem } from '@/components/shared/Carousel';
 import { ResourceCard } from '@/components/resource/ResourceCard';
 import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
 
 // Basic Breadcrumb components (can be moved to ui/breadcrumb.tsx if needed)
 const UIBreadcrumb = ({ children }: { children: React.ReactNode }) => <nav aria-label="breadcrumb"><ol className="flex items-center space-x-1.5 text-sm text-muted-foreground">{children}</ol></nav>;
