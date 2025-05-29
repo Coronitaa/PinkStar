@@ -1,3 +1,4 @@
+
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -25,7 +26,14 @@ export default async function ResourcePage({ params }: ResourcePageProps) {
     notFound();
   }
 
-  const relatedResources = (await getResources({ gameSlug: resource.gameSlug, categorySlug: resource.categorySlug }))
+  // Fetch related resources (from the same game and category)
+  const { resources: allResourcesInCategory } = await getResources({ 
+    gameSlug: resource.gameSlug, 
+    categorySlug: resource.categorySlug,
+    limit: 6 // Fetch a bit more to account for filtering out the current one
+  });
+
+  const relatedResources = allResourcesInCategory
     .filter(r => r.id !== resource.id)
     .slice(0, 5);
 
