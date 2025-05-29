@@ -1,13 +1,13 @@
 
 "use client"; // Added "use client" directive
 
-import * as React from 'react'; 
+import * as React from 'react';
 import type { Resource, Tag } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
-  Download, Tag as TagIcon, User, CalendarDays, Layers, Package, FileText, BarChart3, MessageSquare, 
-  ExternalLink, AlertTriangle, ShieldQuestion, Heart, Star, Users, GitBranch
+import {
+  Download, Tag as TagIcon, User, CalendarDays, Layers, Package, FileText, BarChart3, MessageSquare,
+  ExternalLink, AlertTriangle, ShieldQuestion, Heart, Star, Users, GitBranch, ListChecks
 } from 'lucide-react';
 import { format } from 'date-fns';
 import Link from 'next/link';
@@ -107,7 +107,7 @@ export function ResourceInfoSidebar({ resource }: ResourceInfoSidebarProps) {
           </div>
         </div>
       </SidebarCard>
-      
+
       <SidebarCard title="Details" icon={ListChecks}>
         <InfoItem label="Version" value={resource.version} icon={GitBranch} />
         <InfoItem label="Game" value={<Link href={`/games/${resource.gameSlug}`} className="hover:text-primary transition-colors">{resource.gameName}</Link>} icon={Package} />
@@ -135,7 +135,7 @@ export function ResourceInfoSidebar({ resource }: ResourceInfoSidebarProps) {
           </div>
         </SidebarCard>
       )}
-      
+
       {resource.links && Object.values(resource.links).some(link => !!link) && (
         <SidebarCard title="Project Links" icon={ExternalLink}>
             <div className="space-y-2">
