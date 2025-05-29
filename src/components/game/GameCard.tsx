@@ -1,63 +1,91 @@
+
 import Link from 'next/link';
 import Image from 'next/image';
-import type { Game } from '@/lib/types';
+import type { Game, Category } from '@/lib/types';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { TagBadge } from '@/components/shared/TagBadge';
+import { Package, Download, Palette, Layers } from 'lucide-react';
 
 interface GameCardProps {
   game: Game;
+  categories: Category[];
+  stats: {
+    totalResources: number;
+    totalDownloads: number;
+  };
 }
 
-export function GameCard({ game }: GameCardProps) {
+const MAX_CATEGORIES_DISPLAY = 2;
+
+export function GameCard({ game, categories, stats }: GameCardProps) {
   return (
-    <Card className="flex flex-col overflow-hidden h-full shadow-lg hover:shadow-primary/30 transition-shadow duration-300">
-      <CardHeader className="p-0">
-        <Link href={`/games/${game.slug}`} className="block relative aspect-[16/9] overflow-hidden">
-          <Image
-            src={game.bannerUrl}
-            alt={`${game.name} banner`}
-            layout="fill"
-            objectFit="cover"
-            className="hover:scale-105 transition-transform duration-300"
-            data-ai-hint="game art"
-          />
-        </Link>
-      </CardHeader>
-      <CardContent className="p-4 flex-grow">
-        <div className="flex items-center mb-2">
-          <Image 
-            src={game.iconUrl} 
-            alt={`${game.name} icon`} 
-            width={40} 
-            height={40} 
-            className="rounded-md mr-3"
-            data-ai-hint="game icon"
-          />
-          <CardTitle className="text-xl font-semibold hover:text-primary">
-            <Link href={`/games/${game.slug}`}>
-              {game.name}
-            </Link>
-          </CardTitle>
-        </div>
-        <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{game.description}</p>
-        {game.tags && game.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 mb-2">
-            {game.tags.slice(0, 3).map(tag => (
-              <TagBadge key={tag.id} tag={tag} />
-            ))}
+    <Link href={`/games/${game.slug}`} className="block group">
+      <Card className="flex flex-col overflow-hidden h-full bg-card/80 backdrop-blur-sm shadow-xl hover:shadow-primary/40 transition-all duration-300 ease-in-out border-border/30 hover:border-primary/50 transform hover:-translate-y-1">
+        <CardHeader className="p-0">
+          <div className="block relative aspect-[16/9] overflow-hidden">
+            <Image
+              src={game.bannerUrl}
+              alt={`${game.name} banner`}
+              layout="fill"
+              objectFit="cover"
+              className="group-hover:scale-105 transition-transform duration-300 ease-in-out"
+              data-ai-hint="game art wallpaper"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-card/70 via-card/30 to-transparent group-hover:from-card/50 transition-all duration-300"></div>
           </div>
-        )}
-      </CardContent>
-      <CardFooter className="p-4 pt-0">
-        <Button asChild variant="outline" className="w-full group">
-          <Link href={`/games/${game.slug}`}>
-            View Game
-            <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-          </Link>
-        </Button>
-      </CardFooter>
-    </Card>
+        </CardHeader>
+        <CardContent className="p-5 flex-grow">
+          <div className="flex items-center mb-3">
+            <Image 
+              src={game.iconUrl} 
+              alt={`${game.name} icon`} 
+              width={48} 
+              height={48} 
+              className="rounded-lg mr-4 border-2 border-primary/50 shadow-md"
+              data-ai-hint="game icon logo"
+            />
+            <CardTitle className="text-2xl font-bold text-foreground group-hover:text-primary transition-colors duration-200">
+                {game.name}
+            </CardTitle>
+          </div>
+          <p className="text-sm text-muted-foreground mb-4 line-clamp-2 h-10">{game.description}</p>
+          
+          <div className="mb-4">
+            <h4 className="text-xs font-semibold text-primary mb-1 flex items-center"><Layers className="w-3.5 h-3.5 mr-1.5" /> Categories</h4>
+            {categories.length > 0 ? (
+              <div className="flex flex-wrap gap-1.5">
+                {categories.slice(0, MAX_CATEGORIES_DISPLAY).map(cat => (
+                  <TagBadge 
+                    key={cat.id} 
+                    tag={{ name: cat.name, id: cat.id, type: 'misc' }} 
+                    className="text-xs bg-secondary hover:bg-secondary/80"
+                  />
+                ))}
+                {categories.length > MAX_CATEGORIES_DISPLAY && (
+                  <Badge variant="outline" className="text-xs border-accent/50 text-accent">
+                    +{categories.length - MAX_CATEGORIES_DISPLAY} more
+                  </Badge>
+                )}
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground italic">No categories yet.</p>
+            )}
+          </div>
+        </CardContent>
+        <CardFooter className="p-5 pt-0 border-t border-border/20">
+          <div className="flex justify-between items-center w-full text-sm text-muted-foreground">
+            <div className="flex items-center" title="Total Resources">
+              <Package className="w-4 h-4 mr-1.5 text-accent" />
+              <span>{stats.totalResources.toLocaleString()} Resources</span>
+            </div>
+            <div className="flex items-center" title="Total Downloads">
+              <Download className="w-4 h-4 mr-1.5 text-accent" />
+              <span>{stats.totalDownloads.toLocaleString()} Downloads</span>
+            </div>
+          </div>
+        </CardFooter>
+      </Card>
+    </Link>
   );
 }

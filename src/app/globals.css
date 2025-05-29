@@ -1,99 +1,157 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 0 0% 7%; /* #121212 */
-    --foreground: 0 0% 93%; /* #ECECEC */
+    --background: 270 5% 8%; /* Dark desaturated violet base #141315 */
+    --foreground: 0 0% 95%; /* Slightly brighter off-white #F2F2F2 */
 
-    --card: 0 0% 10%; /* #1A1A1A */
-    --card-foreground: 0 0% 93%; /* #ECECEC */
+    --card: 270 6% 12%; /* Darker violet for cards #1E1D20 */
+    --card-foreground: 0 0% 95%; /* #F2F2F2 */
 
-    --popover: 0 0% 10%; /* #1A1A1A */
-    --popover-foreground: 0 0% 93%; /* #ECECEC */
+    --popover: 270 6% 10%; /* Slightly darker for popovers #1A181B */
+    --popover-foreground: 0 0% 95%; /* #F2F2F2 */
 
-    --primary: 337 79% 48%; /* #D81B60 */
-    --primary-foreground: 0 0% 98%; /* #FAFAFA */
+    --primary: 337 79% 52%; /* #E51A69 - slightly adjusted for vibrancy */
+    --primary-foreground: 0 0% 100%; /* Pure white #FFFFFF */
 
-    --secondary: 0 0% 15%; /* #262626 */
-    --secondary-foreground: 0 0% 93%; /* #ECECEC */
+    --secondary: 270 5% 18%; /* Mid-tone violet for secondary elements #2D2B30 */
+    --secondary-foreground: 0 0% 90%; /* #E6E6E6 */
 
-    --muted: 0 0% 13%; /* #212121 */
-    --muted-foreground: 0 0% 60%; /* #999999 */
+    --muted: 270 4% 15%; /* Muted violet #252427 */
+    --muted-foreground: 0 0% 65%; /* Softer muted text #A6A6A6 */
 
-    --accent: 340 82% 76%; /* #F48FB1 */
-    --accent-foreground: 337 79% 25%; /* #6D0E30 */
+    --accent: 340 85% 78%; /* #F692B9 - slightly adjusted light pink */
+    --accent-foreground: 337 79% 20%; /* Darker pink for text on accent #580B27 */
 
     --destructive: 0 72% 51%; /* #E53E3E */
     --destructive-foreground: 0 0% 98%; /* #FAFAFA */
 
-    --border: 0 0% 20%; /* #333333 */
-    --input: 0 0% 20%; /* #333333 */
-    --ring: 340 82% 76%; /* #F48FB1 -- Accent color for focus rings */
+    --border: 270 5% 25%; /* Violet-tinted border #3E3C42 */
+    --input: 270 5% 22%; /* Slightly darker input background #363439 */
+    --ring: 340 85% 70%; /* Accent color for focus rings (a bit deeper than accent itself) #F37BA7 */
 
-    --radius: 0.5rem;
+    --radius: 0.75rem; /* More rounded corners */
 
-    --chart-1: 337 79% 48%; /* Primary */
-    --chart-2: 340 82% 76%; /* Accent */
+    --chart-1: 337 79% 52%; /* Primary */
+    --chart-2: 340 85% 78%; /* Accent */
     --chart-3: 337 70% 60%;
     --chart-4: 340 70% 80%;
     --chart-5: 337 60% 70%;
 
-    --sidebar-background: 0 0% 9%; /* #171717 */
-    --sidebar-foreground: 0 0% 85%; /* #D9D9D9 */
-    --sidebar-primary: 337 79% 48%; /* #D81B60 */
-    --sidebar-primary-foreground: 0 0% 98%; /* #FAFAFA */
-    --sidebar-accent: 340 82% 70%; /* Muted #F48FB1 */
-    --sidebar-accent-foreground: 337 79% 25%; /* #6D0E30 */
-    --sidebar-border: 0 0% 18%; /* #2E2E2E */
-    --sidebar-ring: 340 82% 76%; /* #F48FB1 */
+    /* Specific sidebar colors, can inherit or be distinct */
+    --sidebar-background: 270 5% 10%; /* #1A181B */
+    --sidebar-foreground: 0 0% 88%; /* #E0E0E0 */
+    --sidebar-primary: 337 79% 52%; /* #E51A69 */
+    --sidebar-primary-foreground: 0 0% 100%; /* #FFFFFF */
+    --sidebar-accent: 340 85% 75%; /* #F588B3 */
+    --sidebar-accent-foreground: 337 79% 20%; /* #580B27 */
+    --sidebar-border: 270 5% 20%; /* #312F33 */
+    --sidebar-ring: 340 85% 70%; /* #F37BA7 */
   }
 
   .dark {
-    --background: 0 0% 7%;
-    --foreground: 0 0% 93%;
-    --card: 0 0% 10%;
-    --card-foreground: 0 0% 93%;
-    --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 93%;
-    --primary: 337 79% 48%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 93%;
-    --muted: 0 0% 13%;
-    --muted-foreground: 0 0% 60%;
-    --accent: 340 82% 76%;
-    --accent-foreground: 337 79% 25%;
+    /* For PinkStar, :root IS the dark theme. .dark can be identical or offer slight variations if needed later. */
+    --background: 270 5% 8%;
+    --foreground: 0 0% 95%;
+    --card: 270 6% 12%;
+    --card-foreground: 0 0% 95%;
+    --popover: 270 6% 10%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 337 79% 52%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 270 5% 18%;
+    --secondary-foreground: 0 0% 90%;
+    --muted: 270 4% 15%;
+    --muted-foreground: 0 0% 65%;
+    --accent: 340 85% 78%;
+    --accent-foreground: 337 79% 20%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
-    --ring: 340 82% 76%;
+    --border: 270 5% 25%;
+    --input: 270 5% 22%;
+    --ring: 340 85% 70%;
     
-    --chart-1: 337 79% 48%;
-    --chart-2: 340 82% 76%;
+    --chart-1: 337 79% 52%;
+    --chart-2: 340 85% 78%;
     --chart-3: 337 70% 60%;
     --chart-4: 340 70% 80%;
     --chart-5: 337 60% 70%;
 
-    --sidebar-background: 0 0% 9%;
-    --sidebar-foreground: 0 0% 85%;
-    --sidebar-primary: 337 79% 48%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 340 82% 70%;
-    --sidebar-accent-foreground: 337 79% 25%;
-    --sidebar-border: 0 0% 18%;
-    --sidebar-ring: 340 82% 76%;
+    --sidebar-background: 270 5% 10%;
+    --sidebar-foreground: 0 0% 88%;
+    --sidebar-primary: 337 79% 52%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 340 85% 75%;
+    --sidebar-accent-foreground: 337 79% 20%;
+    --sidebar-border: 270 5% 20%;
+    --sidebar-ring: 340 85% 70%;
   }
 }
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-border transition-colors duration-200 ease-in-out; /* Add global transition for borders */
   }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground antialiased;
     font-family: var(--font-geist-sans), sans-serif;
+    background-image: linear-gradient(160deg, hsl(270, 10%, 10%) 0%, hsl(265, 15%, 6%) 100%);
+    background-attachment: fixed; /* Makes gradient fixed during scroll */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
   }
+
+  /* Improve scrollbar aesthetics */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--background) / 0.5);
+    border-radius: var(--radius);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--primary) / 0.6);
+    border-radius: var(--radius);
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary));
+  }
+}
+
+/* General component enhancements */
+@layer components {
+  .card-interactive {
+    @apply bg-card/70 backdrop-blur-sm shadow-lg hover:shadow-primary/30 transition-all duration-300 ease-in-out border border-border/30 hover:border-primary/50 transform hover:-translate-y-px;
+  }
+  .button-primary-glow {
+     @apply bg-primary text-primary-foreground hover:bg-primary/90 shadow-md hover:shadow-primary/50 focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background transition-all duration-200;
+  }
+   .button-outline-glow {
+     @apply border border-primary/60 text-primary hover:bg-primary/10 hover:text-primary/90 shadow-sm hover:shadow-primary/20 focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background transition-all duration-200;
+   }
+
+   /* Prose styles for markdown content */
+    .prose {
+      h1, h2, h3, h4, h5, h6 { @apply text-primary; }
+      a { @apply text-accent hover:text-accent/80; }
+      strong { @apply text-foreground/90; }
+      code { @apply bg-muted text-accent px-1 py-0.5 rounded-sm text-sm; }
+      pre { @apply bg-muted p-4 rounded-md overflow-x-auto; }
+      blockquote { @apply border-l-4 border-primary pl-4 italic text-muted-foreground; }
+    }
+    .dark .prose-invert {
+      h1, h2, h3, h4, h5, h6 { @apply text-primary; } /* Ensure primary color stands out */
+      a { @apply text-accent hover:text-accent/80; }
+      strong { @apply text-foreground; } /* Use main foreground */
+      code { @apply bg-secondary text-accent; } /* Adjust code block for dark theme */
+      pre { @apply bg-secondary; }
+      blockquote { @apply border-primary; }
+    }
 }
