@@ -17,7 +17,9 @@ export interface ResourceFile {
   name: string;
   url: string;
   size: string; // e.g., "1.2 MB"
-  version: string;
+  // version: string; // Replaced by supportedVersions
+  supportedVersions: Tag[];
+  supportedLoaders: Tag[];
 }
 
 export interface ResourceLinks {
@@ -41,7 +43,7 @@ export interface Resource {
   downloads: number;
   createdAt: string; // ISO date string
   updatedAt: string; // ISO date string
-  version: string; // Main version of this resource metadata
+  version: string; // Main version of this resource metadata (e.g. of the resource itself, not specific file)
   description: string; // Short summary
   detailedDescription: string; // Markdown or rich text
   files: ResourceFile[];

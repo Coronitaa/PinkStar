@@ -9,6 +9,7 @@ import { ResourceInfoSidebar } from '@/components/resource/ResourceInfoSidebar';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FileText, BookOpen, ListChecks, MessageCircle, Eye, Heart, AlertTriangle } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Carousel, CarouselItem } from '@/components/shared/Carousel'; // For related resources
@@ -29,7 +30,7 @@ export default async function ResourcePage({ params, searchParams }: ResourcePag
   const { resources: allResourcesInCategory } = await getResources({ 
     gameSlug: resource.gameSlug, 
     categorySlug: resource.categorySlug,
-    limit: 6 
+    limit: 6 // Fetch a bit more to ensure we have enough for "related" after filtering current
   });
 
   const relatedResources = allResourcesInCategory
@@ -73,7 +74,7 @@ export default async function ResourcePage({ params, searchParams }: ResourcePag
                   <CardTitle className="text-3xl md:text-4xl font-bold mb-1 text-primary drop-shadow-md">{resource.name}</CardTitle>
                   <CardDescription className="text-base text-muted-foreground">{resource.description}</CardDescription>
                 </div>
-                <Button variant="outline" size="sm" className="mt-3 sm:mt-0 button-outline-glow shrink-0">
+                <Button variant="outline" size="sm" className="mt-3 sm:mt-0 button-outline-glow button-follow-sheen shrink-0">
                   <Heart className="w-4 h-4 mr-2 text-accent" /> Follow
                 </Button>
               </div>
@@ -93,16 +94,52 @@ export default async function ResourcePage({ params, searchParams }: ResourcePag
                   />
                 </TabsContent>
                 <TabsContent value="files">
-                   <ul className="space-y-3">
+                   <ul className="space-y-4">
                     {resource.files.map(file => (
-                      <li key={file.id} className="flex justify-between items-center p-3 border rounded-md bg-card-foreground/10 hover:bg-card-foreground/20 transition-colors">
-                        <div>
-                          <p className="font-medium text-foreground">{file.name}</p>
-                          <p className="text-xs text-muted-foreground">Version: {file.version} | Size: {file.size}</p>
+                      <li key={file.id} className="p-4 border rounded-md bg-card-foreground/10 hover:bg-card-foreground/15 transition-colors shadow-sm">
+                        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
+                          <div className="flex-grow">
+                            <p className="font-medium text-foreground">{file.name}</p>
+                            <p className="text-xs text-muted-foreground mb-1">Size: {file.size}</p>
+                          </div>
+                          <Link href={file.url} download className="shrink-0 self-start sm:self-center">
+                            <Button variant="outline" size="sm" className="button-outline-glow w-full sm:w-auto">Download</Button>
+                          </Link>
                         </div>
-                        <Link href={file.url} download>
-                          <Button variant="outline" size="sm" className="button-outline-glow">Download</Button>
-                        </Link>
+                        {(file.supportedVersions.length > 0 || file.supportedLoaders.length > 0) && (
+                          <div className="mt-3 pt-3 border-t border-border/20 flex flex-col sm:flex-row gap-3 items-start">
+                            {file.supportedVersions.length > 0 && (
+                              <div className="flex-1 min-w-0">
+                                <label className="text-xs text-muted-foreground block mb-1">Compatible Versions:</label>
+                                <Select defaultValue={file.supportedVersions[0]?.id}>
+                                  <SelectTrigger className="w-full sm:w-auto h-8 text-xs rounded-md">
+                                    <SelectValue placeholder="Select version" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {file.supportedVersions.map(vTag => (
+                                      <SelectItem key={vTag.id} value={vTag.id} className="text-xs">{vTag.name}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            )}
+                            {file.supportedLoaders.length > 0 && (
+                              <div className="flex-1 min-w-0">
+                                 <label className="text-xs text-muted-foreground block mb-1">Compatible Loaders:</label>
+                                <Select defaultValue={file.supportedLoaders[0]?.id}>
+                                  <SelectTrigger className="w-full sm:w-auto h-8 text-xs rounded-md">
+                                    <SelectValue placeholder="Select loader" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {file.supportedLoaders.map(lTag => (
+                                      <SelectItem key={lTag.id} value={lTag.id} className="text-xs">{lTag.name}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </li>
                     ))}
                   </ul>

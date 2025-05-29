@@ -154,4 +154,42 @@
       pre { @apply bg-secondary; }
       blockquote { @apply border-primary; }
     }
+
+  /* Sheen effect for Follow button */
+  .button-follow-sheen {
+    @apply relative overflow-hidden; /* Ensure these are applied for the pseudo-element to work */
+  }
+
+  .button-follow-sheen:hover::before {
+    animation: sh02 0.7s 0s linear;
+  }
+
+  .button-follow-sheen::before {
+    content: '';
+    display: block;
+    width: 0px;
+    height: 86%; /* From example */
+    position: absolute;
+    top: 7%; /* From example */
+    left: 0%;
+    opacity: 0;
+    background: hsl(var(--primary-foreground)); /* White, good for contrast on pink hover */
+    box-shadow: 0 0 30px 15px hsl(var(--primary-foreground) / 0.7); /* Adjusted shadow */
+    transform: skewX(-20deg);
+    pointer-events: none; /* Ensure it doesn't block clicks */
+  }
+}
+
+@keyframes sh02 {
+  from {
+    opacity: 0;
+    left: 0%;
+  }
+  50% {
+    opacity: 0.5; /* Make sheen a bit subtle */
+  }
+  to {
+    opacity: 0;
+    left: 100%;
+  }
 }
