@@ -1,6 +1,6 @@
 
 "use client";
-import type React from 'react';
+import React from 'react'; // Added import for React
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -35,77 +35,59 @@ export function Carousel({
   }, []);
 
   useEffect(() => {
-    if (autoplay && numItems > 1) {
+    if (autoplay && numItems > 1 && numItems > itemsToShow) { // Ensure autoplay only if enough items to scroll
       resetTimeout();
       timeoutRef.current = setTimeout(
-        () => setCurrentIndex((prevIndex) => (prevIndex + 1) % numItems),
+        () => setCurrentIndex((prevIndex) => (prevIndex + 1) % (numItems - itemsToShow + 1)), // Adjust for itemsToShow logic
         autoplayInterval
       );
       return () => resetTimeout();
     }
-  }, [currentIndex, autoplay, autoplayInterval, numItems, resetTimeout]);
+  }, [currentIndex, autoplay, autoplayInterval, numItems, itemsToShow, resetTimeout]);
 
   const goToPrevious = () => {
-    setCurrentIndex((prevIndex) => (prevIndex - 1 + numItems) % numItems);
+    setCurrentIndex((prevIndex) => (prevIndex - 1 + (numItems - itemsToShow + 1)) % (numItems - itemsToShow + 1));
   };
 
   const goToNext = () => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % numItems);
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % (numItems - itemsToShow + 1));
   };
   
-  // If there are no items, or fewer than itemsToShow, don't render arrows or complex logic
   if (numItems === 0) {
     return <div className={cn("text-muted-foreground text-center py-4", className)}>No items to display.</div>;
   }
 
-  // Calculate how many actual "pages" or "slides" we have
-  const numPages = Math.ceil(numItems / itemsToShow);
-  const currentEffectiveIndex = Math.floor(currentIndex / itemsToShow);
-
-
-  const handleEffectiveNext = () => {
-    setCurrentIndex(prev => Math.min((currentEffectiveIndex + 1) * itemsToShow, numItems - itemsToShow));
-  };
-
-  const handleEffectivePrevious = () => {
-    setCurrentIndex(prev => Math.max((currentEffectiveIndex - 1) * itemsToShow, 0));
-  };
-
-
-  // Adjust visible items logic for actual sliding effect per item
-  // The transform will shift the whole track.
-  // The width of the track is numItems * (100 / itemsToShow)%
-  // The translation is currentIndex * (100 / itemsToShow)%
-
-  if (numItems <= itemsToShow ) { // If not enough items to scroll, or to fill the view, disable arrows and autoplay effectively
-     showArrows = false;
-     autoplay = false;
-  }
-
+  const effectiveShowArrows = showArrows && numItems > itemsToShow;
 
   return (
     <div className={cn("relative overflow-hidden group", className)}>
       <div 
         className="flex transition-transform duration-700 ease-in-out"
         style={{ 
-            width: `${(numItems / itemsToShow) * 100}%`, // Track width
-            transform: `translateX(-${(currentIndex / numItems) * 100}%)` // Slide percentage
+            // The width of the container for items. Each item will have 100%/itemsToShow width of this.
+            // If we show 3 items, and have 5 total, track is 5 * (100/3)% wide.
+            width: `${(numItems / itemsToShow) * 100}%`, 
+            transform: `translateX(-${(currentIndex * (100 / numItems))}%)` // Slide percentage per item
         }}
       >
         {items.map((item, index) => (
-           <div key={index} className="flex-shrink-0" style={{ width: `${100 / numItems}%`}}> {/* Each item takes its share of the track */}
+           <div 
+              key={index} 
+              className="flex-shrink-0" 
+              style={{ width: `${(100 / itemsToShow) / (numItems / itemsToShow)}%` }} // Each item takes 1/itemsToShow of the viewport
+            > 
              {item}
            </div>
         ))}
       </div>
-      {showArrows && numItems > itemsToShow && (
+      {effectiveShowArrows && (
         <>
           <Button
             variant="outline"
             size="icon"
             className="absolute left-2 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-background/70 hover:bg-background/90"
             onClick={goToPrevious}
-            disabled={currentIndex === 0 && !autoplay} // Disable if at start and not autoplaying (autoplay handles looping)
+            disabled={currentIndex === 0} 
           >
             <ChevronLeft className="h-6 w-6" />
             <span className="sr-only">Previous</span>
@@ -115,7 +97,7 @@ export function Carousel({
             size="icon"
             className="absolute right-2 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-background/70 hover:bg-background/90"
             onClick={goToNext}
-            disabled={currentIndex >= numItems - itemsToShow && !autoplay} // Disable if at end and not autoplaying
+            disabled={currentIndex >= numItems - itemsToShow} 
           >
             <ChevronRight className="h-6 w-6" />
             <span className="sr-only">Next</span>
@@ -132,7 +114,6 @@ interface CarouselItemProps {
 }
 
 export function CarouselItem({ children, className }: CarouselItemProps) {
-  // The width is now controlled by the parent Carousel based on itemsToShow
   return (
     <div className={cn("p-1 h-full", className)}> 
       {children}
