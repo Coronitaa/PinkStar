@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Carousel, CarouselItem } from '@/components/shared/Carousel';
 import { ResourceCard } from '@/components/resource/ResourceCard';
-import { Loader2, Search, Layers, ChevronRight } from 'lucide-react';
+import { Loader2, Search, Layers, ChevronRight, Upload } from 'lucide-react';
 import type { Game, Category, Resource } from '@/lib/types';
 import { fetchBestMatchForCategoryAction } from '@/app/actions/resourceActions';
 
@@ -54,7 +54,6 @@ export function GamePageContent({ game, categories, initialCategoryResources }: 
       const results: Record<string, Resource[] | null> = {};
       for (const category of categories) {
         try {
-          // Fetch a bit more than items to show to allow scrolling if needed
           const bestMatches = await fetchBestMatchForCategoryAction(game.slug, category.slug, debouncedSearchQuery, CAROUSEL_ITEMS_TO_SHOW + 2);
           results[category.slug] = bestMatches.length > 0 ? bestMatches : null; 
         } catch (error) {
@@ -70,34 +69,26 @@ export function GamePageContent({ game, categories, initialCategoryResources }: 
     setGlobalSearchQuery(e.target.value);
   };
   
-  // Rely on native 'x' in type="search" input for clearing
-  // const clearSearch = () => {
-  //   setGlobalSearchQuery('');
-  //   if(searchInputRef.current) searchInputRef.current.value = '';
-  // }
-
   const hasActiveSearch = debouncedSearchQuery.trim().length > 0;
 
   return (
     <div className="space-y-8">
-      <div className="mb-8 p-4 border rounded-lg bg-card shadow-md">
-        <div className="relative flex-grow">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-          <Input
-            ref={searchInputRef}
-            type="search" // This type enables the native 'x' clear button in most browsers
-            placeholder={`Search resources in ${game.name}...`}
-            className="pl-10 w-full text-base"
-            value={globalSearchQuery}
-            onChange={handleSearchInputChange}
-          />
-          {/* Removed explicit Clear button to rely on native input type="search" clearing mechanism
-          {globalSearchQuery && (
-            <Button variant="ghost" size="sm" className="absolute right-2 top-1/2 -translate-y-1/2" onClick={clearSearch}>
-              Clear
-            </Button>
-          )}
-          */}
+      <div className="mb-8 p-4 border rounded-lg bg-card shadow-md sticky top-16 z-40 backdrop-blur-sm bg-background/80">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 max-w-3xl mx-auto"> {/* Max width container */}
+          <div className="relative w-full sm:w-auto sm:flex-grow sm:max-w-[calc(100%/2.5)] md:max-w-[calc(100%/3-1rem)]"> {/* Adjusted width for search */}
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Input
+              ref={searchInputRef}
+              type="search" 
+              placeholder={`Search resources in ${game.name}...`}
+              className="pl-10 w-full text-base"
+              value={globalSearchQuery}
+              onChange={handleSearchInputChange}
+            />
+          </div>
+          <Button variant="outline" className="shrink-0 w-full sm:w-auto">
+            <Upload className="w-4 h-4 mr-2" /> Upload Resource
+          </Button>
         </div>
       </div>
 
@@ -190,9 +181,9 @@ export function GamePageContent({ game, categories, initialCategoryResources }: 
                     autoplay={isAutoplayActive && resourcesForCarousel.length > CAROUSEL_ITEMS_TO_SHOW} 
                     autoplayInterval={5000}
                     itemsToShow={CAROUSEL_ITEMS_TO_SHOW} 
-                    showArrows={resourcesForCarousel.length > CAROUSEL_ITEMS_TO_SHOW} 
+                    showArrows={resourcesForCarousel.length > CAROUSEL_ITEMS_TO_SHOW} // Arrows always shown if items > itemsToShow
                   >
-                  {resourcesForCarousel.slice(0, CAROUSEL_ITEMS_TO_SHOW + 5).map(resource => ( // Show a few more than visible for scrolling
+                  {resourcesForCarousel.slice(0, CAROUSEL_ITEMS_TO_SHOW + 5).map(resource => (
                     <CarouselItem key={resource.id}>
                       <ResourceCard resource={resource} compact />
                     </CarouselItem>
