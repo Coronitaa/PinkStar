@@ -11,7 +11,7 @@ import { ResourceFilterControls } from '@/components/resource/ResourceFilterCont
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Loader2, Search, ListFilter, Info } from 'lucide-react';
+import { Loader2, Search, ListFilter, Info, Upload } from 'lucide-react';
 import { fetchPaginatedResourcesAction } from '@/app/actions/resourceActions';
 
 const RESOURCES_PER_PAGE = 20;
@@ -25,7 +25,7 @@ interface CategoryPageContentProps {
   initialTotal: number;
   gameSlug: string;
   categorySlug: string;
-  availableFilterTags: { versions: Tag[]; loaders: Tag[]; genres: Tag[]; misc: Tag[] };
+  availableFilterTags: { versions: Tag[]; loaders: Tag[]; genres: Tag[]; misc: Tag[]; channels: Tag[] };
   gameName: string;
   categoryName: string;
 }
@@ -66,7 +66,7 @@ export function CategoryPageContent({
   // Sync controlled inputs with URL on initial load or direct URL change
   useEffect(() => {
     const qFromUrl = searchParams.get('q') || '';
-    setSearchQueryInput(qFromUrl); // Respect spaces
+    setSearchQueryInput(qFromUrl); 
 
     const sortParam = searchParams.get('sort');
     if (sortParam && ['relevance', 'downloads', 'updatedAt', 'name'].includes(sortParam)) {
@@ -79,7 +79,8 @@ export function CategoryPageContent({
     const loaderFilters = searchParams.get('loaders')?.split(',').filter(Boolean) || [];
     const genreFilters = searchParams.get('genres')?.split(',').filter(Boolean) || [];
     const miscFilters = searchParams.get('misc')?.split(',').filter(Boolean) || [];
-    activeTagFiltersRef.current = [...versionFilters, ...loaderFilters, ...genreFilters, ...miscFilters];
+    const channelFilters = searchParams.get('channels')?.split(',').filter(Boolean) || [];
+    activeTagFiltersRef.current = [...versionFilters, ...loaderFilters, ...genreFilters, ...miscFilters, ...channelFilters];
 
   }, [searchParams]);
 
@@ -93,14 +94,15 @@ export function CategoryPageContent({
       const loaderFilters = searchParams.get('loaders')?.split(',').filter(Boolean) || [];
       const genreFilters = searchParams.get('genres')?.split(',').filter(Boolean) || [];
       const miscFilters = searchParams.get('misc')?.split(',').filter(Boolean) || [];
-      const currentTags = [...versionFilters, ...loaderFilters, ...genreFilters, ...miscFilters];
+      const channelFilters = searchParams.get('channels')?.split(',').filter(Boolean) || [];
+      const currentTags = [...versionFilters, ...loaderFilters, ...genreFilters, ...miscFilters, ...channelFilters];
 
       const params: GetResourcesParams = {
         gameSlug,
         categorySlug,
         page,
         limit: RESOURCES_PER_PAGE,
-        searchQuery: currentQ || undefined,
+        searchQuery: currentQ || undefined, // Pass raw query
         sortBy: currentSort,
         tags: currentTags.length > 0 ? currentTags : undefined,
       };
@@ -109,7 +111,7 @@ export function CategoryPageContent({
         const data = await fetchPaginatedResourcesAction(params);
         if (page === 1 || options?.isNewSearchOrFilter) {
           setResources(data.resources);
-          setCurrentPage(1); // Reset current page if it's a new search/filter
+          setCurrentPage(1); 
         } else {
           setResources((prev) => [...prev, ...data.resources]);
           setCurrentPage(page);
@@ -124,8 +126,6 @@ export function CategoryPageContent({
 
 
    useEffect(() => {
-    // Fetch page 1 when URL parameters (filters, sort, query) change.
-    // This handles client-side navigation updates.
     fetchAndSetResources(1, { isNewSearchOrFilter: true });
   }, [searchParams, fetchAndSetResources]);
 
@@ -162,10 +162,6 @@ export function CategoryPageContent({
         current.delete(key);
       }
     });
-    // Page will be reset by the effect listening to searchParams if it's not already 1
-    // Or, we can explicitly set it here to ensure immediate effect.
-    // current.set('page', '1'); // Usually not needed here as the effect handles it
-
     startNavTransition(() => {
       router.push(`${pathname}?${current.toString()}`, { scroll: false });
     });
@@ -189,12 +185,13 @@ export function CategoryPageContent({
     updateUrlParams({ sort: value });
   };
 
-  const handleFilterChange = useCallback((tags: { versions?: string; loaders?: string; genres?: string; misc?: string; }) => {
+  const handleFilterChange = useCallback((tags: { versions?: string; loaders?: string; genres?: string; misc?: string, channels?:string }) => {
     updateUrlParams({ 
       versions: tags.versions, 
       loaders: tags.loaders,
       genres: tags.genres,
-      misc: tags.misc
+      misc: tags.misc,
+      channels: tags.channels
     });
   }, [updateUrlParams]);
   
@@ -206,7 +203,7 @@ export function CategoryPageContent({
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-      {(availableFilterTags.versions.length > 0 || availableFilterTags.loaders.length > 0 || availableFilterTags.genres.length > 0 || availableFilterTags.misc.length > 0) && (
+      {(availableFilterTags.versions.length > 0 || availableFilterTags.loaders.length > 0 || availableFilterTags.genres.length > 0 || availableFilterTags.misc.length > 0 || availableFilterTags.channels.length > 0) && (
         <aside className="md:col-span-3 lg:col-span-3 space-y-6">
           <ResourceFilterControls 
             availableTags={availableFilterTags} 
@@ -215,21 +212,21 @@ export function CategoryPageContent({
         </aside>
       )}
 
-      <main className={(availableFilterTags.versions.length > 0 || availableFilterTags.loaders.length > 0 || availableFilterTags.genres.length > 0 || availableFilterTags.misc.length > 0) ? "md:col-span-9 lg:col-span-9" : "md:col-span-12"}>
+      <main className={(availableFilterTags.versions.length > 0 || availableFilterTags.loaders.length > 0 || availableFilterTags.genres.length > 0 || availableFilterTags.misc.length > 0 || availableFilterTags.channels.length > 0) ? "md:col-span-9 lg:col-span-9" : "md:col-span-12"}>
         <div className="mb-6 p-4 border rounded-lg bg-card shadow">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="relative flex-grow">
+          <div className="flex flex-col sm:flex-row gap-4 items-center">
+            <div className="relative flex-grow-0 sm:flex-grow"> {/* Adjusted for controlled width on smaller screens */}
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
                 type="search"
-                placeholder={`Search in ${categoryName}... (e.g., "mod  " or "utility")`}
-                className="pl-10 w-full"
+                placeholder={`Search in ${categoryName}...`}
+                className="pl-10 w-full sm:max-w-md" // Control width
                 value={searchQueryInput}
                 onChange={handleSearchInputChange}
               />
             </div>
             <Select value={sortBy} onValueChange={handleSortChange}>
-              <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectTrigger className="w-full sm:w-auto min-w-[160px]"> {/* Adjusted width */}
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
               <SelectContent>
@@ -239,6 +236,9 @@ export function CategoryPageContent({
                 <SelectItem value="name">Name</SelectItem>
               </SelectContent>
             </Select>
+             <Button variant="outline" className="ml-auto shrink-0">
+                <Upload className="w-4 h-4 mr-2" /> Upload
+            </Button>
           </div>
         </div>
         

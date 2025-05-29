@@ -19,6 +19,7 @@ interface GamePageContentProps {
 }
 
 const DEBOUNCE_DELAY = 300; // milliseconds
+const CAROUSEL_ITEMS_TO_SHOW = 3;
 
 export function GamePageContent({ game, categories, initialCategoryResources }: GamePageContentProps) {
   const [globalSearchQuery, setGlobalSearchQuery] = useState('');
@@ -53,11 +54,12 @@ export function GamePageContent({ game, categories, initialCategoryResources }: 
       const results: Record<string, Resource[] | null> = {};
       for (const category of categories) {
         try {
-          const bestMatches = await fetchBestMatchForCategoryAction(game.slug, category.slug, debouncedSearchQuery, 3);
-          results[category.slug] = bestMatches.length > 0 ? bestMatches : null; // null if no good matches
+          // Fetch a bit more than items to show to allow scrolling if needed
+          const bestMatches = await fetchBestMatchForCategoryAction(game.slug, category.slug, debouncedSearchQuery, CAROUSEL_ITEMS_TO_SHOW + 2);
+          results[category.slug] = bestMatches.length > 0 ? bestMatches : null; 
         } catch (error) {
           console.error(`Failed to fetch search results for category ${category.name}:`, error);
-          results[category.slug] = null; // Treat error as no results
+          results[category.slug] = null; 
         }
       }
       setCategorySearchResults(results);
@@ -68,10 +70,11 @@ export function GamePageContent({ game, categories, initialCategoryResources }: 
     setGlobalSearchQuery(e.target.value);
   };
   
-  const clearSearch = () => {
-    setGlobalSearchQuery('');
-    if(searchInputRef.current) searchInputRef.current.value = '';
-  }
+  // Rely on native 'x' in type="search" input for clearing
+  // const clearSearch = () => {
+  //   setGlobalSearchQuery('');
+  //   if(searchInputRef.current) searchInputRef.current.value = '';
+  // }
 
   const hasActiveSearch = debouncedSearchQuery.trim().length > 0;
 
@@ -82,17 +85,19 @@ export function GamePageContent({ game, categories, initialCategoryResources }: 
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
             ref={searchInputRef}
-            type="search"
+            type="search" // This type enables the native 'x' clear button in most browsers
             placeholder={`Search resources in ${game.name}...`}
             className="pl-10 w-full text-base"
             value={globalSearchQuery}
             onChange={handleSearchInputChange}
           />
+          {/* Removed explicit Clear button to rely on native input type="search" clearing mechanism
           {globalSearchQuery && (
             <Button variant="ghost" size="sm" className="absolute right-2 top-1/2 -translate-y-1/2" onClick={clearSearch}>
               Clear
             </Button>
           )}
+          */}
         </div>
       </div>
 
@@ -115,10 +120,9 @@ export function GamePageContent({ game, categories, initialCategoryResources }: 
         categories.map((category) => {
           const categoryPageLink = `/games/${game.slug}/${category.slug}`;
           const resourcesForCarousel = hasActiveSearch
-            ? categorySearchResults[category.slug] // This can be null (no match) or Resource[]
+            ? categorySearchResults[category.slug] 
             : initialCategoryResources[category.slug];
 
-          // If searching and this category has no results (null), or if it's an empty array
           if (hasActiveSearch && (!resourcesForCarousel || resourcesForCarousel.length === 0)) {
             return (
               <section key={category.id} className="space-y-6 py-6 border-t border-border/40 first:border-t-0 opacity-60">
@@ -141,7 +145,6 @@ export function GamePageContent({ game, categories, initialCategoryResources }: 
             );
           }
           
-          // If not searching and no initial resources, or if somehow resourcesForCarousel is empty array
           if (!resourcesForCarousel || resourcesForCarousel.length === 0) {
              return (
                 <section key={category.id} className="space-y-6 py-6 border-t border-border/40 first:border-t-0">
@@ -184,12 +187,12 @@ export function GamePageContent({ game, categories, initialCategoryResources }: 
               
               <div className="mt-4">
                  <Carousel 
-                    autoplay={isAutoplayActive && resourcesForCarousel.length > 1} 
+                    autoplay={isAutoplayActive && resourcesForCarousel.length > CAROUSEL_ITEMS_TO_SHOW} 
                     autoplayInterval={5000}
-                    itemsToShow={3} // Adjust as needed, consider screen size hooks for true responsiveness
-                    showArrows={resourcesForCarousel.length > 3} // Show arrows if more items than can be shown
+                    itemsToShow={CAROUSEL_ITEMS_TO_SHOW} 
+                    showArrows={resourcesForCarousel.length > CAROUSEL_ITEMS_TO_SHOW} 
                   >
-                  {resourcesForCarousel.map(resource => (
+                  {resourcesForCarousel.slice(0, CAROUSEL_ITEMS_TO_SHOW + 5).map(resource => ( // Show a few more than visible for scrolling
                     <CarouselItem key={resource.id}>
                       <ResourceCard resource={resource} compact />
                     </CarouselItem>
