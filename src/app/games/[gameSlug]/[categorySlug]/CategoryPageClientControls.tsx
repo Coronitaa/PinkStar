@@ -31,7 +31,12 @@ export function CategoryPageClientControls({
   // Sync state with URL search params on initial load or when URL changes
   useEffect(() => {
     setSearchQuery(searchParams.get('q') || '');
-    setSortBy((searchParams.get('sort') as typeof sortBy) || 'relevance');
+    const sortParam = searchParams.get('sort');
+    if (sortParam && ['relevance', 'downloads', 'updatedAt', 'name'].includes(sortParam)) {
+      setSortBy(sortParam as typeof sortBy);
+    } else {
+      setSortBy('relevance');
+    }
   }, [searchParams]);
 
   const updateQueryParams = (newSearchQuery: string, newSortBy: string) => {
@@ -52,30 +57,32 @@ export function CategoryPageClientControls({
     });
   };
 
-  const handleSearchChange = (query: string) => {
+  // This adapter ensures the function passed to children strictly matches (query: string) => void
+  const searchSetterAdapter = (query: string) => {
     setSearchQuery(query);
-    updateQueryParams(query, sortBy);
   };
 
   const handleSortChange = (sort: 'relevance' | 'downloads' | 'updatedAt' | 'name') => {
     setSortBy(sort);
-    updateQueryParams(searchQuery, sort);
+    updateQueryParams(searchQuery, sort); // Update immediately for sort
   };
   
   // Debounce search input
   useEffect(() => {
     const handler = setTimeout(() => {
+      // Only update if the debounced searchQuery is different from the current URL param
       if (searchQuery !== (searchParams.get('q') || '')) {
          updateQueryParams(searchQuery, sortBy);
       }
     }, 500); // 500ms debounce
     return () => clearTimeout(handler);
-  }, [searchQuery, sortBy, searchParams, pathname, router]);
+  }, [searchQuery, sortBy, searchParams, pathname, router]); // Added router, pathname, searchParams to deps
 
 
   return (
     <>
-      {children(searchQuery, sortBy, setSearchQuery, handleSortChange)}
+      {children(searchQuery, sortBy, searchSetterAdapter, handleSortChange)}
     </>
   );
 }
+
