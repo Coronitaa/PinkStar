@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useTransition } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import type React from 'react';
 
 interface CategoryPageClientControlsProps {
   initialSearchQuery?: string;
@@ -23,7 +24,7 @@ export function CategoryPageClientControls({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [isPending, startTransition] = useTransition();
+  const [_isPending, startTransition] = useTransition(); // Renamed to avoid conflict if isPending is passed by children
 
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
   const [sortBy, setSortBy] = useState<'relevance' | 'downloads' | 'updatedAt' | 'name'>(initialSortBy);
@@ -57,32 +58,30 @@ export function CategoryPageClientControls({
     });
   };
 
-  // This adapter ensures the function passed to children strictly matches (query: string) => void
   const searchSetterAdapter = (query: string) => {
     setSearchQuery(query);
   };
 
-  const handleSortChange = (sort: 'relevance' | 'downloads' | 'updatedAt' | 'name') => {
-    setSortBy(sort);
-    updateQueryParams(searchQuery, sort); // Update immediately for sort
+  const handleSortChange = (sortValue: 'relevance' | 'downloads' | 'updatedAt' | 'name') => {
+    setSortBy(sortValue);
+    updateQueryParams(searchQuery, sortValue); 
   };
   
-  // Debounce search input
   useEffect(() => {
     const handler = setTimeout(() => {
-      // Only update if the debounced searchQuery is different from the current URL param
       if (searchQuery !== (searchParams.get('q') || '')) {
          updateQueryParams(searchQuery, sortBy);
       }
-    }, 500); // 500ms debounce
+    }, 500); 
     return () => clearTimeout(handler);
-  }, [searchQuery, sortBy, searchParams, pathname, router]); // Added router, pathname, searchParams to deps
+  }, [searchQuery, sortBy, searchParams, pathname, router]);
 
+
+  const content = children(searchQuery, sortBy, searchSetterAdapter, handleSortChange);
 
   return (
     <>
-      {children(searchQuery, sortBy, searchSetterAdapter, handleSortChange)}
+      {content}
     </>
   );
 }
-
