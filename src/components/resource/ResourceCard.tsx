@@ -63,7 +63,7 @@ export function ResourceCard({ resource, compact = false, onHoverChange }: Resou
     <div
       className={cn(
         "relative h-full group/card", 
-        compact ? "" : "" // No specific width for non-compact
+        compact ? "" : "" 
       )}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -73,7 +73,7 @@ export function ResourceCard({ resource, compact = false, onHoverChange }: Resou
           className={cn(
             "overflow-hidden h-full flex flex-col bg-card/80 backdrop-blur-sm shadow-lg transition-all duration-300 ease-in-out border-border/30 group-hover/card:border-primary/50",
             compact ? "p-2 pb-1.5" : "p-4", 
-            compact ? "" : "transform hover:-translate-y-1"
+            compact ? "" : "transform hover:-translate-y-1" // Keep lift effect for non-compact cards
           )}
         >
           <CardHeader className="p-0">
@@ -89,8 +89,8 @@ export function ResourceCard({ resource, compact = false, onHoverChange }: Resou
               <div className="absolute inset-0 bg-gradient-to-t from-card/70 via-card/30 to-transparent group-hover/card:from-card/50 transition-all duration-300"></div>
             </div>
           </CardHeader>
-          <CardContent className={cn("flex-grow", compact ? 'p-2 pt-1 pb-1' : 'p-4 pt-3')}>
-            <CardTitle className={cn("font-semibold group-hover/card:text-primary transition-colors line-clamp-1", compact ? "text-xs leading-tight mb-0.5" : "text-lg mb-1")}>
+          <CardContent className={cn("flex-grow", compact ? 'p-2 pt-1.5 pb-1' : 'p-4 pt-3')}> {/* Adjusted padding for compact */}
+            <CardTitle className={cn("font-semibold group-hover/card:text-primary transition-colors line-clamp-1", compact ? "text-base mb-1" : "text-lg mb-1")}> {/* Increased title size for compact */}
               {resource.name}
             </CardTitle>
             {!compact && (
@@ -99,7 +99,9 @@ export function ResourceCard({ resource, compact = false, onHoverChange }: Resou
               </p>
             )}
             <p className={cn("text-muted-foreground flex items-center line-clamp-1", compact ? "text-[10px] mb-1" : "text-xs mb-1.5")}>
-              <User className="w-3 h-3 mr-1 text-accent shrink-0" /> By {resource.author.name}
+              {/* Removed User icon for compact view */}
+              {!compact && <User className="w-3 h-3 mr-1 text-accent shrink-0" />} 
+              By {resource.author.name}
             </p>
             {compact && resource.tags.length > 0 && (
               <div className="flex flex-wrap gap-1 mb-1">
@@ -126,7 +128,7 @@ export function ResourceCard({ resource, compact = false, onHoverChange }: Resou
               </div>
             )}
           </CardContent>
-          <div className={cn("text-muted-foreground flex justify-between items-center mt-auto", compact ? 'p-2 pt-0 pb-1 text-[10px]' : 'p-4 pt-0 text-xs border-t border-border/20')}>
+          <div className={cn("text-muted-foreground flex justify-between items-center mt-auto", compact ? 'p-2 pt-0 pb-1.5 text-[10px]' : 'p-4 pt-0 text-xs border-t border-border/20')}> {/* Adjusted padding for compact */}
             <span className="flex items-center" title={`${resource.downloads.toLocaleString()} downloads`}>
               <Download className={cn("mr-1 text-accent", compact ? "w-3 h-3" : "w-3.5 h-3.5")} /> {resource.downloads.toLocaleString()}
             </span>
@@ -137,11 +139,11 @@ export function ResourceCard({ resource, compact = false, onHoverChange }: Resou
         </Card>
       </Link>
 
-      {compact && (
+      {compact && ( // Ensure overlay only shows for compact cards if that's the intent
         <div
           className={cn(
             "detail-overlay absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2", 
-            "w-80 h-auto", 
+            "w-80 h-auto", // Explicit width for the overlay
             "bg-card/95 backdrop-blur-md p-4 rounded-lg shadow-2xl border border-primary/50",
             "flex flex-col transition-all duration-300 ease-in-out transform-gpu", 
             isHovering ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none",
@@ -149,6 +151,7 @@ export function ResourceCard({ resource, compact = false, onHoverChange }: Resou
           )}
           style={{transformOrigin: 'center center'}} 
           onClick={(e) => {
+            // Navigate if the click is on the overlay background, not its interactive children
             if (e.target === e.currentTarget) {
               window.location.href = `/resources/${resource.slug}`; 
             }

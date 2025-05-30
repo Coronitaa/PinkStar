@@ -1,7 +1,6 @@
 
 "use client";
-import React from 'react'; // Added import for React
-import { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -60,21 +59,19 @@ export function Carousel({
   const effectiveShowArrows = showArrows && numItems > itemsToShow;
 
   return (
-    <div className={cn("relative overflow-hidden group", className)}>
+    <div className={cn("relative group overflow-visible", className)}> {/* Changed overflow-hidden to overflow-visible */}
       <div 
         className="flex transition-transform duration-700 ease-in-out"
         style={{ 
-            // The width of the container for items. Each item will have 100%/itemsToShow width of this.
-            // If we show 3 items, and have 5 total, track is 5 * (100/3)% wide.
             width: `${(numItems / itemsToShow) * 100}%`, 
-            transform: `translateX(-${(currentIndex * (100 / numItems))}%)` // Slide percentage per item
+            transform: `translateX(-${(currentIndex * (100 / numItems))}%)` 
         }}
       >
         {items.map((item, index) => (
            <div 
               key={index} 
               className="flex-shrink-0" 
-              style={{ width: `${(100 / itemsToShow) / (numItems / itemsToShow)}%` }} // Each item takes 1/itemsToShow of the viewport
+              style={{ width: `${(100 / itemsToShow) / (numItems / itemsToShow)}%` }} 
             > 
              {item}
            </div>
