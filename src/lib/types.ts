@@ -23,6 +23,7 @@ export interface ResourceFile {
   supportedVersions: Tag[];
   supportedLoaders: Tag[];
   channel?: Tag; // Release, Beta, Alpha etc.
+  date?: string; // Optional: ISO date string for file release date, useful for sorting
 }
 
 export interface ResourceLinks {
