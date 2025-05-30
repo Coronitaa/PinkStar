@@ -1,4 +1,3 @@
-
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getGameBySlug, getCategoryDetails, getResources, getAvailableFilterTags, getCategoriesForGame } from '@/lib/data';
@@ -11,7 +10,7 @@ import { CategoryPageContent } from './CategoryPageContent';
 import { cn } from '@/lib/utils';
 
 const RESOURCES_PER_PAGE = 20;
-const MAX_VISIBLE_CATEGORY_TABS = 5; // Adjust as needed
+const MAX_VISIBLE_CATEGORY_TABS = 5;
 
 interface CategoryPageProps {
   params: { gameSlug: string; categorySlug: string };
@@ -31,17 +30,20 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
 
   const versionFilters = typeof searchParams.versions === 'string' ? searchParams.versions.split(',') : [];
   const loaderFilters = typeof searchParams.loaders === 'string' ? searchParams.loaders.split(',') : [];
-  const activeTagFilters = [...versionFilters, ...loaderFilters].filter(Boolean);
-  
-  // Ensure searchQuery is not trimmed here if spaces are intentional
+  const genreFilters = typeof searchParams.genres === 'string' ? searchParams.genres.split(',') : [];
+  const miscFilters = typeof searchParams.misc === 'string' ? searchParams.misc.split(',') : [];
+  const channelFilters = typeof searchParams.channels === 'string' ? searchParams.channels.split(',') : [];
+
+  const activeTagFilters = [...versionFilters, ...loaderFilters, ...genreFilters, ...miscFilters, ...channelFilters].filter(Boolean);
+
   const searchQuery = typeof searchParams.q === 'string' ? searchParams.q : undefined;
   const sortBy = (typeof searchParams.sort === 'string' ? searchParams.sort : (searchQuery ? 'relevance' : 'downloads')) as SortByType;
 
-  const { resources: initialResources, total: initialTotal, hasMore: initialHasMore } = await getResources({ 
-    gameSlug: params.gameSlug, 
-    categorySlug: params.categorySlug, 
-    tags: activeTagFilters,
-    searchQuery, // Pass raw searchQuery
+  const { resources: initialResources, total: initialTotal, hasMore: initialHasMore } = await getResources({
+    gameSlug: params.gameSlug,
+    categorySlug: params.categorySlug,
+    tags: activeTagFilters.length > 0 ? activeTagFilters : undefined,
+    searchQuery,
     sortBy,
     page: 1,
     limit: RESOURCES_PER_PAGE,
@@ -49,8 +51,8 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
 
   const availableFilterTags = await getAvailableFilterTags(params.gameSlug, params.categorySlug);
 
-  const visibleCategories = allGameCategories.length > MAX_VISIBLE_CATEGORY_TABS 
-    ? allGameCategories.slice(0, MAX_VISIBLE_CATEGORY_TABS) 
+  const visibleCategories = allGameCategories.length > MAX_VISIBLE_CATEGORY_TABS
+    ? allGameCategories.slice(0, MAX_VISIBLE_CATEGORY_TABS)
     : allGameCategories;
   const showMoreCategoriesButton = allGameCategories.length > MAX_VISIBLE_CATEGORY_TABS;
 
@@ -60,6 +62,8 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem><BreadcrumbLink href="/">Home</BreadcrumbLink></BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem><BreadcrumbLink href="/games">Games</BreadcrumbLink></BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem><BreadcrumbLink href={`/games/${game.slug}`}>{game.name}</BreadcrumbLink></BreadcrumbItem>
           <BreadcrumbSeparator />
@@ -81,9 +85,9 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
             <Tabs defaultValue={currentCategory.slug} className="overflow-x-auto whitespace-nowrap scrollbar-hide">
               <TabsList className="inline-flex justify-start gap-1 bg-transparent p-0 w-max">
                 {visibleCategories.map(cat => (
-                  <TabsTrigger 
-                    key={cat.id} 
-                    value={cat.slug} 
+                  <TabsTrigger
+                    key={cat.id}
+                    value={cat.slug}
                     asChild
                     className={cn(
                       "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md hover:bg-muted/50 px-3 py-1.5 h-auto text-sm",
@@ -108,7 +112,7 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
           </div>
         </div>
       )}
-      
+
       <CategoryPageContent
         initialResources={initialResources}
         initialHasMore={initialHasMore}
@@ -123,4 +127,4 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
   );
 }
 
-export const revalidate = 3600; 
+export const revalidate = 3600;

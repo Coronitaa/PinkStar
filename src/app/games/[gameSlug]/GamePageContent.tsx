@@ -1,4 +1,3 @@
-
 'use client';
 
 import type React from 'react';
@@ -19,8 +18,8 @@ interface GamePageContentProps {
 }
 
 const DEBOUNCE_DELAY = 300; // milliseconds
-const CAROUSEL_ITEMS_TO_SHOW = 5; // Increased from 3 due to smaller cards
-const FETCH_CAROUSEL_ITEMS_COUNT = CAROUSEL_ITEMS_TO_SHOW + 5; // Fetch more for carousel logic
+const CAROUSEL_ITEMS_TO_SHOW = 5;
+const FETCH_CAROUSEL_ITEMS_COUNT = CAROUSEL_ITEMS_TO_SHOW + 5;
 
 export function GamePageContent({ game, categories, initialCategoryResources }: GamePageContentProps) {
   const [globalSearchQuery, setGlobalSearchQuery] = useState('');
@@ -29,7 +28,7 @@ export function GamePageContent({ game, categories, initialCategoryResources }: 
   const [categorySearchResults, setCategorySearchResults] = useState<Record<string, Resource[] | null>>({});
   const [isAutoplayActive, setIsAutoplayActive] = useState(true);
   const [isCarouselHovered, setIsCarouselHovered] = useState(false);
-  
+
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Debounce global search query
@@ -57,10 +56,10 @@ export function GamePageContent({ game, categories, initialCategoryResources }: 
       for (const category of categories) {
         try {
           const bestMatches = await fetchBestMatchForCategoryAction(game.slug, category.slug, debouncedSearchQuery, FETCH_CAROUSEL_ITEMS_COUNT);
-          results[category.slug] = bestMatches.length > 0 ? bestMatches : null; 
+          results[category.slug] = bestMatches.length > 0 ? bestMatches : null;
         } catch (error) {
           console.error(`Failed to fetch search results for category ${category.name}:`, error);
-          results[category.slug] = null; 
+          results[category.slug] = null;
         }
       }
       setCategorySearchResults(results);
@@ -70,11 +69,11 @@ export function GamePageContent({ game, categories, initialCategoryResources }: 
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setGlobalSearchQuery(e.target.value);
   };
-  
+
   const hasActiveSearch = debouncedSearchQuery.trim().length > 0;
 
   const handleResourceCardHover = (hovering: boolean) => {
-    if (!hasActiveSearch) { // Only pause main autoplay if not actively searching
+    if (!hasActiveSearch) {
       setIsCarouselHovered(hovering);
     }
   };
@@ -82,17 +81,22 @@ export function GamePageContent({ game, categories, initialCategoryResources }: 
   return (
     <div className="space-y-8">
       {/* Global Search Bar - Standalone, aligned left */}
-      <div className="mb-8">
-        <div className="relative w-full sm:w-auto max-w-md"> {/* Limit width */}
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-          <Input
-            ref={searchInputRef}
-            type="search" 
-            placeholder={`Search all resources in ${game.name}...`}
-            className="pl-10 text-base w-full" // Full width within its max-w-md container
-            value={globalSearchQuery}
-            onChange={handleSearchInputChange}
-          />
+      <div className="mb-8"> {/* Removed sticky classes */}
+        <div className="flex items-center justify-between gap-4 w-full max-w-3xl mx-auto">
+          <div className="relative w-full sm:w-auto"> {/* Container for input to control its width */}
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Input
+              ref={searchInputRef}
+              type="search"
+              placeholder={`Search all resources in ${game.name}...`}
+              className="pl-10 text-base w-full sm:w-auto md:min-w-[300px]"
+              value={globalSearchQuery}
+              onChange={handleSearchInputChange}
+            />
+          </div>
+          <Button variant="outline" className="ml-auto shrink-0">
+            <Upload className="w-4 h-4 mr-2" /> Upload Resource
+          </Button>
         </div>
       </div>
 
@@ -102,7 +106,7 @@ export function GamePageContent({ game, categories, initialCategoryResources }: 
           <p className="ml-4 text-lg text-muted-foreground">Searching...</p>
         </div>
       )}
-      
+
       {!isSearching && hasActiveSearch && Object.values(categorySearchResults).every(res => res === null || res?.length === 0) && (
          <div className="text-center py-12">
             <Layers className="w-16 h-16 text-primary mx-auto mb-4" />
@@ -115,7 +119,7 @@ export function GamePageContent({ game, categories, initialCategoryResources }: 
         categories.map((category) => {
           const categoryPageLink = `/games/${game.slug}/${category.slug}`;
           const resourcesForCarousel = (hasActiveSearch
-            ? categorySearchResults[category.slug] 
+            ? categorySearchResults[category.slug]
             : initialCategoryResources[category.slug]) || [];
 
           if (hasActiveSearch && (!resourcesForCarousel || resourcesForCarousel.length === 0)) {
@@ -139,7 +143,7 @@ export function GamePageContent({ game, categories, initialCategoryResources }: 
               </section>
             );
           }
-          
+
           if (!resourcesForCarousel || resourcesForCarousel.length === 0) {
              return (
                 <section key={category.id} className="space-y-6 py-6 border-t border-border/40 first:border-t-0">
@@ -178,20 +182,20 @@ export function GamePageContent({ game, categories, initialCategoryResources }: 
                     <Link href={categoryPageLink}>View all in {category.name} <ChevronRight className="w-4 h-4 ml-2" /></Link>
                 </Button>
               </div>
-              
+
               <div className="mt-4">
-                 <Carousel 
-                    autoplay={isAutoplayActive && !isCarouselHovered && resourcesForCarousel.length > CAROUSEL_ITEMS_TO_SHOW} 
+                 <Carousel
+                    autoplay={isAutoplayActive && !isCarouselHovered && resourcesForCarousel.length > CAROUSEL_ITEMS_TO_SHOW}
                     autoplayInterval={5000}
-                    itemsToShow={CAROUSEL_ITEMS_TO_SHOW} 
-                    showArrows={resourcesForCarousel.length > CAROUSEL_ITEMS_TO_SHOW} 
+                    itemsToShow={CAROUSEL_ITEMS_TO_SHOW}
+                    showArrows={resourcesForCarousel.length > CAROUSEL_ITEMS_TO_SHOW}
                   >
                   {resourcesForCarousel.slice(0, FETCH_CAROUSEL_ITEMS_COUNT).map(resource => (
                     <CarouselItem key={resource.id}>
-                      <ResourceCard 
-                        resource={resource} 
-                        compact 
-                        onHoverChange={handleResourceCardHover} 
+                      <ResourceCard
+                        resource={resource}
+                        compact
+                        onHoverChange={handleResourceCardHover}
                       />
                     </CarouselItem>
                   ))}

@@ -1,4 +1,3 @@
-
 import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
@@ -6,14 +5,15 @@ import { getGameBySlug, getCategoriesForGame, getHighlightedResources, getGameSt
 import type { Category, Game, Resource } from '@/lib/types';
 import { TagBadge } from '@/components/shared/TagBadge';
 import { Card, CardContent } from '@/components/ui/card';
-import { GamePageContent } from './GamePageContent'; 
+import { GamePageContent } from './GamePageContent';
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { Layers, Download, Heart, Package } from 'lucide-react';
 
 interface GamePageProps {
   params: { gameSlug: string };
 }
 
-const CAROUSEL_ITEMS_TO_SHOW_ON_GAME_PAGE = 5; 
+const CAROUSEL_ITEMS_TO_SHOW_ON_GAME_PAGE = 5;
 const FETCH_ITEMS_FOR_GAME_PAGE_CAROUSEL = CAROUSEL_ITEMS_TO_SHOW_ON_GAME_PAGE + 5;
 
 export default async function GamePage({ params }: GamePageProps) {
@@ -27,18 +27,28 @@ export default async function GamePage({ params }: GamePageProps) {
 
   const initialCategoryResources: Record<string, Resource[]> = {};
   for (const category of categories) {
-    initialCategoryResources[category.slug] = await getHighlightedResources(params.gameSlug, category.slug, FETCH_ITEMS_FOR_GAME_PAGE_CAROUSEL); 
+    initialCategoryResources[category.slug] = await getHighlightedResources(params.gameSlug, category.slug, FETCH_ITEMS_FOR_GAME_PAGE_CAROUSEL);
   }
 
   return (
-    <div className="space-y-12">
-      <section className="relative -mx-4 -mt-8">
+    <div className="space-y-8"> {/* Reduced top-level space to space-y-8 */}
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem><BreadcrumbLink href="/">Home</BreadcrumbLink></BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem><BreadcrumbLink href="/games">Games</BreadcrumbLink></BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem><BreadcrumbPage>{game.name}</BreadcrumbPage></BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+
+      <section className="relative -mx-4 -mt-4"> {/* Adjusted negative margin */}
         <div className="relative h-64 md:h-80 lg:h-96 w-full">
           <Image
             src={game.bannerUrl}
             alt={`${game.name} banner`}
-            fill 
-            style={{objectFit:"cover"}} 
+            fill
+            style={{objectFit:"cover"}}
             priority
             data-ai-hint="game wallpaper splash"
           />
@@ -62,17 +72,17 @@ export default async function GamePage({ params }: GamePageProps) {
                   {game.tags.map(tag => <TagBadge key={tag.id} tag={tag} />)}
                 </div>
               )}
-              <div className="mt-3 flex items-center space-x-6 text-sm text-muted-foreground">
+              <div className="mt-3 flex items-center space-x-4 sm:space-x-6 text-sm text-muted-foreground">
                 <span className="flex items-center" title={`${stats.totalResources.toLocaleString()} resources`}>
-                  <Package className="w-4 h-4 mr-1.5 text-accent" /> 
+                  <Package className="w-4 h-4 mr-1.5 text-accent" />
                   {stats.totalResources.toLocaleString()}
                 </span>
                 <span className="flex items-center" title={`${stats.totalDownloads.toLocaleString()} downloads`}>
-                  <Download className="w-4 h-4 mr-1.5 text-accent" /> 
+                  <Download className="w-4 h-4 mr-1.5 text-accent" />
                   {stats.totalDownloads.toLocaleString()}
                 </span>
                 <span className="flex items-center" title={`${stats.totalFollowers.toLocaleString()} followers`}>
-                  <Heart className="w-4 h-4 mr-1.5 text-accent" /> 
+                  <Heart className="w-4 h-4 mr-1.5 text-accent" />
                   {stats.totalFollowers.toLocaleString()}
                 </span>
               </div>
@@ -80,9 +90,9 @@ export default async function GamePage({ params }: GamePageProps) {
           </div>
         </div>
       </section>
-      
+
       {game.longDescription && (
-        <section>
+        <section className="pt-4"> {/* Added pt-4 for spacing */}
             <Card>
                 <CardContent className="p-6">
                     <p className="text-foreground/90 whitespace-pre-line">{game.longDescription}</p>
@@ -90,11 +100,12 @@ export default async function GamePage({ params }: GamePageProps) {
             </Card>
         </section>
       )}
-      
-      <GamePageContent 
-        game={game} 
-        categories={categories} 
-        initialCategoryResources={initialCategoryResources} 
+
+      {/* GamePageContent is now responsible for its own top margin/spacing */}
+      <GamePageContent
+        game={game}
+        categories={categories}
+        initialCategoryResources={initialCategoryResources}
       />
 
     </div>

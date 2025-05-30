@@ -1,4 +1,3 @@
-
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -9,9 +8,8 @@ import { ResourceInfoSidebar } from '@/components/resource/ResourceInfoSidebar';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ResourceFilesTabContent } from '@/components/resource/ResourceFilesTabContent'; 
-// Removed ResourceChangelogTabContent import
-import { FileText, BookOpen, ListChecks, MessageCircle, Eye, Heart } from 'lucide-react'; 
+import { ResourceFilesTabContent } from '@/components/resource/ResourceFilesTabContent';
+import { FileText, BookOpen, ListChecks, MessageCircle, Eye, Heart } from 'lucide-react';
 import { Carousel, CarouselItem } from '@/components/shared/Carousel';
 import { ResourceCard } from '@/components/resource/ResourceCard';
 
@@ -26,10 +24,10 @@ export default async function ResourcePage({ params, searchParams }: ResourcePag
     notFound();
   }
 
-  const { resources: allResourcesInCategory } = await getResources({ 
-    gameSlug: resource.gameSlug, 
+  const { resources: allResourcesInCategory } = await getResources({
+    gameSlug: resource.gameSlug,
     categorySlug: resource.categorySlug,
-    limit: 6 
+    limit: 6 // Fetch a few for related items
   });
 
   const relatedResources = allResourcesInCategory
@@ -43,6 +41,8 @@ export default async function ResourcePage({ params, searchParams }: ResourcePag
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem><BreadcrumbLink href="/">Home</BreadcrumbLink></BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem><BreadcrumbLink href="/games">Games</BreadcrumbLink></BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem><BreadcrumbLink href={`/games/${resource.gameSlug}`}>{resource.gameName}</BreadcrumbLink></BreadcrumbItem>
           <BreadcrumbSeparator />
@@ -77,26 +77,26 @@ export default async function ResourcePage({ params, searchParams }: ResourcePag
                   <Heart className="w-4 h-4 mr-2 text-accent" /> Follow
                 </Button>
               </div>
-              
+
               <Tabs defaultValue={defaultTab} className="w-full">
-                <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 mb-4 bg-card-foreground/5 rounded-md"> {/* Adjusted grid cols */}
+                <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 mb-4 bg-card-foreground/5 rounded-md"> {/* Adjusted for 3 tabs */}
                   <TabsTrigger value="overview" id="overview-tab"><Eye className="w-4 h-4 mr-1 sm:mr-2" />Overview</TabsTrigger>
                   <TabsTrigger value="files" id="files-tab"><FileText className="w-4 h-4 mr-1 sm:mr-2" />Files</TabsTrigger>
                   <TabsTrigger value="requirements" id="requirements-tab"><ListChecks className="w-4 h-4 mr-1 sm:mr-2" />Requirements</TabsTrigger>
-                  {/* Removed Changelog TabTrigger */}
-                  <TabsTrigger value="comments" id="comments-tab"><MessageCircle className="w-4 h-4 mr-1 sm:mr-2" />Comments</TabsTrigger>
+                  {/* Removed Changelog and Comments TabTriggers to match the latest request for 3 tabs */}
                 </TabsList>
                 <TabsContent value="overview">
-                  <div 
+                  <div
                     className="prose prose-sm sm:prose lg:prose-lg dark:prose-invert max-w-none prose-headings:text-primary prose-a:text-accent hover:prose-a:text-accent/80 whitespace-pre-line leading-relaxed"
                     dangerouslySetInnerHTML={{ __html: resource.detailedDescription.replace(/\n/g, '<br />') }}
                   />
                 </TabsContent>
                 <TabsContent value="files">
                   {resource.files && resource.files.length > 0 ? (
-                    <ResourceFilesTabContent 
-                        files={resource.files} 
-                        allChangelogEntries={resource.changelogEntries || []} // Pass changelog entries
+                    <ResourceFilesTabContent
+                        files={resource.files}
+                        allChangelogEntries={resource.changelogEntries || []}
+                        resourceSlug={resource.slug} // Pass slug for potential deep linking
                     />
                   ) : (
                     <p className="text-muted-foreground p-4 text-center">No files available for this resource.</p>
@@ -109,10 +109,7 @@ export default async function ResourcePage({ params, searchParams }: ResourcePag
                     <p className="text-muted-foreground p-4 text-center">No specific requirements listed for this resource.</p>
                   )}
                 </TabsContent>
-                {/* Removed Changelog TabContent */}
-                <TabsContent value="comments">
-                  <p className="text-muted-foreground p-4 text-center">Comments are coming soon! Share your thoughts and feedback in the future.</p>
-                </TabsContent>
+                {/* Comments tab content removed */}
               </Tabs>
             </CardContent>
           </Card>
@@ -126,8 +123,8 @@ export default async function ResourcePage({ params, searchParams }: ResourcePag
       {relatedResources.length > 0 && (
         <section className="pt-8 mt-8 border-t border-border/30">
           <h2 className="text-2xl font-semibold mb-6 text-center text-primary">Related Resources</h2>
-           <Carousel 
-            itemsToShow={3} 
+           <Carousel
+            itemsToShow={3}
             showArrows={relatedResources.length > 3}
             autoplay={true}
             autoplayInterval={6000}
