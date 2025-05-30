@@ -2,17 +2,18 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import { getGameBySlug, getCategoriesForGame, getHighlightedResources } from '@/lib/data';
+import { getGameBySlug, getCategoriesForGame, getHighlightedResources, getGameStats } from '@/lib/data';
 import type { Category, Game, Resource } from '@/lib/types';
 import { TagBadge } from '@/components/shared/TagBadge';
 import { Card, CardContent } from '@/components/ui/card';
 import { GamePageContent } from './GamePageContent'; 
+import { Layers, Download, Heart, Package } from 'lucide-react';
 
 interface GamePageProps {
   params: { gameSlug: string };
 }
 
-const CAROUSEL_ITEMS_TO_SHOW_ON_GAME_PAGE = 5; // Same as in GamePageContent
+const CAROUSEL_ITEMS_TO_SHOW_ON_GAME_PAGE = 5; 
 const FETCH_ITEMS_FOR_GAME_PAGE_CAROUSEL = CAROUSEL_ITEMS_TO_SHOW_ON_GAME_PAGE + 5;
 
 export default async function GamePage({ params }: GamePageProps) {
@@ -22,6 +23,7 @@ export default async function GamePage({ params }: GamePageProps) {
   }
 
   const categories = await getCategoriesForGame(params.gameSlug);
+  const stats = await getGameStats(params.gameSlug);
 
   const initialCategoryResources: Record<string, Resource[]> = {};
   for (const category of categories) {
@@ -60,6 +62,20 @@ export default async function GamePage({ params }: GamePageProps) {
                   {game.tags.map(tag => <TagBadge key={tag.id} tag={tag} />)}
                 </div>
               )}
+              <div className="mt-3 flex items-center space-x-6 text-sm text-muted-foreground">
+                <span className="flex items-center" title={`${stats.totalResources.toLocaleString()} resources`}>
+                  <Package className="w-4 h-4 mr-1.5 text-accent" /> 
+                  {stats.totalResources.toLocaleString()}
+                </span>
+                <span className="flex items-center" title={`${stats.totalDownloads.toLocaleString()} downloads`}>
+                  <Download className="w-4 h-4 mr-1.5 text-accent" /> 
+                  {stats.totalDownloads.toLocaleString()}
+                </span>
+                <span className="flex items-center" title={`${stats.totalFollowers.toLocaleString()} followers`}>
+                  <Heart className="w-4 h-4 mr-1.5 text-accent" /> 
+                  {stats.totalFollowers.toLocaleString()}
+                </span>
+              </div>
             </div>
           </div>
         </div>
