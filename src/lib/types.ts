@@ -5,10 +5,12 @@ export interface Author {
   avatarUrl?: string;
 }
 
+export type TagType = 'version' | 'loader' | 'genre' | 'platform' | 'misc' | 'channel';
+
 export interface Tag {
   id: string;
   name: string;
-  type: 'version' | 'loader' | 'genre' | 'platform' | 'misc' | 'channel';
+  type: TagType;
   color?: string; // Hex color or Tailwind class for badge background
   textColor?: string; // Optional: Tailwind class for text color if contrast is needed
 }
@@ -50,6 +52,7 @@ export interface Resource {
   categoryName: string; // To show on resource card
   categorySlug: string;
   imageUrl: string;
+  imageGallery?: string[]; // For the detail hover card image carousel
   author: Author;
   tags: Tag[];
   downloads: number;
@@ -104,3 +107,4 @@ export interface PaginatedResourcesResponse {
   total: number; // Total number of resources matching filters (before pagination)
   hasMore: boolean; // Indicates if there are more resources to load
 }
+

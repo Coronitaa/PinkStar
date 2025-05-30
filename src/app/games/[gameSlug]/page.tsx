@@ -6,7 +6,7 @@ import { getGameBySlug, getCategoriesForGame, getHighlightedResources } from '@/
 import type { Category, Game, Resource } from '@/lib/types';
 import { TagBadge } from '@/components/shared/TagBadge';
 import { Card, CardContent } from '@/components/ui/card';
-import { GamePageContent } from './GamePageContent'; // New client component
+import { GamePageContent } from './GamePageContent'; 
 
 interface GamePageProps {
   params: { gameSlug: string };
@@ -23,7 +23,8 @@ export default async function GamePage({ params }: GamePageProps) {
   // Fetch initial highlighted resources for each category
   const initialCategoryResources: Record<string, Resource[]> = {};
   for (const category of categories) {
-    initialCategoryResources[category.slug] = await getHighlightedResources(params.gameSlug, category.slug, 5);
+    // Fetch slightly more for carousel to have enough for sliding logic
+    initialCategoryResources[category.slug] = await getHighlightedResources(params.gameSlug, category.slug, 8); 
   }
 
   return (
@@ -33,10 +34,10 @@ export default async function GamePage({ params }: GamePageProps) {
           <Image
             src={game.bannerUrl}
             alt={`${game.name} banner`}
-            fill // Changed from layout="fill"
-            style={{objectFit:"cover"}} // Changed from objectFit="cover"
+            fill 
+            style={{objectFit:"cover"}} 
             priority
-            data-ai-hint="game wallpaper"
+            data-ai-hint="game wallpaper splash"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent" />
         </div>
@@ -48,7 +49,7 @@ export default async function GamePage({ params }: GamePageProps) {
               width={128}
               height={128}
               className="rounded-lg border-4 border-background shadow-xl"
-              data-ai-hint="game logo"
+              data-ai-hint="game icon avatar"
             />
             <div>
               <h1 className="text-4xl md:text-5xl font-bold text-foreground drop-shadow-md">{game.name}</h1>

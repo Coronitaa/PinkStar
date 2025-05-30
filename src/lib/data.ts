@@ -90,7 +90,14 @@ const authors: Author[] = [
 
 const allResources: Resource[] = [
   {
-    id: 'res1', name: 'Ultra Graphics Mod', slug: 'ultra-graphics-mod', gameName: 'PixelVerse Adventures', gameSlug: 'pixelverse-adventures', categoryName: 'Visual Enhancements', categorySlug: 'visual-enhancements', imageUrl: 'https://placehold.co/600x400/D81B60/FFFFFF?text=UltraGFX', author: authors[0], tags: [commonTags.v1_20, commonTags.fabric, commonTags.texturePack, commonTags.pc, commonTags.enhancement], downloads: 15000, createdAt: new Date('2023-05-10T10:00:00Z').toISOString(), updatedAt: new Date('2023-08-15T14:30:00Z').toISOString(), version: '2.1.0', description: 'Breathtaking visual overhaul for PixelVerse. Experience the world like never before with this amazing mod.', detailedDescription: `Ultra Graphics Mod transforms your PixelVerse experience with stunning high-resolution textures, advanced lighting effects, and realistic weather systems. Explore familiar landscapes with a newfound sense of awe and immersion. This mod is optimized for performance while delivering top-tier visuals.\n\nFeatures:\n- 4K Texture Support\n- Dynamic Global Illumination\n- Volumetric Clouds & Fog\n- Enhanced Water Shaders\n- Particle Effect Overhaul\n\nThis is a must have graphics mod for any PixelVerse player seeking ultimate immersion. Our team spent months crafting these visuals.`, 
+    id: 'res1', name: 'Ultra Graphics Mod', slug: 'ultra-graphics-mod', gameName: 'PixelVerse Adventures', gameSlug: 'pixelverse-adventures', categoryName: 'Visual Enhancements', categorySlug: 'visual-enhancements', 
+    imageUrl: 'https://placehold.co/600x400/D81B60/FFFFFF?text=UltraGFX+Main',
+    imageGallery: [
+        'https://placehold.co/800x600/D81B60/FFFFFF?text=UltraGFX+Scene+1',
+        'https://placehold.co/800x600/C2185B/FFFFFF?text=UltraGFX+Scene+2',
+        'https://placehold.co/800x600/AD1457/FFFFFF?text=UltraGFX+Character',
+    ],
+    author: authors[0], tags: [commonTags.v1_20, commonTags.fabric, commonTags.texturePack, commonTags.pc, commonTags.enhancement], downloads: 15000, createdAt: new Date('2023-05-10T10:00:00Z').toISOString(), updatedAt: new Date('2023-08-15T14:30:00Z').toISOString(), version: '2.1.0', description: 'Breathtaking visual overhaul for PixelVerse. Experience the world like never before.', detailedDescription: `Ultra Graphics Mod transforms your PixelVerse experience with stunning high-resolution textures, advanced lighting effects, and realistic weather systems. Explore familiar landscapes with a newfound sense of awe and immersion. This mod is optimized for performance while delivering top-tier visuals.\n\nFeatures:\n- 4K Texture Support\n- Dynamic Global Illumination\n- Volumetric Clouds & Fog\n- Enhanced Water Shaders\n- Particle Effect Overhaul\n\nThis is a must have graphics mod for any PixelVerse player seeking ultimate immersion. Our team spent months crafting these visuals.`, 
     files: [
       { id: 'file1_1', name: 'ultra-graphics-v2.1.0-fabric-1.20.jar', url: '#', size: '5.5 MB', supportedVersions: [commonTags.v1_20], supportedLoaders: [commonTags.fabric], channel: commonTags.channelRelease },
       { id: 'file1_2', name: 'ultra-graphics-v2.0.0-fabric-1.19.jar', url: '#', size: '5.3 MB', supportedVersions: [commonTags.v1_19], supportedLoaders: [commonTags.fabric], channel: commonTags.channelBeta }
@@ -103,7 +110,13 @@ const allResources: Resource[] = [
     ], rating: 4.8, followers: 1250, links: { discord: 'https://discord.gg/example', wiki: 'https://wiki.example.com/ultragfx', issues: 'https://github.com/example/ultragfx/issues', source: 'https://github.com/example/ultragfx' }
   },
   {
-    id: 'res2', name: 'Advanced Minimap Utility', slug: 'advanced-minimap', gameName: 'PixelVerse Adventures', gameSlug: 'pixelverse-adventures', categoryName: 'Utilities', categorySlug: 'utilities', imageUrl: 'https://placehold.co/600x400/F48FB1/121212?text=Minimap', author: authors[1], tags: [commonTags.v1_19, commonTags.v1_20, commonTags.v1_20_1, commonTags.v1_20_4, commonTags.fabric, commonTags.forge, commonTags.utility, commonTags.library], downloads: 250000, createdAt: new Date('2023-01-20T09:00:00Z').toISOString(), updatedAt: new Date('2024-03-01T11:00:00Z').toISOString(), version: '3.5.2', description: 'Highly customizable minimap with waypoints, entity radar, and biome information. A must-have utility.', detailedDescription: `The Advanced Minimap is an essential tool for any PixelVerse adventurer. It offers a highly configurable on-screen map that displays terrain, entities, and waypoints. \n\nKey Features:\n- Customizable zoom levels and display modes.\n- Unlimited waypoints with color coding and teleportation (if server allows).\n- Entity radar for players, mobs, and items.\n- Biome overlay and chunk grid.\n- Cave mode for underground exploration. An excellent utility. This description provides overview details.`, 
+    id: 'res2', name: 'Advanced Minimap Utility', slug: 'advanced-minimap', gameName: 'PixelVerse Adventures', gameSlug: 'pixelverse-adventures', categoryName: 'Utilities', categorySlug: 'utilities', 
+    imageUrl: 'https://placehold.co/600x400/F48FB1/121212?text=Minimap+UI',
+    imageGallery: [
+        'https://placehold.co/800x600/F48FB1/121212?text=Minimap+Settings',
+        'https://placehold.co/800x600/EC407A/FFFFFF?text=Minimap+Cave+Mode',
+    ],
+    author: authors[1], tags: [commonTags.v1_19, commonTags.v1_20, commonTags.v1_20_1, commonTags.v1_20_4, commonTags.fabric, commonTags.forge, commonTags.utility, commonTags.library], downloads: 250000, createdAt: new Date('2023-01-20T09:00:00Z').toISOString(), updatedAt: new Date('2024-03-01T11:00:00Z').toISOString(), version: '3.5.2', description: 'Highly customizable minimap with waypoints, entity radar, and biome information.', detailedDescription: `The Advanced Minimap is an essential tool for any PixelVerse adventurer. It offers a highly configurable on-screen map that displays terrain, entities, and waypoints. \n\nKey Features:\n- Customizable zoom levels and display modes.\n- Unlimited waypoints with color coding and teleportation (if server allows).\n- Entity radar for players, mobs, and items.\n- Biome overlay and chunk grid.\n- Cave mode for underground exploration. An excellent utility. This description provides overview details.`, 
     files: [
       { id: 'file2_1', name: 'advanced-minimap-v3.5.2-fabric.jar', url: '#', size: '1.2 MB', supportedVersions: [commonTags.v1_19, commonTags.v1_20, commonTags.v1_20_1, commonTags.v1_20_4], supportedLoaders: [commonTags.fabric], channel: commonTags.channelRelease }, 
       { id: 'file2_2', name: 'advanced-minimap-v3.5.2-forge.jar', url: '#', size: '1.3 MB', supportedVersions: [commonTags.v1_19, commonTags.v1_20, commonTags.v1_20_1, commonTags.v1_20_4], supportedLoaders: [commonTags.forge], channel: commonTags.channelRelease },
@@ -116,19 +129,38 @@ const allResources: Resource[] = [
     ], rating: 4.5, followers: 8700, links: { discord: 'https://discord.gg/modmaster', source: 'https://github.com/modmaster/minimap' }
   },
   {
-    id: 'res3', name: 'Skyblock Odyssey Map', slug: 'skyblock-odyssey-map', gameName: 'PixelVerse Adventures', gameSlug: 'pixelverse-adventures', categoryName: 'Maps & Worlds', categorySlug: 'maps-and-worlds', imageUrl: 'https://placehold.co/600x400/880E4F/FFFFFF?text=SkyblockMap', author: authors[2], tags: [commonTags.v1_20, commonTags.map], downloads: 7500, createdAt: new Date('2023-07-01T12:00:00Z').toISOString(), updatedAt: new Date('2023-07-05T18:00:00Z').toISOString(), version: '1.0.0', description: 'A challenging Skyblock adventure map.', detailedDescription: `Embark on Skyblock Odyssey, a meticulously crafted map that tests your survival skills and creativity. Start on a tiny island with limited resources and expand your world, complete challenges, and discover hidden secrets across multiple floating islands. \n\nIncludes:\n- Custom island designs and progression.\n- Unique challenges and quests.\n- Villager trading system. This map offers a great overview of skyblock mechanics.`, 
+    id: 'res3', name: 'Skyblock Odyssey Map', slug: 'skyblock-odyssey-map', gameName: 'PixelVerse Adventures', gameSlug: 'pixelverse-adventures', categoryName: 'Maps & Worlds', categorySlug: 'maps-and-worlds', 
+    imageUrl: 'https://placehold.co/600x400/880E4F/FFFFFF?text=Skyblock+Island',
+    imageGallery: [
+        'https://placehold.co/800x600/880E4F/FFFFFF?text=Skyblock+Start',
+        'https://placehold.co/800x600/C2185B/FFFFFF?text=Skyblock+Nether+Island',
+    ],
+    author: authors[2], tags: [commonTags.v1_20, commonTags.map], downloads: 7500, createdAt: new Date('2023-07-01T12:00:00Z').toISOString(), updatedAt: new Date('2023-07-05T18:00:00Z').toISOString(), version: '1.0.0', description: 'A challenging Skyblock adventure map.', detailedDescription: `Embark on Skyblock Odyssey, a meticulously crafted map that tests your survival skills and creativity. Start on a tiny island with limited resources and expand your world, complete challenges, and discover hidden secrets across multiple floating islands. \n\nIncludes:\n- Custom island designs and progression.\n- Unique challenges and quests.\n- Villager trading system. This map offers a great overview of skyblock mechanics.`, 
     files: [{ id: 'file3_1', name: 'skyblock-odyssey-v1.0.zip', url: '#', size: '10.2 MB', supportedVersions: [commonTags.v1_20], supportedLoaders: [], channel: commonTags.channelRelease }], 
     requirements: 'PixelVerse Adventures v1.20 or higher. No mods required.', 
     changelogEntries: [{ id: 'cl3-1', versionName: 'Skyblock Odyssey v1.0.0', date: '2023-07-01T12:00:00Z', notes: 'Initial release of the Skyblock Odyssey map.', relatedFileId: 'file3_1', gameVersionTag: commonTags.v1_20, channelTag: commonTags.channelRelease }], rating: 4.2, followers: 300, links: { wiki: 'https://pixelperfect.com/skyblock/wiki' }
   },
   {
-    id: 'res4', name: 'Cosmic Galaxy Ship Pack', slug: 'cosmic-galaxy-pack', gameName: 'Galaxy Explorers', gameSlug: 'galaxy-explorers', categoryName: 'Ship Customization', categorySlug: 'ship-customization', imageUrl: 'https://placehold.co/600x400/AD1457/FFFFFF?text=CosmicPack', author: authors[0], tags: [commonTags.utility, commonTags.pc], downloads: 9200, createdAt: new Date('2023-06-10T10:00:00Z').toISOString(), updatedAt: new Date('2023-08-25T14:30:00Z').toISOString(), version: '1.5.0', description: 'Stunning ship skins and engine trails for your starship.', detailedDescription: `Take your starship to the next level with the Cosmic Galaxy Pack! This pack includes a variety of breathtaking ship skins inspired by nebulas, supernovas, and distant galaxies. Also features custom engine trail effects and cockpit decals. \n\nContents:\n- 10 unique ship skins.\n- 5 animated engine trail effects.\n- 3 cockpit decal sets. Great overview of customization options.`, 
+    id: 'res4', name: 'Cosmic Galaxy Ship Pack', slug: 'cosmic-galaxy-pack', gameName: 'Galaxy Explorers', gameSlug: 'galaxy-explorers', categoryName: 'Ship Customization', categorySlug: 'ship-customization', 
+    imageUrl: 'https://placehold.co/600x400/AD1457/FFFFFF?text=Cosmic+Ship',
+    imageGallery: [
+        'https://placehold.co/800x600/AD1457/FFFFFF?text=Nebula+Skin',
+        'https://placehold.co/800x600/C2185B/FFFFFF?text=Engine+Trails',
+        'https://placehold.co/800x600/880E4F/FFFFFF?text=Starfighter+View',
+    ],
+    author: authors[0], tags: [commonTags.utility, commonTags.pc], downloads: 9200, createdAt: new Date('2023-06-10T10:00:00Z').toISOString(), updatedAt: new Date('2023-08-25T14:30:00Z').toISOString(), version: '1.5.0', description: 'Stunning ship skins and engine trails for your starship.', detailedDescription: `Take your starship to the next level with the Cosmic Galaxy Pack! This pack includes a variety of breathtaking ship skins inspired by nebulas, supernovas, and distant galaxies. Also features custom engine trail effects and cockpit decals. \n\nContents:\n- 10 unique ship skins.\n- 5 animated engine trail effects.\n- 3 cockpit decal sets. Great overview of customization options.`, 
     files: [{ id: 'file4_1', name: 'cosmic-galaxy-pack-v1.5.0.pak', url: '#', size: '25.5 MB', supportedVersions: [], supportedLoaders: [], channel: commonTags.channelRelease }], 
     requirements: 'Galaxy Explorers v2.3 or newer.', 
     changelogEntries: [{ id: 'cl4-1', versionName: 'Cosmic Galaxy Pack v1.5.0', date: '2023-08-25T14:30:00Z', notes: 'Added 2 new skins and optimized existing textures.', relatedFileId: 'file4_1', channelTag: commonTags.channelRelease }], rating: 4.9, followers: 550, links: { issues: 'https://creative.works/cosmicpack/issues'}
   },
   {
-    id: 'res5', name: 'Inventory Sorter Utility', slug: 'inventory-sorter', gameName: 'PixelVerse Adventures', gameSlug: 'pixelverse-adventures', categoryName: 'Utilities', categorySlug: 'utilities', imageUrl: 'https://placehold.co/600x400/EC407A/FFFFFF?text=InvSort', author: authors[1], tags: [commonTags.v1_20, commonTags.v1_21, commonTags.fabric, commonTags.utility], downloads: 120000, createdAt: new Date('2023-03-15T00:00:00Z').toISOString(), updatedAt: new Date('2023-09-10T00:00:00Z').toISOString(), version: '1.8.0', description: 'Automatically sorts inventory and chests. A very useful utility.', detailedDescription: `Tired of messy inventories? The Inventory Sorter mod is here to help! With a single click or configurable hotkey, sort your player inventory or any chest according to predefined rules or custom configurations. Supports item categories, names, and mod-specific sorting. \n\nFeatures:\n- One-click sorting for player inventory and chests.\n- Customizable sorting rules.\n- Hotkey support.\n- Integration with other inventory mods. This utility makes life easier. Provides a great overview of sorting.`, 
+    id: 'res5', name: 'Inventory Sorter Utility', slug: 'inventory-sorter', gameName: 'PixelVerse Adventures', gameSlug: 'pixelverse-adventures', categoryName: 'Utilities', categorySlug: 'utilities', 
+    imageUrl: 'https://placehold.co/600x400/EC407A/FFFFFF?text=InvSort+Icon',
+    imageGallery: [
+        'https://placehold.co/800x600/EC407A/FFFFFF?text=Sorted+Chest',
+        'https://placehold.co/800x600/F06292/121212?text=Sort+Options',
+    ],
+    author: authors[1], tags: [commonTags.v1_20, commonTags.v1_21, commonTags.fabric, commonTags.utility], downloads: 120000, createdAt: new Date('2023-03-15T00:00:00Z').toISOString(), updatedAt: new Date('2023-09-10T00:00:00Z').toISOString(), version: '1.8.0', description: 'Automatically sorts inventory and chests. A very useful utility.', detailedDescription: `Tired of messy inventories? The Inventory Sorter mod is here to help! With a single click or configurable hotkey, sort your player inventory or any chest according to predefined rules or custom configurations. Supports item categories, names, and mod-specific sorting. \n\nFeatures:\n- One-click sorting for player inventory and chests.\n- Customizable sorting rules.\n- Hotkey support.\n- Integration with other inventory mods. This utility makes life easier. Provides a great overview of sorting.`, 
     files: [{ id: 'file5_1', name: 'inventory-sorter-v1.8.0.jar', url: '#', size: '0.5 MB', supportedVersions: [commonTags.v1_20, commonTags.v1_21], supportedLoaders: [commonTags.fabric], channel: commonTags.channelRelease }], 
     requirements: 'Fabric API.', 
     changelogEntries: [
@@ -137,7 +169,14 @@ const allResources: Resource[] = [
     ], rating: 5.0, followers: 9800
   },
   {
-    id: 'res6', name: 'Realistic Textures HD Pack', slug: 'realistic-textures-hd', gameName: 'PixelVerse Adventures', gameSlug: 'pixelverse-adventures', categoryName: 'Visual Enhancements', categorySlug: 'visual-enhancements', imageUrl: 'https://placehold.co/600x400/F06292/121212?text=HDTextures', author: authors[2], tags: [commonTags.v1_20, commonTags.v1_21, commonTags.texturePack], downloads: 50000, createdAt: new Date('2023-02-01T00:00:00Z').toISOString(), updatedAt: new Date('2023-07-20T00:00:00Z').toISOString(), version: '4.2.0', description: 'Complete HD texture overhaul for a realistic visual experience.', detailedDescription: `Experience PixelVerse Adventures in stunning high definition with the Realistic Textures HD pack. This pack replaces all default textures with high-resolution, detailed alternatives, bringing a new level of realism to your world. From individual blocks to expansive landscapes, every detail is enhanced. \n\nIncludes:\n- 256x, 128x, and 64x resolution options.\n- Normal and specular maps for PBR effects (with compatible shaders).\n- Connected textures support. Perfect for a visual graphics boost.`, 
+    id: 'res6', name: 'Realistic Textures HD Pack', slug: 'realistic-textures-hd', gameName: 'PixelVerse Adventures', gameSlug: 'pixelverse-adventures', categoryName: 'Visual Enhancements', categorySlug: 'visual-enhancements', 
+    imageUrl: 'https://placehold.co/600x400/F06292/121212?text=HD+Terrain',
+    imageGallery: [
+        'https://placehold.co/800x600/F06292/121212?text=Realistic+Wood',
+        'https://placehold.co/800x600/E91E63/FFFFFF?text=HD+Stone',
+        'https://placehold.co/800x600/D81B60/FFFFFF?text=Realistic+Water',
+    ],
+    author: authors[2], tags: [commonTags.v1_20, commonTags.v1_21, commonTags.texturePack], downloads: 50000, createdAt: new Date('2023-02-01T00:00:00Z').toISOString(), updatedAt: new Date('2023-07-20T00:00:00Z').toISOString(), version: '4.2.0', description: 'Complete HD texture overhaul for a realistic visual experience.', detailedDescription: `Experience PixelVerse Adventures in stunning high definition with the Realistic Textures HD pack. This pack replaces all default textures with high-resolution, detailed alternatives, bringing a new level of realism to your world. From individual blocks to expansive landscapes, every detail is enhanced. \n\nIncludes:\n- 256x, 128x, and 64x resolution options.\n- Normal and specular maps for PBR effects (with compatible shaders).\n- Connected textures support. Perfect for a visual graphics boost.`, 
     files: [
       { id: 'file6_1', name: 'realistic-textures-hd-v4.2.0_256x.zip', url: '#', size: '150 MB', supportedVersions: [commonTags.v1_20, commonTags.v1_21], supportedLoaders: [], channel: commonTags.channelAlpha }, 
       { id: 'file6_2', name: 'realistic-textures-hd-v4.2.0_128x.zip', url: '#', size: '80 MB', supportedVersions: [commonTags.v1_20, commonTags.v1_21], supportedLoaders: [], channel: commonTags.channelRelease }
@@ -157,13 +196,17 @@ const allResources: Resource[] = [
     categoryName: 'Utilities',
     categorySlug: 'utilities',
     imageUrl: `https://placehold.co/600x400/7B1FA2/FFFFFF?text=Util-${i + 1}`,
+    imageGallery: [
+        `https://placehold.co/800x600/7B1FA2/FFFFFF?text=Util-${i + 1}-Feature1`,
+        `https://placehold.co/800x600/8E24AA/FFFFFF?text=Util-${i + 1}-Feature2`,
+    ],
     author: authors[i % 3],
-    tags: [commonTags.v1_20, (i % 2 === 0 ? commonTags.fabric : commonTags.forge), commonTags.utility],
+    tags: [commonTags.v1_20, (i % 2 === 0 ? commonTags.fabric : commonTags.forge), commonTags.utility, commonTags.library, commonTags.enhancement],
     downloads: Math.floor(Math.random() * 10000) + 500,
     createdAt: new Date(Date.now() - Math.random() * 1000 * 60 * 60 * 24 * 30 * (i + 1)).toISOString(),
     updatedAt: new Date(Date.now() - Math.random() * 1000 * 60 * 60 * 24 * 7 * (i + 1)).toISOString(),
     version: `1.${i % 5}.0`,
-    description: `A handy utility mod number ${i + 1} for everyday tasks in PixelVerse. This item helps with various overview tasks.`,
+    description: `A handy utility mod number ${i + 1} for everyday tasks in PixelVerse.`,
     detailedDescription: `This is Utility Mod ${i + 1}. It helps with various things like item management, information display, or minor gameplay tweaks. It is designed to be lightweight and compatible with most other mods. Essential utility for players. This is part of the detailed overview.`,
     files: [{ id: `file-pv-util-${i+7}`, name: `utility-mod-${i+1}.jar`, url: '#', size: '0.2MB', supportedVersions: [commonTags.v1_20], supportedLoaders: [(i % 2 === 0 ? commonTags.fabric : commonTags.forge)], channel: i % 3 === 0 ? commonTags.channelRelease : (i % 3 === 1 ? commonTags.channelBeta : commonTags.channelAlpha) }],
     requirements: (i % 2 === 0 ? 'Fabric API' : 'Forge Mod Loader'),
@@ -172,19 +215,37 @@ const allResources: Resource[] = [
     followers: Math.floor(Math.random() * 500) + 10,
   })),
   {
-    id: 'res-pv-map-extra', name: 'PixelVerse Grand Plaza Map', slug: 'pv-grand-plaza', gameName: 'PixelVerse Adventures', gameSlug: 'pixelverse-adventures', categoryName: 'Maps & Worlds', categorySlug: 'maps-and-worlds', imageUrl: 'https://placehold.co/600x400/880E4F/FFFFFF?text=PVPlaza', author: authors[0], tags: [commonTags.v1_21, commonTags.map], downloads: 1200, createdAt: new Date('2023-10-01T12:00:00Z').toISOString(), updatedAt: new Date('2023-10-05T18:00:00Z').toISOString(), version: '1.0.0', description: 'A large central hub map for servers or exploration. Beautiful map.', detailedDescription: `The PixelVerse Grand Plaza is a sprawling map featuring a magnificent central plaza, market stalls, park areas, and connecting pathways. Ideal as a server spawn, a roleplaying hub, or simply a beautiful world to explore. It includes hidden areas and details for dedicated explorers. This map is truly grand and offers a great overview for your city.`, 
+    id: 'res-pv-map-extra', name: 'PixelVerse Grand Plaza Map', slug: 'pv-grand-plaza', gameName: 'PixelVerse Adventures', gameSlug: 'pixelverse-adventures', categoryName: 'Maps & Worlds', categorySlug: 'maps-and-worlds', 
+    imageUrl: 'https://placehold.co/600x400/880E4F/FFFFFF?text=PVPlaza+Overview',
+    imageGallery: [
+        'https://placehold.co/800x600/880E4F/FFFFFF?text=Plaza+Fountain',
+        'https://placehold.co/800x600/C2185B/FFFFFF?text=Market+Stalls',
+    ],
+    author: authors[0], tags: [commonTags.v1_21, commonTags.map], downloads: 1200, createdAt: new Date('2023-10-01T12:00:00Z').toISOString(), updatedAt: new Date('2023-10-05T18:00:00Z').toISOString(), version: '1.0.0', description: 'A large central hub map for servers or exploration.', detailedDescription: `The PixelVerse Grand Plaza is a sprawling map featuring a magnificent central plaza, market stalls, park areas, and connecting pathways. Ideal as a server spawn, a roleplaying hub, or simply a beautiful world to explore. It includes hidden areas and details for dedicated explorers. This map is truly grand and offers a great overview for your city.`, 
     files: [{ id: 'file-pv-map-extra', name: 'pv-grand-plaza.zip', url: '#', size: '15.2 MB', supportedVersions: [commonTags.v1_21], supportedLoaders: [], channel: commonTags.channelRelease }],
     requirements: 'PixelVerse Adventures v1.21 or higher.',
     changelogEntries: [{ id: 'cl-pv-map', versionName: 'Grand Plaza v1.0.0', date: '2023-10-05T18:00:00Z', notes: 'Initial release of the Grand Plaza map.', relatedFileId: 'file-pv-map-extra', gameVersionTag: commonTags.v1_21, channelTag: commonTags.channelRelease }], rating: 4.0, followers: 150
   },
    {
-    id: 'res-ge-nav', name: 'Advanced Navigation System', slug: 'ge-advanced-navigation', gameName: 'Galaxy Explorers', gameSlug: 'galaxy-explorers', categoryName: 'Gameplay Mechanics', categorySlug: 'gameplay-mechanics', imageUrl: 'https://placehold.co/600x400/C2185B/FFFFFF?text=AdvNav', author: authors[1], tags: [commonTags.pc, commonTags.utility, commonTags.enhancement], downloads: 18000, createdAt: new Date('2023-04-10T10:00:00Z').toISOString(), updatedAt: new Date('2023-09-05T14:30:00Z').toISOString(), version: '2.2.0', description: 'Overhauls in-ship navigation and targeting for Galaxy Explorers.', detailedDescription: 'The Advanced Navigation System (ANS) provides a comprehensive suite of tools for pilots in Galaxy Explorers. Features improved HUD elements, long-range scanners, jump point calculations, and customizable targeting reticles. Makes space travel more intuitive and combat more precise. A key system for exploration.', 
+    id: 'res-ge-nav', name: 'Advanced Navigation System', slug: 'ge-advanced-navigation', gameName: 'Galaxy Explorers', gameSlug: 'galaxy-explorers', categoryName: 'Gameplay Mechanics', categorySlug: 'gameplay-mechanics', 
+    imageUrl: 'https://placehold.co/600x400/C2185B/FFFFFF?text=AdvNav+HUD',
+    imageGallery: [
+        'https://placehold.co/800x600/C2185B/FFFFFF?text=Nav+System+UI',
+        'https://placehold.co/800x600/AD1457/FFFFFF?text=Targeting+Reticule',
+    ],
+    author: authors[1], tags: [commonTags.pc, commonTags.utility, commonTags.enhancement], downloads: 18000, createdAt: new Date('2023-04-10T10:00:00Z').toISOString(), updatedAt: new Date('2023-09-05T14:30:00Z').toISOString(), version: '2.2.0', description: 'Overhauls in-ship navigation and targeting for Galaxy Explorers.', detailedDescription: 'The Advanced Navigation System (ANS) provides a comprehensive suite of tools for pilots in Galaxy Explorers. Features improved HUD elements, long-range scanners, jump point calculations, and customizable targeting reticles. Makes space travel more intuitive and combat more precise. A key system for exploration.', 
     files: [{ id: 'file-ge-nav-1', name: 'ge-ans-v2.2.0.pak', url: '#', size: '8.1 MB', supportedVersions: [], supportedLoaders: [], channel: commonTags.channelRelease }], 
     requirements: 'Galaxy Explorers v2.5+.', 
     changelogEntries: [{ id: 'cl-ge-nav', versionName: 'ANS v2.2.0', date: '2023-09-05T14:30:00Z', notes: 'Added new scanner modes.\nUI improvements.', relatedFileId: 'file-ge-nav-1', channelTag: commonTags.channelRelease }], rating: 4.7, followers: 900, links: { source: 'https://github.com/modmaster/ge-ans'}
   },
   {
-    id: 'res-kc-ai', name: 'Enhanced Tactical AI Mod', slug: 'kc-tactical-ai', gameName: 'Kingdoms Collide', gameSlug: 'kingdoms-collide', categoryName: 'AI & NPCs', categorySlug: 'ai-and-npcs', imageUrl: 'https://placehold.co/600x400/E91E63/FFFFFF?text=TacticalAI', author: authors[2], tags: [commonTags.pc, commonTags.utility], downloads: 5500, createdAt: new Date('2023-05-20T00:00:00Z').toISOString(), updatedAt: new Date('2023-08-10T00:00:00Z').toISOString(), version: '1.3.0', description: 'Makes enemy and allied AI smarter and more challenging in Kingdoms Collide.', detailedDescription: 'Experience more dynamic battles in Kingdoms Collide with the Enhanced Tactical AI mod. Enemy commanders will use more complex strategies, respond better to player actions, and manage their economies more efficiently. Allied AI will also show improved coordination and unit control. This mod improves AI significantly.', 
+    id: 'res-kc-ai', name: 'Enhanced Tactical AI Mod', slug: 'kc-tactical-ai', gameName: 'Kingdoms Collide', gameSlug: 'kingdoms-collide', categoryName: 'AI & NPCs', categorySlug: 'ai-and-npcs', 
+    imageUrl: 'https://placehold.co/600x400/E91E63/FFFFFF?text=Smart+AI',
+    imageGallery: [
+        'https://placehold.co/800x600/E91E63/FFFFFF?text=AI+Formations',
+        'https://placehold.co/800x600/D81B60/FFFFFF?text=AI+Base+Management',
+    ],
+    author: authors[2], tags: [commonTags.pc, commonTags.utility], downloads: 5500, createdAt: new Date('2023-05-20T00:00:00Z').toISOString(), updatedAt: new Date('2023-08-10T00:00:00Z').toISOString(), version: '1.3.0', description: 'Makes enemy and allied AI smarter and more challenging in Kingdoms Collide.', detailedDescription: 'Experience more dynamic battles in Kingdoms Collide with the Enhanced Tactical AI mod. Enemy commanders will use more complex strategies, respond better to player actions, and manage their economies more efficiently. Allied AI will also show improved coordination and unit control. This mod improves AI significantly.', 
     files: [{ id: 'file-kc-ai-1', name: 'kc-eta-v1.3.0.mod', url: '#', size: '3.5 MB', supportedVersions: [], supportedLoaders: [], channel: commonTags.channelAlpha }], 
     requirements: 'Kingdoms Collide v1.8 or newer.', 
     changelogEntries: [{ id: 'cl-kc-ai', versionName: 'ETA v1.3.0', date: '2023-08-10T00:00:00Z', notes: 'AI now utilizes flanking maneuvers more effectively.\nImproved resource management logic for AI opponents.', relatedFileId: 'file-kc-ai-1', channelTag: commonTags.channelAlpha }], rating: 4.3, followers: 280
@@ -363,7 +424,6 @@ export const getBestMatchResourcesData = async (gameSlug: string, categorySlug: 
 export const getResourceBySlug = async (slug: string): Promise<Resource | undefined> => {
   const resource = allResources.find(r => r.slug === slug);
   if (resource) {
-    // Ensure changelog entries are sorted by date descending if they exist
     const resourceCopy = { ...resource };
     if (resourceCopy.changelogEntries) {
       resourceCopy.changelogEntries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -425,3 +485,4 @@ export const formatTimeAgo = (dateString: string | undefined) => {
   // Client-side will render "time ago"
   return formatDistanceToNow(new Date(dateString), { addSuffix: true });
 };
+
