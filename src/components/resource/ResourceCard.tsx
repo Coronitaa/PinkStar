@@ -4,14 +4,14 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import type { Resource, ResourceFile, Tag } from '@/lib/types'; // Added Tag
+import type { Resource, ResourceFile, Tag } from '@/lib/types'; 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TagBadge } from '@/components/shared/TagBadge';
 import { Download, Eye, User, Tags, Info, ArrowRight, Star } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { Carousel, CarouselItem as NestedCarouselItem } from '@/components/shared/Carousel';
+import { Carousel as NestedCarousel, CarouselItem as NestedCarouselItem } from '@/components/shared/Carousel';
 
 interface ResourceCardProps {
   resource: Resource;
@@ -20,7 +20,7 @@ interface ResourceCardProps {
 }
 
 const MAX_TAGS_COMPACT = 1;
-const MAX_TAGS_OVERLAY = 5; 
+const MAX_TAGS_OVERLAY = 9; 
 
 const RatingDisplay: React.FC<{ rating?: number, compact?: boolean }> = ({ rating, compact = false }) => {
   if (typeof rating !== 'number') return null;
@@ -28,7 +28,7 @@ const RatingDisplay: React.FC<{ rating?: number, compact?: boolean }> = ({ ratin
   const halfStar = rating % 1 >= 0.5; 
   const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
 
-  const starSize = compact ? "w-2.5 h-2.5" : "w-3.5 h-3.5"; // Slightly larger for non-compact
+  const starSize = compact ? "w-2.5 h-2.5" : "w-3.5 h-3.5"; 
 
   return (
     <div className={cn("flex items-center", compact ? "gap-0.5" : "gap-1")}>
@@ -63,7 +63,7 @@ export function ResourceCard({ resource, compact = false, onHoverChange }: Resou
     <div
       className={cn(
         "relative h-full group/card", 
-        compact ? "w-full" : ""
+        compact ? "" : "" // No specific width for non-compact
       )}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -72,9 +72,8 @@ export function ResourceCard({ resource, compact = false, onHoverChange }: Resou
         <Card
           className={cn(
             "overflow-hidden h-full flex flex-col bg-card/80 backdrop-blur-sm shadow-lg transition-all duration-300 ease-in-out border-border/30 group-hover/card:border-primary/50",
-            compact ? "transform group-hover/card:shadow-primary/30" : "transform hover:-translate-y-1",
-             // Removed hover:-translate-y-px from compact to let overlay handle visual feedback
-            compact ? "p-2 pb-1.5" : "p-4" // Base padding for compact card
+            compact ? "p-2 pb-1.5" : "p-4", 
+            compact ? "" : "transform hover:-translate-y-1"
           )}
         >
           <CardHeader className="p-0">
@@ -138,22 +137,18 @@ export function ResourceCard({ resource, compact = false, onHoverChange }: Resou
         </Card>
       </Link>
 
-      {/* Hover Detail Overlay - Only for compact cards */}
       {compact && (
         <div
           className={cn(
-            "detail-overlay absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2", // Centering
-            "w-80 h-auto", // Explicit larger size
+            "detail-overlay absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2", 
+            "w-80 h-auto", 
             "bg-card/95 backdrop-blur-md p-4 rounded-lg shadow-2xl border border-primary/50",
-            "flex flex-col transition-all duration-300 ease-in-out transform-gpu", // Added transform-gpu
-            "opacity-0 scale-95 pointer-events-none", // Start hidden and scaled down
-            "group-hover/card:opacity-100 group-hover/card:scale-100 group-hover/card:pointer-events-auto", // Show on hover
-            "z-30" // Ensure it's above other cards
+            "flex flex-col transition-all duration-300 ease-in-out transform-gpu", 
+            isHovering ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none",
+            "z-30" 
           )}
-          style={{transformOrigin: 'center center'}} // Ensure scaling is from center
+          style={{transformOrigin: 'center center'}} 
           onClick={(e) => {
-            // Navigate if the click is on the overlay background itself
-            // And not on an interactive element within the overlay
             if (e.target === e.currentTarget) {
               window.location.href = `/resources/${resource.slug}`; 
             }
