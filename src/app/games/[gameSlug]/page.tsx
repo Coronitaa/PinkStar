@@ -12,6 +12,9 @@ interface GamePageProps {
   params: { gameSlug: string };
 }
 
+const CAROUSEL_ITEMS_TO_SHOW_ON_GAME_PAGE = 5; // Same as in GamePageContent
+const FETCH_ITEMS_FOR_GAME_PAGE_CAROUSEL = CAROUSEL_ITEMS_TO_SHOW_ON_GAME_PAGE + 5;
+
 export default async function GamePage({ params }: GamePageProps) {
   const game = await getGameBySlug(params.gameSlug);
   if (!game) {
@@ -20,16 +23,14 @@ export default async function GamePage({ params }: GamePageProps) {
 
   const categories = await getCategoriesForGame(params.gameSlug);
 
-  // Fetch initial highlighted resources for each category
   const initialCategoryResources: Record<string, Resource[]> = {};
   for (const category of categories) {
-    // Fetch slightly more for carousel to have enough for sliding logic
-    initialCategoryResources[category.slug] = await getHighlightedResources(params.gameSlug, category.slug, 8); 
+    initialCategoryResources[category.slug] = await getHighlightedResources(params.gameSlug, category.slug, FETCH_ITEMS_FOR_GAME_PAGE_CAROUSEL); 
   }
 
   return (
     <div className="space-y-12">
-      <section className="relative -mx-4 -mt-8"> {/* Stretch banner */}
+      <section className="relative -mx-4 -mt-8">
         <div className="relative h-64 md:h-80 lg:h-96 w-full">
           <Image
             src={game.bannerUrl}
@@ -84,4 +85,4 @@ export default async function GamePage({ params }: GamePageProps) {
   );
 }
 
-export const revalidate = 3600; // Revalidate data every hour
+export const revalidate = 3600;

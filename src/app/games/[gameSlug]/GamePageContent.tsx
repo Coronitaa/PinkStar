@@ -19,7 +19,8 @@ interface GamePageContentProps {
 }
 
 const DEBOUNCE_DELAY = 300; // milliseconds
-const CAROUSEL_ITEMS_TO_SHOW = 3;
+const CAROUSEL_ITEMS_TO_SHOW = 5; // Increased from 3 due to smaller cards
+const FETCH_CAROUSEL_ITEMS_COUNT = CAROUSEL_ITEMS_TO_SHOW + 5; // Fetch more for carousel logic
 
 export function GamePageContent({ game, categories, initialCategoryResources }: GamePageContentProps) {
   const [globalSearchQuery, setGlobalSearchQuery] = useState('');
@@ -55,7 +56,7 @@ export function GamePageContent({ game, categories, initialCategoryResources }: 
       const results: Record<string, Resource[] | null> = {};
       for (const category of categories) {
         try {
-          const bestMatches = await fetchBestMatchForCategoryAction(game.slug, category.slug, debouncedSearchQuery, CAROUSEL_ITEMS_TO_SHOW + 5); // Fetch more for better carousel with arrows
+          const bestMatches = await fetchBestMatchForCategoryAction(game.slug, category.slug, debouncedSearchQuery, FETCH_CAROUSEL_ITEMS_COUNT);
           results[category.slug] = bestMatches.length > 0 ? bestMatches : null; 
         } catch (error) {
           console.error(`Failed to fetch search results for category ${category.name}:`, error);
@@ -80,25 +81,18 @@ export function GamePageContent({ game, categories, initialCategoryResources }: 
 
   return (
     <div className="space-y-8">
-      {/* Sticky Search and Upload Bar */}
-      <div className="mb-8 p-4 border rounded-lg bg-card shadow-md sticky top-16 z-40 backdrop-blur-sm bg-background/80">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 max-w-3xl mx-auto">
-          {/* Search Input - Aligned Left, takes necessary width */}
-          <div className="relative w-full sm:w-auto">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            <Input
-              ref={searchInputRef}
-              type="search" 
-              placeholder={`Search resources in ${game.name}...`}
-              className="pl-10 text-base w-full sm:w-auto md:min-w-[300px]"
-              value={globalSearchQuery}
-              onChange={handleSearchInputChange}
-            />
-          </div>
-          {/* Upload Button - Aligned Right */}
-          <Button variant="outline" className="shrink-0 w-full sm:w-auto">
-            <Upload className="w-4 h-4 mr-2" /> Upload Resource
-          </Button>
+      {/* Global Search Bar - Standalone, aligned left */}
+      <div className="mb-8">
+        <div className="relative w-full sm:w-auto max-w-md"> {/* Limit width */}
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+          <Input
+            ref={searchInputRef}
+            type="search" 
+            placeholder={`Search all resources in ${game.name}...`}
+            className="pl-10 text-base w-full" // Full width within its max-w-md container
+            value={globalSearchQuery}
+            onChange={handleSearchInputChange}
+          />
         </div>
       </div>
 
@@ -123,7 +117,6 @@ export function GamePageContent({ game, categories, initialCategoryResources }: 
           const resourcesForCarousel = (hasActiveSearch
             ? categorySearchResults[category.slug] 
             : initialCategoryResources[category.slug]) || [];
-
 
           if (hasActiveSearch && (!resourcesForCarousel || resourcesForCarousel.length === 0)) {
             return (
@@ -169,7 +162,6 @@ export function GamePageContent({ game, categories, initialCategoryResources }: 
             );
           }
 
-
           return (
             <section key={category.id} className="space-y-6 py-6 border-t border-border/40 first:border-t-0">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
@@ -194,7 +186,7 @@ export function GamePageContent({ game, categories, initialCategoryResources }: 
                     itemsToShow={CAROUSEL_ITEMS_TO_SHOW} 
                     showArrows={resourcesForCarousel.length > CAROUSEL_ITEMS_TO_SHOW} 
                   >
-                  {resourcesForCarousel.slice(0, CAROUSEL_ITEMS_TO_SHOW + 5).map(resource => (
+                  {resourcesForCarousel.slice(0, FETCH_CAROUSEL_ITEMS_COUNT).map(resource => (
                     <CarouselItem key={resource.id}>
                       <ResourceCard 
                         resource={resource} 
@@ -216,4 +208,3 @@ export function GamePageContent({ game, categories, initialCategoryResources }: 
     </div>
   );
 }
-
