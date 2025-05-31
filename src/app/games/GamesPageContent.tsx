@@ -108,8 +108,8 @@ export function GamesPageContent({ initialGames }: { initialGames: GameWithDetai
         </p>
       </section>
 
-      <div className="mb-8 p-4 border rounded-lg bg-card shadow-md sticky top-16 z-40 backdrop-blur-sm bg-background/80">
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-2xl mx-auto">
+      <div className="mb-12 p-4 border rounded-lg bg-card shadow-md backdrop-blur-sm bg-background/80 max-w-2xl mx-auto">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <div className="relative flex-grow w-full sm:w-auto">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
