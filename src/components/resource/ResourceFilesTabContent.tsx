@@ -14,6 +14,7 @@ import { format } from 'date-fns';
 interface ResourceFilesTabContentProps {
   files: ResourceFile[];
   allChangelogEntries?: ChangelogEntry[];
+  resourceSlug: string; // Add resourceSlug here
 }
 
 const CLEAR_FILTER_VALUE = "_ANY_"; 
