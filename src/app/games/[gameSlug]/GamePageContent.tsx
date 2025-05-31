@@ -81,25 +81,17 @@ export function GamePageContent({ game, categories, initialCategoryResources }: 
   return (
     <div className="space-y-8">
       {/* Global Search Bar - Standalone, aligned left */}
-      <div className="mb-8"> {/* Removed sticky classes */}
-        <div className="flex items-center justify-between gap-4 w-full max-w-3xl mx-auto">
-          <div className="relative w-full sm:w-auto"> {/* Container for input to control its width */}
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            <Input
-              ref={searchInputRef}
-              type="search"
-              placeholder={`Search all resources in ${game.name}...`}
-              className="pl-10 text-base w-full sm:w-auto md:min-w-[300px]"
-              value={globalSearchQuery}
-              onChange={handleSearchInputChange}
-            />
-          </div>
-          <Button variant="outline" className="ml-auto shrink-0">
-            <Upload className="w-4 h-4 mr-2" /> Upload Resource
-          </Button>
-        </div>
+      <div className="relative w-full sm:w-auto max-w-md mb-8"> {/* Container for input to control its width */}
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+        <Input
+ ref={searchInputRef}
+ type="search"
+ placeholder={`Search all resources in ${game.name}...`}
+ className="pl-10 text-base w-full"
+ value={globalSearchQuery}
+ onChange={handleSearchInputChange}
+        />
       </div>
-
       {isSearching && (
         <div className="flex justify-center items-center py-12">
           <Loader2 className="h-12 w-12 animate-spin text-primary" />
