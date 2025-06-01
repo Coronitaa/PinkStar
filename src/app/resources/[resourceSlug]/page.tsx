@@ -92,7 +92,7 @@ export default async function ResourcePage({ params, searchParams }: ResourcePag
                   <CardDescription className="text-base text-muted-foreground">{resource.description}</CardDescription>
                 </div>
                 <Button variant="outline" size="sm" className="mt-3 sm:mt-0 button-outline-glow button-follow-sheen shrink-0">
-                  <Heart className="w-4 h-4 mr-2 text-accent fill-accent" /> Follow
+                  <Heart className="w-4 h-4 mr-2 text-accent" /> Follow {/* No fill by default */}
                 </Button>
               </div>
 

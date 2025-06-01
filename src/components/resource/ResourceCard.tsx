@@ -114,8 +114,7 @@ export function ResourceCard({ resource, compact = false, onHoverChange }: Resou
               </p>
             )}
             <p className={cn("text-muted-foreground flex items-center line-clamp-1", compact ? "text-[10px] mb-1" : "text-xs mb-1.5")}>
-              <User className={cn("mr-1 text-accent shrink-0", compact ? "w-2.5 h-2.5" : "w-3 h-3")} />
-              By {resource.author.name}
+              By <span className="text-primary ml-1">{resource.author.name}</span>
             </p>
             {compact && resource.tags.length > 0 && (
               <div className="flex flex-wrap gap-1 mb-1">
@@ -207,6 +206,9 @@ export function ResourceCard({ resource, compact = false, onHoverChange }: Resou
           </div>
 
           <h3 className="text-base font-semibold text-primary mb-1 line-clamp-1">{resource.name}</h3>
+          <p className="text-xs text-muted-foreground mb-1.5">
+            By <span className="text-primary">{resource.author.name}</span>
+          </p>
           
           {resource.rating !== undefined && (
             <div className="mb-1.5">
@@ -239,7 +241,7 @@ export function ResourceCard({ resource, compact = false, onHoverChange }: Resou
             </div>
             {resource.followers !== undefined && (
               <div className="flex items-center text-muted-foreground" title={`${resource.followers.toLocaleString()} followers`}>
-                <Heart className="w-3.5 h-3.5 mr-1 text-accent fill-accent" />
+                <Heart className="w-3.5 h-3.5 mr-1 text-accent fill-accent" /> {/* Kept filled for stats */}
                 {formatNumberWithSuffix(resource.followers)}
               </div>
             )}
