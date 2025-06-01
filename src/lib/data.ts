@@ -197,7 +197,7 @@ const allResources: Resource[] = [
       { id: 'cl1-1', versionName: 'Ultra Graphics v2.1.0', date: '2023-08-15T14:30:00Z', notes: 'Added support for PixelVerse v1.20.X.\nFixed water rendering artifacts.\nImproved shadow quality on distant objects.', relatedFileId: 'file1_1', gameVersionTag: commonTags.v1_20, channelTag: commonTags.channelRelease, loaderTags: [commonTags.fabric] },
       { id: 'cl1-2', versionName: 'Ultra Graphics v2.0.0', date: '2023-07-01T10:00:00Z', notes: 'Major visual overhaul, new lighting engine implemented.\nPerformance optimizations for mid-range GPUs.\nAdded experimental volumetric fog (can be toggled in settings).', relatedFileId: 'file1_2', gameVersionTag: commonTags.v1_19, channelTag: commonTags.channelBeta, loaderTags: [commonTags.fabric] },
       { id: 'cl1-3', versionName: 'Ultra Graphics v2.0.0 Alpha 1', date: '2023-06-15T10:00:00Z', notes: 'Alpha release of v2.0.0. Includes new lighting engine.\nPlease report any bugs found.', gameVersionTag: commonTags.v1_19, channelTag: commonTags.channelAlpha, loaderTags: [commonTags.fabric] }
-    ], rating: 4.8, followers: 1250, links: { discord: 'https://discord.gg/example', wiki: 'https://wiki.example.com/ultragfx', issues: 'https://github.com/example/ultragfx', source: 'https://github.com/example/ultragfx' }
+    ], rating: 4.8, reviewCount: 285, followers: 1250, links: { discord: 'https://discord.gg/example', wiki: 'https://wiki.example.com/ultragfx', issues: 'https://github.com/example/ultragfx', source: 'https://github.com/example/ultragfx' }
   },
   {
     id: 'res-web-ui-kit', name: 'Aurora UI Kit', slug: 'aurora-ui-kit', parentItemName: 'Profolio X', parentItemSlug: 'profolio-x', parentItemType: 'web', categoryName: 'UI Components', categorySlug: 'ui-components',
@@ -206,7 +206,7 @@ const allResources: Resource[] = [
     description: 'A comprehensive React component library for Profolio X.',
     detailedDescription: 'Aurora UI Kit provides a set of beautifully designed and accessible React components, perfectly styled for Profolio X using Tailwind CSS. Includes buttons, forms, modals, navigation, and more. Accelerate your Profolio X customization.',
     files: [{ id: 'file-web-uikit', name: 'aurora-ui-kit-v1.2.0.zip', url: '#', size: '1.2 MB', supportedVersions: [], supportedLoaders: [], channel: commonTags.channelRelease, date: '2024-01-15T11:00:00Z' }],
-    requirements: 'React 18+, Tailwind CSS 3+', rating: 4.9, followers: 150,
+    requirements: 'React 18+, Tailwind CSS 3+', rating: 4.9, reviewCount: 75, followers: 150,
     links: { source: 'https://github.com/webweaver/aurora-ui', projectUrl: 'https://example.com/profolio-x-demo/aurora-ui'}
   },
   {
@@ -216,7 +216,7 @@ const allResources: Resource[] = [
     description: 'Quickly integrate Firebase Authentication into your Flutter app.',
     detailedDescription: 'This starter package provides all necessary boilerplate code to integrate Firebase Authentication (Email/Password, Google Sign-In) into a Flutter application like TaskMaster Pro. Includes UI screens for login, registration, and password reset.',
     files: [{ id: 'file-app-auth', name: 'firebase-auth-starter-flutter.zip', url: '#', size: '800 KB', supportedVersions: [], supportedLoaders: [], channel: commonTags.channelRelease, date: '2023-12-01T09:00:00Z' }],
-    requirements: 'Flutter 3+, Firebase project configured.', rating: 4.7, followers: 200,
+    requirements: 'Flutter 3+, Firebase project configured.', rating: 4.7, reviewCount: 120, followers: 200,
     links: { source: 'https://github.com/apparchitect/firebase-auth-starter', projectUrl: 'https://example.com/taskmaster-app/auth-starter'}
   },
   {
@@ -226,8 +226,26 @@ const allResources: Resource[] = [
     description: 'A set of high-resolution brushes for creating stunning space nebulae.',
     detailedDescription: 'Create breathtaking space scenes with the Nebula Brush Pack for Photoshop (and compatible software). Includes over 50 high-resolution brushes for stars, gas clouds, and cosmic dust, perfect for digital artists working on projects like Cybernetic Dreams.',
     files: [{ id: 'file-art-brushes', name: 'nebula-brush-pack.abr', url: '#', size: '15 MB', supportedVersions: [], supportedLoaders: [], channel: commonTags.channelRelease, date: '2023-11-20T13:00:00Z' }],
-    requirements: 'Adobe Photoshop CC or compatible graphics software.', rating: 4.9, followers: 350,
+    requirements: 'Adobe Photoshop CC or compatible graphics software.', rating: 4.9, reviewCount: 95, followers: 350,
     links: { projectUrl: 'https://example.com/cybernetic-dreams-gallery/brushes'}
+  },
+  {
+    id: 'res2', name: 'Inventory Sorter', slug: 'inventory-sorter', parentItemName: 'PixelVerse Adventures', parentItemSlug: 'pixelverse-adventures', parentItemType: 'game', categoryName: 'Utilities', categorySlug: 'utilities',
+    imageUrl: 'https://placehold.co/600x400/F48FB1/121212?text=InvSort',
+    author: authors[1], tags: [commonTags.v1_19, commonTags.fabric, commonTags.utility, commonTags.pc], downloads: 7500, createdAt: new Date('2023-02-20T11:00:00Z').toISOString(), updatedAt: new Date('2023-06-01T16:00:00Z').toISOString(), version: '1.2.3', description: 'Automatically sorts your inventory with a single click.', detailedDescription: 'Tired of messy inventories? Inventory Sorter adds a smart button to your inventory screen that intelligently organizes all your items by category and name. Customizable sorting profiles coming soon!', 
+    files: [
+      { id: 'file2_1', name: 'inventory-sorter-v1.2.3-fabric-1.19.jar', url: '#', size: '250 KB', supportedVersions: [commonTags.v1_19], supportedLoaders: [commonTags.fabric], channel: commonTags.channelRelease, date: '2023-06-01T16:00:00Z' }
+    ], 
+    requirements: 'Fabric API.', rating: 4.5, reviewCount: 150, followers: 500, links: { source: 'https://github.com/example/invsort' }
+  },
+  {
+    id: 'res3', name: 'The Lost Mines Adventure Map', slug: 'lost-mines-map', parentItemName: 'PixelVerse Adventures', parentItemSlug: 'pixelverse-adventures', parentItemType: 'game', categoryName: 'Maps & Worlds', categorySlug: 'maps-and-worlds',
+    imageUrl: 'https://placehold.co/600x400/880E4F/FFFFFF?text=LostMines',
+    author: authors[2], tags: [commonTags.map, commonTags.adventure, commonTags.pc], downloads: 3200, createdAt: new Date('2023-09-05T09:00:00Z').toISOString(), updatedAt: new Date('2023-10-10T12:30:00Z').toISOString(), version: '1.0.0', description: 'A challenging adventure map with puzzles and boss fights.', detailedDescription: 'Embark on a perilous journey through The Lost Mines! This custom adventure map features intricate puzzles, challenging parkour sections, unique boss encounters, and a captivating story. Can you uncover the secrets hidden deep within?', 
+    files: [
+      { id: 'file3_1', name: 'lost-mines-adventure-map-v1.0.zip', url: '#', size: '12.1 MB', supportedVersions: [commonTags.v1_20], supportedLoaders: [], channel: commonTags.channelRelease, date: '2023-10-10T12:30:00Z' }
+    ], 
+    rating: 4.2, reviewCount: 88, followers: 300, links: { discord: 'https://discord.gg/pixelperfectmaps' }
   },
 ];
 
@@ -333,12 +351,8 @@ export const getCategoriesForItemGeneric = async (itemSlug: string, itemType: It
 export const getItemStatsGeneric = async (itemSlug: string, itemType: ItemType): Promise<ItemStats> => {
   const { resources } = await getResources({ parentItemSlug: itemSlug, parentItemType: itemType, limit: Infinity });
   const totalResources = resources.length;
-  // Calculate totalDownloads by summing downloads of all associated resources for ALL item types
   const totalDownloads = resources.reduce((sum, resource) => sum + (resource.downloads || 0), 0);
   const totalFollowers = Math.floor(Math.random() * 1200000) + 50000;
-  // Views might still be relevant for non-game items, or could be derived differently.
-  // For now, let's keep it for non-game types if totalDownloads isn't the primary metric.
-  // However, the request implies totalDownloads for all, so we might not need totalViews as prominently.
   const totalViews = itemType !== 'game' ? Math.floor(Math.random() * 50000000) + 1000000 : undefined; 
   return delayed({ totalResources, totalDownloads, totalFollowers, totalViews });
 };
@@ -580,3 +594,4 @@ export const formatTimeAgo = (dateString: string | undefined): string => {
 };
     
     
+

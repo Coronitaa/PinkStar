@@ -10,7 +10,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ResourceFilesTabContent } from '@/components/resource/ResourceFilesTabContent';
-import { FileText, BookOpen, ListChecks, MessageCircle, Eye, Star } from 'lucide-react'; // Changed Heart to Star
+import { FileText, BookOpen, ListChecks, MessageCircle, Eye, Heart } from 'lucide-react';
 import { Carousel, CarouselItem } from '@/components/shared/Carousel';
 import { ResourceCard } from '@/components/resource/ResourceCard';
 
@@ -92,7 +92,7 @@ export default async function ResourcePage({ params, searchParams }: ResourcePag
                   <CardDescription className="text-base text-muted-foreground">{resource.description}</CardDescription>
                 </div>
                 <Button variant="outline" size="sm" className="mt-3 sm:mt-0 button-outline-glow button-follow-sheen shrink-0">
-                  <Star className="w-4 h-4 mr-2 text-accent" /> Follow {/* Changed Heart to Star */}
+                  <Heart className="w-4 h-4 mr-2 text-accent fill-accent" /> Follow
                 </Button>
               </div>
 
@@ -159,3 +159,4 @@ export default async function ResourcePage({ params, searchParams }: ResourcePag
 }
 
 export const revalidate = 3600;
+

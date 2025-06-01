@@ -7,8 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Download, Tag as TagIcon, User, CalendarDays, Layers, Package, FileText, BarChart3, MessageSquare,
-  ExternalLink, AlertTriangle, ShieldQuestion, Star, Users, GitBranch, ListChecks, Binary, Palette, MusicIcon, Laptop
-} from 'lucide-react'; // Changed Heart to Star
+  ExternalLink, AlertTriangle, ShieldQuestion, Star, Users, GitBranch, ListChecks, Binary, Palette, MusicIcon, Laptop, Heart, StarHalf
+} from 'lucide-react';
 import { format } from 'date-fns';
 import Link from 'next/link'; 
 import { TagBadge } from '../shared/TagBadge';
@@ -54,17 +54,27 @@ const InfoItem: React.FC<InfoItemProps> = ({ label, value, icon: Icon, className
   </div>
 );
 
-const RatingDisplay: React.FC<{ rating?: number }> = ({ rating }) => {
-  if (typeof rating !== 'number') return <span className="text-muted-foreground">N/A</span>;
-  const fullStars = Math.floor(rating);
-  const halfStar = rating % 1 >= 0.5; // Assuming StarHalf is not used here for simplicity, adjust if needed.
-  const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+const RatingDisplaySidebar: React.FC<{ rating?: number; reviewCount?: number }> = ({ rating, reviewCount }) => {
+  if (typeof rating !== 'number' || rating < 0 || rating > 5) return <span className="text-muted-foreground">N/A</span>;
+
+  const stars = [];
+  const starSize = "w-4 h-4"; 
+  for (let i = 0; i < 5; i++) {
+    if (rating >= i + 0.75) {
+      stars.push(<Star key={`star-full-${i}`} className={cn(starSize, "text-amber-400 fill-amber-400")} />);
+    } else if (rating >= i + 0.25) {
+      stars.push(<StarHalf key={`star-half-${i}`} className={cn(starSize, "text-amber-400 fill-amber-400")} />);
+    } else {
+      stars.push(<Star key={`star-empty-${i}`} className={cn(starSize, "text-amber-400/40")} />); 
+    }
+  }
   return (
     <div className="flex items-center">
-      {[...Array(fullStars)].map((_, i) => <Star key={`full-${i}`} className="w-4 h-4 text-amber-400 fill-amber-400" />)}
-      {/* If you have a StarHalf icon, you can add it here based on 'halfStar' */}
-      {[...Array(emptyStars)].map((_, i) => <Star key={`empty-${i}`} className="w-4 h-4 text-amber-400/50" />)}
-      <span className="ml-1.5 text-xs text-muted-foreground">({rating.toFixed(1)})</span>
+      {stars}
+      <span className="ml-1.5 text-xs text-muted-foreground">
+        ({rating.toFixed(1)})
+        {reviewCount !== undefined && <span className="ml-1">({formatNumberWithSuffix(reviewCount)} reviews)</span>}
+      </span>
     </div>
   );
 };
@@ -158,8 +168,8 @@ export function ResourceInfoSidebar({ resource }: ResourceInfoSidebarProps) {
         <InfoItem label="Project" value={<Link href={parentItemPath} className="hover:text-primary transition-colors">{resource.parentItemName}</Link>} icon={getItemTypeIcon(resource.parentItemType)} />
         <InfoItem label="Category" value={<Link href={`${parentItemPath}/${resource.categorySlug}`} className="hover:text-primary transition-colors">{resource.categoryName}</Link>} icon={Layers} />
         <InfoItem label="Downloads" value={formatNumberWithSuffix(resource.downloads)} icon={BarChart3} />
-        <InfoItem label="Rating" value={<RatingDisplay rating={resource.rating} />} icon={Star} />
-        <InfoItem label="Followers" value={formatNumberWithSuffix(resource.followers)} icon={Star} /> {/* Changed Heart to Star */}
+        <InfoItem label="Rating" value={<RatingDisplaySidebar rating={resource.rating} reviewCount={resource.reviewCount} />} icon={Star} />
+        <InfoItem label="Followers" value={formatNumberWithSuffix(resource.followers)} icon={Heart} />
         <InfoItem label="Created" value={format(new Date(resource.createdAt), 'MMM d, yyyy')} icon={CalendarDays} />
         <InfoItem label="Updated" value={updatedAtFormatted} icon={CalendarDays} suppressHydrationWarning={true} />
       </SidebarCard>
@@ -217,3 +227,4 @@ export function ResourceInfoSidebar({ resource }: ResourceInfoSidebarProps) {
     </div>
   );
 }
+

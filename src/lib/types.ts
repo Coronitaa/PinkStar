@@ -125,6 +125,7 @@ export interface Resource {
   changelogEntries?: ChangelogEntry[];
   searchScore?: number;
   rating?: number;
+  reviewCount?: number;
   followers?: number;
   links?: ResourceLinks;
 }
@@ -153,3 +154,4 @@ export interface ItemWithDetails extends GenericListItem {
   categories: Category[]; // Top categories to display on the item card
   stats: ItemStats;
 }
+

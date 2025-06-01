@@ -8,7 +8,7 @@ import { TagBadge } from '@/components/shared/TagBadge';
 import { Card, CardContent } from '@/components/ui/card';
 import { ArtMusicItemPageContent } from './ArtMusicItemPageContent';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
-import { Layers, Download, Star, Package, Music } from 'lucide-react'; // Changed Heart to Star
+import { Layers, Download, Heart, Package, Music } from 'lucide-react';
 
 interface ArtMusicItemPageProps {
   params: { artMusicSlug: string };
@@ -97,7 +97,7 @@ export default async function ArtMusicItemPage({ params }: ArtMusicItemPageProps
                   </span>
                 )}
                 <span className="flex items-center" title={`${stats.totalFollowers.toLocaleString()} followers`}>
-                  <Star className="w-4 h-4 mr-1.5 text-accent" /> {/* Changed Heart to Star */}
+                  <Heart className="w-4 h-4 mr-1.5 text-accent fill-accent" />
                   {formatNumberWithSuffix(stats.totalFollowers)}
                 </span>
               </div>
@@ -126,3 +126,4 @@ export default async function ArtMusicItemPage({ params }: ArtMusicItemPageProps
 }
 
 export const revalidate = 3600;
+

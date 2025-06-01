@@ -7,7 +7,7 @@ import Image from 'next/image';
 import type { Resource, ResourceFile, Tag } from '@/lib/types'; 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TagBadge } from '@/components/shared/TagBadge';
-import { Download, Eye, User, Tags, Info, ArrowRight, Star, StarHalf } from 'lucide-react'; // Removed Heart
+import { Download, Eye, User, Tags, Info, ArrowRight, Star, StarHalf, Heart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -23,7 +23,7 @@ interface ResourceCardProps {
 const MAX_TAGS_COMPACT = 1;
 const MAX_TAGS_OVERLAY = 9; 
 
-const RatingDisplay: React.FC<{ rating?: number; compact?: boolean; fiveStarMode?: boolean }> = ({ rating, compact = false, fiveStarMode = false }) => {
+const RatingDisplay: React.FC<{ rating?: number; reviewCount?: number; compact?: boolean; fiveStarMode?: boolean }> = ({ rating, reviewCount, compact = false, fiveStarMode = false }) => {
   if (typeof rating !== 'number' || rating < 0 || rating > 5) return null;
 
   if (fiveStarMode) {
@@ -41,7 +41,10 @@ const RatingDisplay: React.FC<{ rating?: number; compact?: boolean; fiveStarMode
     return (
       <div className="flex items-center">
         {stars}
-        <span className="ml-1.5 text-xs text-muted-foreground">({rating.toFixed(1)})</span>
+        <span className="ml-1.5 text-xs text-muted-foreground">
+          ({rating.toFixed(1)})
+          {reviewCount !== undefined && <span className="ml-1">({formatNumberWithSuffix(reviewCount)} reviews)</span>}
+        </span>
       </div>
     );
   } else { 
@@ -207,7 +210,7 @@ export function ResourceCard({ resource, compact = false, onHoverChange }: Resou
           
           {resource.rating !== undefined && (
             <div className="mb-1.5">
-              <RatingDisplay rating={resource.rating} fiveStarMode={true} />
+              <RatingDisplay rating={resource.rating} reviewCount={resource.reviewCount} fiveStarMode={true} />
             </div>
           )}
 
@@ -236,7 +239,7 @@ export function ResourceCard({ resource, compact = false, onHoverChange }: Resou
             </div>
             {resource.followers !== undefined && (
               <div className="flex items-center text-muted-foreground" title={`${resource.followers.toLocaleString()} followers`}>
-                <Star className="w-3.5 h-3.5 mr-1 text-accent" /> {/* Changed Heart to Star */}
+                <Heart className="w-3.5 h-3.5 mr-1 text-accent fill-accent" />
                 {formatNumberWithSuffix(resource.followers)}
               </div>
             )}
@@ -275,3 +278,4 @@ export function ResourceCard({ resource, compact = false, onHoverChange }: Resou
     </div>
   );
 }
+
