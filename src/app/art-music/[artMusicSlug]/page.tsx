@@ -2,13 +2,13 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import { getArtMusicItemBySlug, getCategoriesForItemGeneric, getHighlightedResources, getItemStatsGeneric } from '@/lib/data';
+import { getArtMusicItemBySlug, getCategoriesForItemGeneric, getHighlightedResources, getItemStatsGeneric, formatNumberWithSuffix } from '@/lib/data';
 import type { ArtMusicItem, Category, Resource } from '@/lib/types';
 import { TagBadge } from '@/components/shared/TagBadge';
 import { Card, CardContent } from '@/components/ui/card';
 import { ArtMusicItemPageContent } from './ArtMusicItemPageContent';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
-import { Layers, Eye, Heart, Package, Music } from 'lucide-react';
+import { Layers, Eye, Heart, Package, Music, Download } from 'lucide-react';
 
 interface ArtMusicItemPageProps {
   params: { artMusicSlug: string };
@@ -88,17 +88,23 @@ export default async function ArtMusicItemPage({ params }: ArtMusicItemPageProps
               <div className="mt-3 flex items-center space-x-4 sm:space-x-6 text-sm text-muted-foreground">
                 <span className="flex items-center" title={`${stats.totalResources.toLocaleString()} resources`}>
                   <Package className="w-4 h-4 mr-1.5 text-accent" />
-                  {stats.totalResources.toLocaleString()}
+                  {formatNumberWithSuffix(stats.totalResources)}
                 </span>
-                {stats.totalViews !== undefined && (
+                {stats.totalDownloads !== undefined && (
+                  <span className="flex items-center" title={`${stats.totalDownloads.toLocaleString()} downloads`}>
+                    <Download className="w-4 h-4 mr-1.5 text-accent" />
+                    {formatNumberWithSuffix(stats.totalDownloads)}
+                  </span>
+                )}
+                 {stats.totalViews !== undefined && stats.totalDownloads === undefined && (
                     <span className="flex items-center" title={`${stats.totalViews.toLocaleString()} views`}>
                         <Eye className="w-4 h-4 mr-1.5 text-accent" />
-                        {stats.totalViews.toLocaleString()}
+                        {formatNumberWithSuffix(stats.totalViews)}
                     </span>
                 )}
-                <span className="flex items-center" title={`${stats.totalFollowers.toLocaleString()} followers`}>
+                <span className="flex items-center" title={`${stats.totalFollowers.toLocaleString()} followers/likes`}>
                   <Heart className="w-4 h-4 mr-1.5 text-accent" />
-                  {stats.totalFollowers.toLocaleString()}
+                  {formatNumberWithSuffix(stats.totalFollowers)}
                 </span>
               </div>
             </div>
@@ -126,5 +132,3 @@ export default async function ArtMusicItemPage({ params }: ArtMusicItemPageProps
 }
 
 export const revalidate = 3600;
-
-    

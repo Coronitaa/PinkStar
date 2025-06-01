@@ -2,18 +2,18 @@
 "use client"; 
 
 import * as React from 'react';
-import type { Resource, Tag } from '@/lib/types';
+import type { Resource, Tag, ItemType } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Download, Tag as TagIcon, User, CalendarDays, Layers, Package, FileText, BarChart3, MessageSquare,
-  ExternalLink, AlertTriangle, ShieldQuestion, Heart, Star, Users, GitBranch, ListChecks
+  ExternalLink, AlertTriangle, ShieldQuestion, Heart, Star, Users, GitBranch, ListChecks, Binary, Palette, MusicIcon, Laptop
 } from 'lucide-react';
 import { format } from 'date-fns';
-import Link from 'next/link'; // Added Link import
+import Link from 'next/link'; 
 import { TagBadge } from '../shared/TagBadge';
 import { Separator } from '@/components/ui/separator';
-import { formatTimeAgo } from '@/lib/data'; 
+import { formatTimeAgo, formatNumberWithSuffix } from '@/lib/data'; 
 import { cn } from '@/lib/utils';
 
 interface SidebarCardProps extends React.PropsWithChildren<{ title?: string; icon?: React.ElementType; className?: string }> {}
@@ -69,9 +69,19 @@ const RatingDisplay: React.FC<{ rating?: number }> = ({ rating }) => {
   );
 };
 
-interface ResourceInfoSidebarProps { // Defined props interface
+interface ResourceInfoSidebarProps { 
   resource: Resource;
 }
+
+const getItemTypeIcon = (itemType: ItemType) => {
+  switch (itemType) {
+    case 'game': return Package;
+    case 'web': return Binary;
+    case 'app': return Laptop;
+    case 'art-music': return Palette; // Could be MusicIcon too
+    default: return Package;
+  }
+};
 
 export function ResourceInfoSidebar({ resource }: ResourceInfoSidebarProps) {
   const latestFile = resource.files.length > 0 ? resource.files[0] : null;
@@ -99,11 +109,19 @@ export function ResourceInfoSidebar({ resource }: ResourceInfoSidebarProps) {
       case 'loader': return 'loaders';
       case 'genre': return 'genres';
       case 'misc': return 'misc';
-      case 'channel': return 'channels'; // Assuming 'channels' is a filter type for category page
-      // 'platform' tags might not have a direct filter on the category page
+      case 'channel': return 'channels';
+      case 'framework': return 'frameworks';
+      case 'language': return 'languages';
+      case 'tooling': return 'tooling';
+      case 'platform': return 'platforms';
+      case 'app-category': return 'appCategories';
+      case 'art-style': return 'artStyles';
+      case 'music-genre': return 'musicGenres';
       default: return null;
     }
   };
+
+  const parentItemPath = `/${resource.parentItemType}s/${resource.parentItemSlug}`; // Simplified, assuming pluralization for 'app' & 'art-music' if needed, or direct type for path
 
   return (
     <div className="space-y-5 sticky top-20">
@@ -129,7 +147,6 @@ export function ResourceInfoSidebar({ resource }: ResourceInfoSidebarProps) {
           )}
           <div>
             <p className="font-semibold text-foreground">{resource.author.name}</p>
-            
             <p className="text-xs text-muted-foreground">Creator of this resource</p>
           </div>
         </div>
@@ -137,11 +154,11 @@ export function ResourceInfoSidebar({ resource }: ResourceInfoSidebarProps) {
 
       <SidebarCard title="Details" icon={ListChecks}>
         <InfoItem label="Version" value={resource.version} icon={GitBranch} />
-        <InfoItem label="Game" value={<Link href={`/games/${resource.gameSlug}`} className="hover:text-primary transition-colors">{resource.gameName}</Link>} icon={Package} />
-        <InfoItem label="Category" value={<Link href={`/games/${resource.gameSlug}/${resource.categorySlug}`} className="hover:text-primary transition-colors">{resource.categoryName}</Link>} icon={Layers} />
-        <InfoItem label="Downloads" value={resource.downloads.toLocaleString()} icon={BarChart3} />
+        <InfoItem label="Project" value={<Link href={parentItemPath} className="hover:text-primary transition-colors">{resource.parentItemName}</Link>} icon={getItemTypeIcon(resource.parentItemType)} />
+        <InfoItem label="Category" value={<Link href={`${parentItemPath}/${resource.categorySlug}`} className="hover:text-primary transition-colors">{resource.categoryName}</Link>} icon={Layers} />
+        <InfoItem label="Downloads" value={formatNumberWithSuffix(resource.downloads)} icon={BarChart3} />
         <InfoItem label="Rating" value={<RatingDisplay rating={resource.rating} />} icon={Star} />
-        <InfoItem label="Followers" value={(resource.followers || 0).toLocaleString()} icon={Heart} />
+        <InfoItem label="Followers" value={formatNumberWithSuffix(resource.followers)} icon={Heart} />
         <InfoItem label="Created" value={format(new Date(resource.createdAt), 'MMM d, yyyy')} icon={CalendarDays} />
         <InfoItem label="Updated" value={updatedAtFormatted} icon={CalendarDays} suppressHydrationWarning={true} />
       </SidebarCard>
@@ -160,7 +177,7 @@ export function ResourceInfoSidebar({ resource }: ResourceInfoSidebarProps) {
                         return (
                           <Link 
                             key={tag.id} 
-                            href={`/games/${resource.gameSlug}/${resource.categorySlug}?${queryParam}=${tag.id}`}
+                            href={`${parentItemPath}/${resource.categorySlug}?${queryParam}=${tag.id}`}
                             className="hover:opacity-80 transition-opacity"
                           >
                             <TagBadge tag={tag} />
@@ -184,6 +201,7 @@ export function ResourceInfoSidebar({ resource }: ResourceInfoSidebarProps) {
                 {resource.links.wiki && <Button variant="outline" size="sm" asChild className="w-full justify-start"><Link href={resource.links.wiki} target="_blank"><ShieldQuestion className="mr-2 h-4 w-4 text-green-400"/>Wiki / Guide</Link></Button>}
                 {resource.links.issues && <Button variant="outline" size="sm" asChild className="w-full justify-start"><Link href={resource.links.issues} target="_blank"><AlertTriangle className="mr-2 h-4 w-4 text-yellow-400"/>Issue Tracker</Link></Button>}
                 {resource.links.source && <Button variant="outline" size="sm" asChild className="w-full justify-start"><Link href={resource.links.source} target="_blank"><GitBranch className="mr-2 h-4 w-4 text-gray-400"/>Source Code</Link></Button>}
+                {resource.links.projectUrl && <Button variant="outline" size="sm" asChild className="w-full justify-start"><Link href={resource.links.projectUrl} target="_blank"><ExternalLink className="mr-2 h-4 w-4 text-blue-400"/>Visit Resource Site</Link></Button>}
             </div>
         </SidebarCard>
       )}

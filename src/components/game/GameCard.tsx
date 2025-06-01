@@ -5,7 +5,8 @@ import type { ItemWithDetails, Category, ItemStats } from '@/lib/types';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TagBadge } from '@/components/shared/TagBadge';
-import { Package, Download, Layers, Tag as TagIcon } from 'lucide-react'; // Removed Eye, ExternalLink
+import { Package, Download, Layers, Tag as TagIcon } from 'lucide-react';
+import { formatNumberWithSuffix } from '@/lib/data';
 
 interface ItemCardProps {
   item: ItemWithDetails;
@@ -19,8 +20,6 @@ export function ItemCard({ item, basePath }: ItemCardProps) {
   const itemTags = item.tags || [];
   const categories = item.categories || [];
   const stats = item.stats;
-
-  // Event handlers for external link removed as the link itself is removed from footer
 
   return (
     <Link href={`${basePath}/${item.slug}`} className="block group h-full">
@@ -83,7 +82,7 @@ export function ItemCard({ item, basePath }: ItemCardProps) {
                 {categories.slice(0, MAX_CATEGORIES_DISPLAY).map(cat => (
                   <TagBadge
                     key={cat.id}
-                    tag={{ name: cat.name, id: cat.id, type: 'misc' }} // Assuming categories are misc type for display
+                    tag={{ name: cat.name, id: cat.id, type: 'misc' }} 
                     className="text-xs bg-secondary hover:bg-secondary/80"
                   />
                 ))}
@@ -98,17 +97,16 @@ export function ItemCard({ item, basePath }: ItemCardProps) {
         </CardContent>
         <CardFooter className="p-5 pt-0 border-t border-border/20 mt-auto">
           <div className="flex justify-between items-center w-full text-sm text-muted-foreground">
-            <div className="flex items-center" title="Total Resources">
+            <div className="flex items-center" title={`${stats.totalResources.toLocaleString()} Resources`}>
               <Package className="w-4 h-4 mr-1.5 text-accent" />
-              <span>{stats.totalResources.toLocaleString()} Resources</span>
+              <span>{formatNumberWithSuffix(stats.totalResources)} Resources</span>
             </div>
             {stats.totalDownloads !== undefined && (
-                 <div className="flex items-center" title="Total Downloads">
+                 <div className="flex items-center" title={`${stats.totalDownloads.toLocaleString()} Downloads`}>
                     <Download className="w-4 h-4 mr-1.5 text-accent" />
-                    <span>{stats.totalDownloads.toLocaleString()} Dls</span>
+                    <span>{formatNumberWithSuffix(stats.totalDownloads)} Dls</span>
                  </div>
             )}
-            {/* "Views" and "Visit Project" link removed from here */}
           </div>
         </CardFooter>
       </Card>

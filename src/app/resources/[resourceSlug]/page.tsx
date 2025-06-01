@@ -1,8 +1,9 @@
+
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { getResourceBySlug, getResources } from '@/lib/data';
-import type { Resource } from '@/lib/types';
+import type { Resource, ItemType } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ResourceInfoSidebar } from '@/components/resource/ResourceInfoSidebar';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
@@ -18,23 +19,40 @@ interface ResourcePageProps {
   searchParams?: { tab?: string };
 }
 
+const getItemTypeSectionPathAndName = (itemType: ItemType): { path: string; name: string } => {
+  switch (itemType) {
+    case 'game': return { path: '/games', name: 'Games' };
+    case 'web': return { path: '/web', name: 'Web Projects' };
+    case 'app': return { path: '/apps', name: 'Apps' };
+    case 'art-music': return { path: '/art-music', name: 'Art & Music' };
+    default: return { path: '/', name: 'Projects' }; // Fallback
+  }
+};
+
+
 export default async function ResourcePage({ params, searchParams }: ResourcePageProps) {
   const resource = await getResourceBySlug(params.resourceSlug);
   if (!resource) {
     notFound();
   }
 
-  const { resources: allResourcesInCategory } = await getResources({
-    gameSlug: resource.gameSlug,
+  const { resources: allResourcesInParentCategory } = await getResources({
+    parentItemSlug: resource.parentItemSlug,
+    parentItemType: resource.parentItemType,
     categorySlug: resource.categorySlug,
     limit: 6 // Fetch a few for related items
   });
 
-  const relatedResources = allResourcesInCategory
+  const relatedResources = allResourcesInParentCategory
     .filter(r => r.id !== resource.id)
     .slice(0, 5);
 
   const defaultTab = searchParams?.tab || "overview";
+
+  const parentItemSection = getItemTypeSectionPathAndName(resource.parentItemType);
+  const parentItemPath = `${parentItemSection.path}/${resource.parentItemSlug}`;
+  const parentCategoryPath = `${parentItemPath}/${resource.categorySlug}`;
+
 
   return (
     <div className="space-y-8">
@@ -42,11 +60,11 @@ export default async function ResourcePage({ params, searchParams }: ResourcePag
         <BreadcrumbList>
           <BreadcrumbItem><BreadcrumbLink href="/">Home</BreadcrumbLink></BreadcrumbItem>
           <BreadcrumbSeparator />
-          <BreadcrumbItem><BreadcrumbLink href="/games">Games</BreadcrumbLink></BreadcrumbItem>
+          <BreadcrumbItem><BreadcrumbLink href={parentItemSection.path}>{parentItemSection.name}</BreadcrumbLink></BreadcrumbItem>
           <BreadcrumbSeparator />
-          <BreadcrumbItem><BreadcrumbLink href={`/games/${resource.gameSlug}`}>{resource.gameName}</BreadcrumbLink></BreadcrumbItem>
+          <BreadcrumbItem><BreadcrumbLink href={parentItemPath}>{resource.parentItemName}</BreadcrumbLink></BreadcrumbItem>
           <BreadcrumbSeparator />
-          <BreadcrumbItem><BreadcrumbLink href={`/games/${resource.gameSlug}/${resource.categorySlug}`}>{resource.categoryName}</BreadcrumbLink></BreadcrumbItem>
+          <BreadcrumbItem><BreadcrumbLink href={parentCategoryPath}>{resource.categoryName}</BreadcrumbLink></BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem><BreadcrumbPage>{resource.name}</BreadcrumbPage></BreadcrumbItem>
         </BreadcrumbList>
@@ -79,11 +97,10 @@ export default async function ResourcePage({ params, searchParams }: ResourcePag
               </div>
 
               <Tabs defaultValue={defaultTab} className="w-full">
-                <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 mb-4 bg-card-foreground/5 rounded-md"> {/* Adjusted for 3 tabs */}
+                <TabsList className="grid w-full grid-cols-3 mb-4 bg-card-foreground/5 rounded-md">
                   <TabsTrigger value="overview" id="overview-tab"><Eye className="w-4 h-4 mr-1 sm:mr-2" />Overview</TabsTrigger>
                   <TabsTrigger value="files" id="files-tab"><FileText className="w-4 h-4 mr-1 sm:mr-2" />Files</TabsTrigger>
                   <TabsTrigger value="requirements" id="requirements-tab"><ListChecks className="w-4 h-4 mr-1 sm:mr-2" />Requirements</TabsTrigger>
-                  {/* Removed Changelog and Comments TabTriggers to match the latest request for 3 tabs */}
                 </TabsList>
                 <TabsContent value="overview">
                   <div
@@ -96,7 +113,7 @@ export default async function ResourcePage({ params, searchParams }: ResourcePag
                     <ResourceFilesTabContent
                         files={resource.files}
                         allChangelogEntries={resource.changelogEntries || []}
-                        resourceSlug={resource.slug} // Pass slug for potential deep linking
+                        resourceSlug={resource.slug}
                     />
                   ) : (
                     <p className="text-muted-foreground p-4 text-center">No files available for this resource.</p>
@@ -109,7 +126,6 @@ export default async function ResourcePage({ params, searchParams }: ResourcePag
                     <p className="text-muted-foreground p-4 text-center">No specific requirements listed for this resource.</p>
                   )}
                 </TabsContent>
-                {/* Comments tab content removed */}
               </Tabs>
             </CardContent>
           </Card>

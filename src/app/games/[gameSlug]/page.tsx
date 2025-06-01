@@ -2,13 +2,13 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import { getGameBySlug, getCategoriesForItemGeneric, getHighlightedResources, getItemStatsGeneric } from '@/lib/data';
+import { getGameBySlug, getCategoriesForItemGeneric, getHighlightedResources, getItemStatsGeneric, formatNumberWithSuffix } from '@/lib/data';
 import type { Category, Game, Resource } from '@/lib/types';
 import { TagBadge } from '@/components/shared/TagBadge';
 import { Card, CardContent } from '@/components/ui/card';
 import { GamePageContent } from './GamePageContent';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
-import { Layers, Download, Heart, Package } from 'lucide-react';
+import { Layers, Download, Heart, Package, Eye } from 'lucide-react';
 
 interface GamePageProps {
   params: { gameSlug: string };
@@ -34,7 +34,7 @@ export default async function GamePage({ params }: GamePageProps) {
           initialCategoryResources[category.slug] = await getHighlightedResources(params.gameSlug, 'game', category.slug, FETCH_ITEMS_FOR_GAME_PAGE_CAROUSEL);
         } catch (error) {
           console.error(`Error fetching highlighted resources for category ${category.slug} in game ${params.gameSlug}:`, error);
-          initialCategoryResources[category.slug] = []; // Default to empty array on error
+          initialCategoryResources[category.slug] = []; 
         }
       } else {
         console.warn('Skipping invalid category object:', category);
@@ -44,7 +44,7 @@ export default async function GamePage({ params }: GamePageProps) {
 
 
   return (
-    <div className="space-y-8"> {/* Reduced top-level space to space-y-8 */}
+    <div className="space-y-8"> 
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem><BreadcrumbLink href="/">Home</BreadcrumbLink></BreadcrumbItem>
@@ -55,7 +55,7 @@ export default async function GamePage({ params }: GamePageProps) {
         </BreadcrumbList>
       </Breadcrumb>
 
-      <section className="relative -mx-4 -mt-4"> {/* Adjusted negative margin */}
+      <section className="relative -mx-4 -mt-4"> 
         <div className="relative h-64 md:h-80 lg:h-96 w-full">
           <Image
             src={game.bannerUrl}
@@ -88,15 +88,23 @@ export default async function GamePage({ params }: GamePageProps) {
               <div className="mt-3 flex items-center space-x-4 sm:space-x-6 text-sm text-muted-foreground">
                 <span className="flex items-center" title={`${stats.totalResources.toLocaleString()} resources`}>
                   <Package className="w-4 h-4 mr-1.5 text-accent" />
-                  {stats.totalResources.toLocaleString()}
+                  {formatNumberWithSuffix(stats.totalResources)}
                 </span>
-                <span className="flex items-center" title={`${stats.totalDownloads?.toLocaleString() ?? '0'} downloads`}>
-                  <Download className="w-4 h-4 mr-1.5 text-accent" />
-                  {stats.totalDownloads?.toLocaleString() ?? '0'}
-                </span>
-                <span className="flex items-center" title={`${stats.totalFollowers.toLocaleString()} followers`}>
+                {stats.totalDownloads !== undefined && (
+                  <span className="flex items-center" title={`${stats.totalDownloads.toLocaleString()} downloads`}>
+                    <Download className="w-4 h-4 mr-1.5 text-accent" />
+                    {formatNumberWithSuffix(stats.totalDownloads)}
+                  </span>
+                )}
+                 {stats.totalViews !== undefined && stats.totalDownloads === undefined && (
+                    <span className="flex items-center" title={`${stats.totalViews.toLocaleString()} views`}>
+                        <Eye className="w-4 h-4 mr-1.5 text-accent" />
+                        {formatNumberWithSuffix(stats.totalViews)}
+                    </span>
+                )}
+                <span className="flex items-center" title={`${stats.totalFollowers.toLocaleString()} followers/likes`}>
                   <Heart className="w-4 h-4 mr-1.5 text-accent" />
-                  {stats.totalFollowers.toLocaleString()}
+                  {formatNumberWithSuffix(stats.totalFollowers)}
                 </span>
               </div>
             </div>
@@ -105,7 +113,7 @@ export default async function GamePage({ params }: GamePageProps) {
       </section>
 
       {game.longDescription && (
-        <section className="pt-4"> {/* Added pt-4 for spacing */}
+        <section className="pt-4"> 
             <Card>
                 <CardContent className="p-6">
                     <p className="text-foreground/90 whitespace-pre-line">{game.longDescription}</p>
@@ -114,7 +122,6 @@ export default async function GamePage({ params }: GamePageProps) {
         </section>
       )}
 
-      {/* GamePageContent is now responsible for its own top margin/spacing */}
       <GamePageContent
         game={game}
         categories={categories}

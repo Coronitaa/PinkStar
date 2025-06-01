@@ -179,7 +179,6 @@ const allCategories: Category[] = [
 
 
 const allResources: Resource[] = [
-  // Game Resources (existing)
   {
     id: 'res1', name: 'Ultra Graphics Mod', slug: 'ultra-graphics-mod', parentItemName: 'PixelVerse Adventures', parentItemSlug: 'pixelverse-adventures', parentItemType: 'game', categoryName: 'Visual Enhancements', categorySlug: 'visual-enhancements', 
     imageUrl: 'https://placehold.co/600x400/D81B60/FFFFFF?text=UltraGFX+Main',
@@ -200,7 +199,6 @@ const allResources: Resource[] = [
       { id: 'cl1-3', versionName: 'Ultra Graphics v2.0.0 Alpha 1', date: '2023-06-15T10:00:00Z', notes: 'Alpha release of v2.0.0. Includes new lighting engine.\nPlease report any bugs found.', gameVersionTag: commonTags.v1_19, channelTag: commonTags.channelAlpha, loaderTags: [commonTags.fabric] }
     ], rating: 4.8, followers: 1250, links: { discord: 'https://discord.gg/example', wiki: 'https://wiki.example.com/ultragfx', issues: 'https://github.com/example/ultragfx', source: 'https://github.com/example/ultragfx' }
   },
-  // ... (other existing game resources) ...
   {
     id: 'res-web-ui-kit', name: 'Aurora UI Kit', slug: 'aurora-ui-kit', parentItemName: 'Profolio X', parentItemSlug: 'profolio-x', parentItemType: 'web', categoryName: 'UI Components', categorySlug: 'ui-components',
     imageUrl: 'https://placehold.co/600x400/0288D1/FFFFFF?text=AuroraUI',
@@ -209,7 +207,7 @@ const allResources: Resource[] = [
     detailedDescription: 'Aurora UI Kit provides a set of beautifully designed and accessible React components, perfectly styled for Profolio X using Tailwind CSS. Includes buttons, forms, modals, navigation, and more. Accelerate your Profolio X customization.',
     files: [{ id: 'file-web-uikit', name: 'aurora-ui-kit-v1.2.0.zip', url: '#', size: '1.2 MB', supportedVersions: [], supportedLoaders: [], channel: commonTags.channelRelease, date: '2024-01-15T11:00:00Z' }],
     requirements: 'React 18+, Tailwind CSS 3+', rating: 4.9, followers: 150,
-    links: { source: 'https://github.com/webweaver/aurora-ui' }
+    links: { source: 'https://github.com/webweaver/aurora-ui', projectUrl: 'https://example.com/profolio-x-demo/aurora-ui'}
   },
   {
     id: 'res-app-auth', name: 'Firebase Auth Starter', slug: 'firebase-auth-starter', parentItemName: 'TaskMaster Pro', parentItemSlug: 'taskmaster-pro', parentItemType: 'app', categoryName: 'SDKs & Libraries', categorySlug: 'sdks-libraries',
@@ -219,6 +217,7 @@ const allResources: Resource[] = [
     detailedDescription: 'This starter package provides all necessary boilerplate code to integrate Firebase Authentication (Email/Password, Google Sign-In) into a Flutter application like TaskMaster Pro. Includes UI screens for login, registration, and password reset.',
     files: [{ id: 'file-app-auth', name: 'firebase-auth-starter-flutter.zip', url: '#', size: '800 KB', supportedVersions: [], supportedLoaders: [], channel: commonTags.channelRelease, date: '2023-12-01T09:00:00Z' }],
     requirements: 'Flutter 3+, Firebase project configured.', rating: 4.7, followers: 200,
+    links: { source: 'https://github.com/apparchitect/firebase-auth-starter', projectUrl: 'https://example.com/taskmaster-app/auth-starter'}
   },
   {
     id: 'res-art-nebula', name: 'Nebula Brush Pack', slug: 'nebula-brush-pack', parentItemName: 'Cybernetic Dreams', parentItemSlug: 'cybernetic-dreams', parentItemType: 'art-music', categoryName: 'Brushes & Presets', categorySlug: 'brushes-presets',
@@ -228,12 +227,35 @@ const allResources: Resource[] = [
     detailedDescription: 'Create breathtaking space scenes with the Nebula Brush Pack for Photoshop (and compatible software). Includes over 50 high-resolution brushes for stars, gas clouds, and cosmic dust, perfect for digital artists working on projects like Cybernetic Dreams.',
     files: [{ id: 'file-art-brushes', name: 'nebula-brush-pack.abr', url: '#', size: '15 MB', supportedVersions: [], supportedLoaders: [], channel: commonTags.channelRelease, date: '2023-11-20T13:00:00Z' }],
     requirements: 'Adobe Photoshop CC or compatible graphics software.', rating: 4.9, followers: 350,
+    links: { projectUrl: 'https://example.com/cybernetic-dreams-gallery/brushes'}
   },
 ];
 
 
 const MOCK_DELAY = 0; 
 const delayed = <T>(data: T): Promise<T> => new Promise(resolve => setTimeout(() => resolve(data), MOCK_DELAY));
+
+// Function to format numbers with suffixes (K, M, B)
+export function formatNumberWithSuffix(num: number | undefined | null): string {
+  if (num === undefined || num === null) return '0';
+  if (num < 1000) return num.toString();
+  
+  const suffixes = ["", "k", "M", "B", "T"];
+  const i = Math.floor(Math.log10(Math.abs(num)) / 3);
+  
+  if (i >= suffixes.length) return num.toExponential(1);
+
+  const scaledNum = num / Math.pow(1000, i);
+  
+  // Use toFixed(1) for one decimal place, but only if it's not .0
+  // e.g., 1.2k, 1M, not 1.0k
+  const formattedNum = scaledNum.toFixed(1);
+  if (formattedNum.endsWith('.0')) {
+    return Math.floor(scaledNum) + suffixes[i];
+  }
+  return formattedNum + suffixes[i];
+}
+
 
 // Generic function to calculate search score
 export const calculateGenericItemSearchScore = (item: GenericListItem, query: string): number => {
@@ -258,7 +280,6 @@ export const calculateGenericItemSearchScore = (item: GenericListItem, query: st
       }
     });
   }
-  // Add itemType specific field checks if needed
   if (item.itemType === 'web' && (item as WebItem).technologies) {
     (item as WebItem).technologies?.forEach(tech => {
       if (tech.name.toLowerCase().includes(lowerQuery)) score +=1;
@@ -315,8 +336,8 @@ export const getItemStatsGeneric = async (itemSlug: string, itemType: ItemType):
   const { resources } = await getResources({ parentItemSlug: itemSlug, parentItemType: itemType, limit: Infinity });
   const totalResources = resources.length;
   const totalDownloads = itemType === 'game' ? resources.reduce((sum, resource) => sum + resource.downloads, 0) : undefined;
-  const totalFollowers = Math.floor(Math.random() * 1000) + 50; // Generic follower count
-  const totalViews = itemType !== 'game' ? Math.floor(Math.random() * 50000) + 1000 : undefined;
+  const totalFollowers = Math.floor(Math.random() * 1200000) + 50000; // Generic follower count, increased for suffix testing
+  const totalViews = itemType !== 'game' ? Math.floor(Math.random() * 50000000) + 1000000 : undefined;
   return delayed({ totalResources, totalDownloads, totalFollowers, totalViews });
 };
 
@@ -389,6 +410,7 @@ export const getResources = async (params: GetResourcesParams): Promise<Paginate
       if (params?.searchQuery && params.searchQuery.length > 0) {
         filteredResources.sort((a, b) => (b.searchScore || 0) - (a.searchScore || 0));
       } else {
+        // Default relevance if no search query: combination of downloads, recency, and rating
         filteredResources.sort((a, b) => {
           const scoreA = (a.downloads / 1000) + (new Date(a.updatedAt).getTime() / (1000 * 60 * 60 * 24 * 30)) + (a.rating || 0);
           const scoreB = (b.downloads / 1000) + (new Date(b.updatedAt).getTime() / (1000 * 60 * 60 * 24 * 30)) + (b.rating || 0);
@@ -417,16 +439,17 @@ export const getResources = async (params: GetResourcesParams): Promise<Paginate
     const start = (page - 1) * limit;
     const end = start + limit;
     paginatedResources = filteredResources.slice(start, end);
-  } else if (limit === Infinity) {
+  } else if (limit === Infinity) { // Handle case where limit is Infinity explicitly
     paginatedResources = filteredResources;
   }
 
+  // Ensure files and changelogs are sorted before returning
   paginatedResources.forEach(resource => {
     if (resource.changelogEntries) {
       resource.changelogEntries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     }
     if (resource.files) {
-      resource.files.sort((a,b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime());
+        resource.files.sort((a,b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime());
     }
   });
 
@@ -438,17 +461,17 @@ export const getResources = async (params: GetResourcesParams): Promise<Paginate
   });
 };
 
-export const getBestMatchResourcesData = async (parentItemSlug: string, parentItemType: ItemType, categorySlug: string, searchQuery: string, limit: number = 3): Promise<Resource[]> => {
-  if (!searchQuery || searchQuery.length === 0) return []; 
+export const getBestMatchForCategoryAction = async (parentItemSlug: string, parentItemType: ItemType, categorySlug: string, searchQuery: string, limit: number = 3): Promise<Resource[]> => {
+  if (!searchQuery || searchQuery.length === 0) return []; // Ensure searchQuery is not empty string or undefined
   
   const { resources } = await getResources({
     parentItemSlug,
     parentItemType,
     categorySlug,
     searchQuery, 
-    sortBy: 'relevance',
+    sortBy: 'relevance', // Explicitly sort by relevance
     limit,
-    minScore: 1, 
+    minScore: 1, // Require at least some match
   });
   return delayed(resources);
 };
@@ -457,7 +480,9 @@ export const getBestMatchResourcesData = async (parentItemSlug: string, parentIt
 export const getResourceBySlug = async (slug: string): Promise<Resource | undefined> => {
   const resource = allResources.find(r => r.slug === slug);
   if (resource) {
+    // Make a copy to avoid mutating the original mock data
     const resourceCopy = { ...resource };
+    // Sort changelog entries if they exist
     if (resourceCopy.changelogEntries) {
       resourceCopy.changelogEntries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     }
@@ -474,11 +499,7 @@ export const getHighlightedResources = async (parentItemSlug: string, parentItem
   return delayed(resources);
 };
 
-export const getAvailableFilterTags = async (parentItemSlug: string, parentItemType: ItemType, categorySlug?: string): Promise<{ versions: Tag[], loaders: Tag[], genres: Tag[], misc: Tag[], channels: Tag[], // Game specific
-  frameworks: Tag[], languages: Tag[], tooling: Tag[], // Web specific
-  appCategories: Tag[], // App specific (can also use 'platforms' from commonTags)
-  artStyles: Tag[], musicGenres: Tag[] // Art & Music specific
-}> => {
+export const getAvailableFilterTags = async (parentItemSlug: string, parentItemType: ItemType, categorySlug?: string): Promise<Partial<AvailableTags>> => {
   const { resources: allFilteredResources } = await getResources({ parentItemSlug, parentItemType, categorySlug, limit: Infinity }); 
   
   const tagsMap: Record<TagType, Map<string, Tag>> = {
@@ -509,38 +530,40 @@ export const getAvailableFilterTags = async (parentItemSlug: string, parentItemT
     return order.indexOf(a.name) - order.indexOf(b.name);
   };
 
-  return delayed({
-    versions: Array.from(tagsMap['version'].values()).sort(sortByVersion),
-    loaders: Array.from(tagsMap['loader'].values()).sort(sortByName),
-    genres: Array.from(tagsMap['genre'].values()).sort(sortByName), // Game genres
-    misc: Array.from(tagsMap['misc'].values()).sort(sortByName),
-    channels: Array.from(tagsMap['channel'].values()).sort(sortChannels),
-    // Web specific
-    frameworks: Array.from(tagsMap['framework'].values()).sort(sortByName),
-    languages: Array.from(tagsMap['language'].values()).sort(sortByName),
-    tooling: Array.from(tagsMap['tooling'].values()).sort(sortByName),
-    // App specific
-    appCategories: Array.from(tagsMap['app-category'].values()).sort(sortByName), // App specific genres/categories
-    // Art & Music specific
-    artStyles: Array.from(tagsMap['art-style'].values()).sort(sortByName),
-    musicGenres: Array.from(tagsMap['music-genre'].values()).sort(sortByName),
-  });
+  const result: Partial<AvailableTags> = {};
+  if (tagsMap['version'].size > 0) result.versions = Array.from(tagsMap['version'].values()).sort(sortByVersion);
+  if (tagsMap['loader'].size > 0) result.loaders = Array.from(tagsMap['loader'].values()).sort(sortByName);
+  if (tagsMap['genre'].size > 0) result.genres = Array.from(tagsMap['genre'].values()).sort(sortByName);
+  if (tagsMap['misc'].size > 0) result.misc = Array.from(tagsMap['misc'].values()).sort(sortByName);
+  if (tagsMap['channel'].size > 0) result.channels = Array.from(tagsMap['channel'].values()).sort(sortChannels);
+  if (tagsMap['framework'].size > 0) result.frameworks = Array.from(tagsMap['framework'].values()).sort(sortByName);
+  if (tagsMap['language'].size > 0) result.languages = Array.from(tagsMap['language'].values()).sort(sortByName);
+  if (tagsMap['tooling'].size > 0) result.tooling = Array.from(tagsMap['tooling'].values()).sort(sortByName);
+  if (tagsMap['platform'].size > 0) result.platforms = Array.from(tagsMap['platform'].values()).sort(sortByName); // Added platforms
+  if (tagsMap['app-category'].size > 0) result.appCategories = Array.from(tagsMap['app-category'].values()).sort(sortByName);
+  if (tagsMap['art-style'].size > 0) result.artStyles = Array.from(tagsMap['art-style'].values()).sort(sortByName);
+  if (tagsMap['music-genre'].size > 0) result.musicGenres = Array.from(tagsMap['music-genre'].values()).sort(sortByName);
+  
+  return delayed(result);
 };
 
 
 export const formatTimeAgo = (dateString: string | undefined): string => {
   if (!dateString) return 'N/A';
   try {
-    // Check if running in browser environment for consistent server render
     if (typeof window === 'undefined') {
-        return new Date(dateString).toLocaleDateString(); // Or any static format
+        return new Date(dateString).toLocaleDateString(); 
     }
     return formatDistanceToNow(new Date(dateString), { addSuffix: true });
   } catch (error) {
     console.error("Error formatting date:", dateString, error);
-    return new Date(dateString).toLocaleDateString(); // Fallback for invalid date string
+    // Fallback for invalid date string or other errors during formatting
+    try {
+        return new Date(dateString).toLocaleDateString();
+    } catch (fallbackError) {
+        return 'Invalid Date';
+    }
   }
 };
     
-
     
