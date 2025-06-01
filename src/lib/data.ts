@@ -530,12 +530,15 @@ export const getAvailableFilterTags = async (parentItemSlug: string, parentItemT
 
 export const formatTimeAgo = (dateString: string | undefined): string => {
   if (!dateString) return 'N/A';
-  // Check if running in browser environment for consistent server render
-  if (typeof window === 'undefined') {
-    return new Date(dateString).toLocaleDateString(); // Or any static format
+  try {
+    // Check if running in browser environment for consistent server render
+    if (typeof window === 'undefined') {
+        return new Date(dateString).toLocaleDateString(); // Or any static format
+    }
+    return formatDistanceToNow(new Date(dateString), { addSuffix: true });
+  } catch (error) {
+    console.error("Error formatting date:", dateString, error);
+    return new Date(dateString).toLocaleDateString(); // Fallback for invalid date string
   }
-  return formatDistanceToNow(new Date(dateString), { addSuffix: true });
 };
-
-
     

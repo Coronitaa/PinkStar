@@ -1,6 +1,7 @@
+
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getGameBySlug, getCategoryDetails, getResources, getAvailableFilterTags, getCategoriesForGame } from '@/lib/data';
+import { getGameBySlug, getCategoryDetails, getResources, getAvailableFilterTags, getCategoriesForItemGeneric } from '@/lib/data';
 import type { Game, Category, Resource, Tag } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
@@ -21,8 +22,8 @@ type SortByType = 'relevance' | 'downloads' | 'updatedAt' | 'name';
 
 export default async function CategoryPage({ params, searchParams }: CategoryPageProps) {
   const game = await getGameBySlug(params.gameSlug);
-  const currentCategory = await getCategoryDetails(params.gameSlug, params.categorySlug);
-  const allGameCategories = await getCategoriesForGame(params.gameSlug);
+  const currentCategory = await getCategoryDetails(params.gameSlug, 'game', params.categorySlug);
+  const allGameCategories = await getCategoriesForItemGeneric(params.gameSlug, 'game');
 
   if (!game || !currentCategory) {
     notFound();
@@ -40,7 +41,8 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
   const sortBy = (typeof searchParams.sort === 'string' ? searchParams.sort : (searchQuery ? 'relevance' : 'downloads')) as SortByType;
 
   const { resources: initialResources, total: initialTotal, hasMore: initialHasMore } = await getResources({
-    gameSlug: params.gameSlug,
+    parentItemSlug: params.gameSlug,
+    parentItemType: 'game',
     categorySlug: params.categorySlug,
     tags: activeTagFilters.length > 0 ? activeTagFilters : undefined,
     searchQuery,
@@ -49,7 +51,7 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
     limit: RESOURCES_PER_PAGE,
   });
 
-  const availableFilterTags = await getAvailableFilterTags(params.gameSlug, params.categorySlug);
+  const availableFilterTags = await getAvailableFilterTags(params.gameSlug, 'game', params.categorySlug);
 
   const visibleCategories = allGameCategories.length > MAX_VISIBLE_CATEGORY_TABS
     ? allGameCategories.slice(0, MAX_VISIBLE_CATEGORY_TABS)

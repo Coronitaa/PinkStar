@@ -1,7 +1,8 @@
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import { getGameBySlug, getCategoriesForGame, getHighlightedResources, getGameStats } from '@/lib/data';
+import { getGameBySlug, getCategoriesForItemGeneric, getHighlightedResources, getItemStatsGeneric } from '@/lib/data';
 import type { Category, Game, Resource } from '@/lib/types';
 import { TagBadge } from '@/components/shared/TagBadge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -22,13 +23,25 @@ export default async function GamePage({ params }: GamePageProps) {
     notFound();
   }
 
-  const categories = await getCategoriesForGame(params.gameSlug);
-  const stats = await getGameStats(params.gameSlug);
+  const categories = await getCategoriesForItemGeneric(params.gameSlug, 'game');
+  const stats = await getItemStatsGeneric(params.gameSlug, 'game');
 
   const initialCategoryResources: Record<string, Resource[]> = {};
-  for (const category of categories) {
-    initialCategoryResources[category.slug] = await getHighlightedResources(params.gameSlug, category.slug, FETCH_ITEMS_FOR_GAME_PAGE_CAROUSEL);
+  if (Array.isArray(categories)) {
+    for (const category of categories) {
+      if (category && typeof category.slug === 'string') {
+        try {
+          initialCategoryResources[category.slug] = await getHighlightedResources(params.gameSlug, 'game', category.slug, FETCH_ITEMS_FOR_GAME_PAGE_CAROUSEL);
+        } catch (error) {
+          console.error(`Error fetching highlighted resources for category ${category.slug} in game ${params.gameSlug}:`, error);
+          initialCategoryResources[category.slug] = []; // Default to empty array on error
+        }
+      } else {
+        console.warn('Skipping invalid category object:', category);
+      }
+    }
   }
+
 
   return (
     <div className="space-y-8"> {/* Reduced top-level space to space-y-8 */}
@@ -77,9 +90,9 @@ export default async function GamePage({ params }: GamePageProps) {
                   <Package className="w-4 h-4 mr-1.5 text-accent" />
                   {stats.totalResources.toLocaleString()}
                 </span>
-                <span className="flex items-center" title={`${stats.totalDownloads.toLocaleString()} downloads`}>
+                <span className="flex items-center" title={`${stats.totalDownloads?.toLocaleString() ?? '0'} downloads`}>
                   <Download className="w-4 h-4 mr-1.5 text-accent" />
-                  {stats.totalDownloads.toLocaleString()}
+                  {stats.totalDownloads?.toLocaleString() ?? '0'}
                 </span>
                 <span className="flex items-center" title={`${stats.totalFollowers.toLocaleString()} followers`}>
                   <Heart className="w-4 h-4 mr-1.5 text-accent" />
