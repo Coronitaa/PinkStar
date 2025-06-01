@@ -13,7 +13,7 @@ import Link from 'next/link';
 import type { AuthFormData as GenericAuthFormData } from '@/lib/types'; // Using the merged type
 import { PasswordStrengthBar } from './PasswordStrengthBar';
 
-// Schema for Sign Up (kept for structure, but UI will be hidden)
+// Schema for Sign Up
 const signUpSchema = z.object({
   email: z.string().email({ message: 'Invalid email address.' }),
   username: z.string().min(3, { message: 'Username must be at least 3 characters.' }).max(20, { message: 'Username must be at most 20 characters.' }).regex(/^[a-zA-Z0-9_]+$/, { message: 'Username can only contain letters, numbers, and underscores.' }),
@@ -53,32 +53,11 @@ export function AuthForm({ mode, onSubmit, loading }: AuthFormProps) {
   const passwordValue = form.watch('passwordBody');
 
   const title = mode === 'signin' ? 'Sign In to PinkStar' : 'Create an Account';
-  const description = mode === 'signin' ? 'Enter your credentials to access your account.' : 'Sign-up is currently suspended. Please contact support if you need an account.';
+  const description = mode === 'signin' ? 'Enter your credentials to access your account.' : 'Fill in the details below to create your PinkStar account.';
   const buttonText = mode === 'signin' ? 'Sign In' : 'Sign Up';
-  // const alternativeText = mode === 'signin' ? "Don't have an account?" : 'Already have an account?';
-  // const alternativeLink = mode === 'signin' ? '/auth/signup' : '/auth/signin';
-  // const alternativeLinkText = mode === 'signin' ? 'Sign Up' : 'Sign In';
-
-  if (mode === 'signup') {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Card className="w-full max-w-md shadow-xl">
-          <CardHeader>
-            <CardTitle className="text-3xl font-bold text-primary">Sign Up Suspended</CardTitle>
-            <CardDescription>User registration is currently suspended. Please sign in if you have an account, or contact an administrator.</CardDescription>
-          </CardHeader>
-          <CardFooter className="flex justify-center">
-            <p className="text-sm text-muted-foreground">
-              Already have an account?{' '}
-              <Link href="/auth/signin" className="font-medium text-primary hover:underline">
-                Sign In
-              </Link>
-            </p>
-          </CardFooter>
-        </Card>
-      </div>
-    );
-  }
+  const alternativeText = mode === 'signin' ? "Don't have an account?" : 'Already have an account?';
+  const alternativeLink = mode === 'signin' ? '/auth/signup' : '/auth/signin';
+  const alternativeLinkText = mode === 'signin' ? 'Sign Up' : 'Sign In';
 
   return (
     <div className="flex items-center justify-center py-12">
@@ -90,7 +69,7 @@ export function AuthForm({ mode, onSubmit, loading }: AuthFormProps) {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              {mode === 'signup' && ( // This block will effectively not render due to the check above
+              {mode === 'signup' && (
                 <>
                   <FormField
                     control={form.control}
@@ -164,15 +143,13 @@ export function AuthForm({ mode, onSubmit, loading }: AuthFormProps) {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full button-primary-glow" disabled={loading || mode === 'signup'}>
+              <Button type="submit" className="w-full button-primary-glow" disabled={loading}>
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {buttonText}
               </Button>
             </form>
           </Form>
         </CardContent>
-        {/* Hiding the "Don't have an account?" link for sign-in mode as sign-up is suspended */}
-        {/* 
         <CardFooter className="flex justify-center">
           <p className="text-sm text-muted-foreground">
             {alternativeText}{' '}
@@ -181,7 +158,6 @@ export function AuthForm({ mode, onSubmit, loading }: AuthFormProps) {
             </Link>
           </p>
         </CardFooter>
-        */}
       </Card>
     </div>
   );

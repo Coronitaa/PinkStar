@@ -97,12 +97,9 @@ export function Header() {
               <Button variant="outline" size="sm" asChild>
                 <Link href="/auth/signin">Sign In</Link>
               </Button>
-              {/* Sign Up button is removed as sign-up is suspended */}
-              {/* 
               <Button variant="default" size="sm" asChild className="button-primary-glow">
                 <Link href="/auth/signup">Sign Up</Link>
               </Button>
-              */}
             </>
           )}
         </div>
