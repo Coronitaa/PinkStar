@@ -5,70 +5,91 @@ export interface Author {
   avatarUrl?: string;
 }
 
-export type TagType = 'version' | 'loader' | 'genre' | 'platform' | 'misc' | 'channel';
+export type TagType = 'version' | 'loader' | 'genre' | 'platform' | 'misc' | 'channel' | 'framework' | 'language' | 'tooling' | 'app-category' | 'art-style' | 'music-genre';
 
 export interface Tag {
   id: string;
   name: string;
   type: TagType;
-  color?: string; // Hex color or Tailwind class for badge background
-  textColor?: string; // Optional: Tailwind class for text color if contrast is needed
+  color?: string;
+  textColor?: string;
 }
 
 export interface ResourceFile {
   id:string;
   name: string;
   url: string;
-  size: string; // e.g., "1.2 MB"
+  size: string;
   supportedVersions: Tag[];
   supportedLoaders: Tag[];
-  channel?: Tag; // Release, Beta, Alpha etc.
-  date?: string; // Optional: ISO date string for file release date, useful for sorting
+  channel?: Tag;
+  date?: string;
 }
 
 export interface ResourceLinks {
   discord?: string;
   wiki?: string;
   issues?: string;
-  source?: string; // Example: GitHub, GitLab
+  source?: string;
+  projectUrl?: string; // For direct link to a web project, app store, etc.
 }
 
 export interface ChangelogEntry {
   id: string;
-  versionName: string; // e.g., "Sodium 0.6.13 for NeoForge 1.21.5"
-  date: string; // ISO date string
-  notes: string; // Markdown content for the entry
-  relatedFileId?: string; // ID of the ResourceFile this changelog entry refers to for download
-  gameVersionTag?: Tag; // Specific game version for this entry (e.g., 1.21.5)
-  channelTag?: Tag; // e.g., Release, Beta, Alpha
-  loaderTags?: Tag[]; // e.g., Fabric, Forge
+  versionName: string;
+  date: string;
+  notes: string;
+  relatedFileId?: string;
+  gameVersionTag?: Tag;
+  channelTag?: Tag;
+  loaderTags?: Tag[];
 }
 
-export interface Resource {
+export type ItemType = 'game' | 'web' | 'app' | 'art-music';
+
+export interface BaseItem {
   id: string;
   name: string;
   slug: string;
-  gameName: string; // To show on resource card if game context is not obvious
-  gameSlug: string;
-  categoryName: string; // To show on resource card
-  categorySlug: string;
-  imageUrl: string;
-  imageGallery?: string[]; // For the detail hover card image carousel
-  author: Author;
-  tags: Tag[];
-  downloads: number;
-  createdAt: string; // ISO date string
-  updatedAt: string; // ISO date string
-  version: string; // Main version of this resource metadata (e.g. of the resource itself, not specific file)
-  description: string; // Short summary
-  detailedDescription: string; // Markdown or rich text
-  files: ResourceFile[];
-  requirements?: string; // For the new "Requirements" tab
-  changelogEntries?: ChangelogEntry[];
-  searchScore?: number; // Optional score for search relevance
-  rating?: number; // Optional: 0-5 stars
-  followers?: number; // Optional: count of followers
-  links?: ResourceLinks; // Optional: links provided by author
+  description: string;
+  longDescription?: string;
+  bannerUrl: string;
+  iconUrl: string;
+  tags?: Tag[];
+  createdAt?: string;
+  updatedAt?: string;
+  itemType: ItemType;
+  projectUrl?: string; // For Web, App, ArtMusic to link externally if needed from ItemCard
+}
+
+export interface Game extends BaseItem {
+  itemType: 'game';
+}
+
+export interface WebItem extends BaseItem {
+  itemType: 'web';
+  technologies?: Tag[]; // e.g., React, Next.js, Firebase
+}
+
+export interface AppItem extends BaseItem {
+  itemType: 'app';
+  platforms?: Tag[]; // e.g., iOS, Android, Web
+}
+
+export interface ArtMusicItem extends BaseItem {
+  itemType: 'art-music';
+  artistName?: string;
+  medium?: Tag; // e.g., Digital Painting, Sculpture, Electronic Music
+}
+
+// GenericListItem can be any of the specific item types
+export type GenericListItem = Game | WebItem | AppItem | ArtMusicItem;
+
+export interface ItemStats {
+  totalResources: number;
+  totalDownloads?: number; // Downloads might not apply to all types
+  totalViews?: number;    // Views might be more generic
+  totalFollowers: number;
 }
 
 export interface Category {
@@ -76,36 +97,59 @@ export interface Category {
   name: string;
   slug: string;
   description?: string;
-  gameSlug?: string; // To associate category with a game if needed for specific fetches
+  parentItemSlug?: string; // Slug of the game, web project, etc. this category belongs to
+  parentItemType?: ItemType; // Type of the parent item
 }
 
-export interface Game {
+export interface Resource {
   id: string;
   name: string;
   slug: string;
-  description: string; // Short description for game card
-  longDescription?: string; // Longer description for game page
-  bannerUrl: string;
-  iconUrl: string;
-  tags?: Tag[]; // General tags for the game, e.g., "RPG", "Multiplayer"
-  createdAt?: string; // ISO date string
-  updatedAt?: string; // ISO date string
+  parentItemName: string;
+  parentItemSlug: string;
+  parentItemType: ItemType; // 'game', 'web', 'app', 'art-music'
+  categoryName: string;
+  categorySlug: string;
+  imageUrl: string;
+  imageGallery?: string[];
+  author: Author;
+  tags: Tag[];
+  downloads: number; // Or perhaps 'interactions' if more generic
+  createdAt: string;
+  updatedAt: string;
+  version: string;
+  description: string;
+  detailedDescription: string;
+  files: ResourceFile[];
+  requirements?: string;
+  changelogEntries?: ChangelogEntry[];
+  searchScore?: number;
+  rating?: number;
+  followers?: number;
+  links?: ResourceLinks;
 }
 
+
 export interface GetResourcesParams {
-  gameSlug?: string;
+  parentItemSlug?: string;
+  parentItemType?: ItemType;
   categorySlug?: string;
   tags?: string[];
   searchQuery?: string;
-  sortBy?: 'relevance' | 'downloads' | 'updatedAt' | 'name'; // 'relevance' will now use scoring
+  sortBy?: 'relevance' | 'downloads' | 'updatedAt' | 'name';
   page?: number;
   limit?: number;
-  minScore?: number; // Minimum search score to be included
+  minScore?: number;
 }
 
 export interface PaginatedResourcesResponse {
   resources: Resource[];
-  total: number; // Total number of resources matching filters (before pagination)
-  hasMore: boolean; // Indicates if there are more resources to load
+  total: number;
+  hasMore: boolean;
 }
 
+// For the main listing pages (games, web, apps, art-music)
+export interface ItemWithDetails extends GenericListItem {
+  categories: Category[]; // Top categories to display on the item card
+  stats: ItemStats;
+}

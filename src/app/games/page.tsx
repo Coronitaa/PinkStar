@@ -1,21 +1,12 @@
+
 import { getGamesWithDetails } from '@/lib/data';
-import type { Game, Category } from '@/lib/types';
+import type { ItemWithDetails } from '@/lib/types'; // Use generalized type
 import { GamesPageContent } from './GamesPageContent';
 
-export interface GameWithDetails extends Game {
-  categories: Category[];
-  stats: {
-    totalResources: number;
-    totalDownloads: number;
-    totalFollowers: number;
-  };
-}
-
-// Renamed from HomePage to GamesPage
 export default async function GamesPage() {
-  const gamesWithDetails: GameWithDetails[] = await getGamesWithDetails();
+  const gamesWithDetails: ItemWithDetails[] = await getGamesWithDetails();
   return (
-    <GamesPageContent initialGames={gamesWithDetails} />
+    <GamesPageContent initialItems={gamesWithDetails} />
   );
 }
 
