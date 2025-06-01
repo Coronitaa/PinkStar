@@ -3,7 +3,7 @@
 
 import type { User } from 'firebase/auth';
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import { auth } from '@/lib/firebase/clientApp';
+import { auth, db } from '@/lib/firebase/clientApp'; // Ensure db is imported
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -11,7 +11,8 @@ import {
   onAuthStateChanged,
   updateProfile,
 } from 'firebase/auth';
-import type { AuthFormActionData } from '@/components/auth/AuthForm'; // Updated import
+import { doc, setDoc, getDoc } from 'firebase/firestore'; // Import Firestore functions
+import type { AuthFormActionData } from '@/components/auth/AuthForm';
 import { useToast } from "@/hooks/use-toast";
 
 interface AuthContextType {
@@ -37,6 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (currentUser) {
         // Placeholder for admin check. In production, use custom claims.
         setIsAdmin(currentUser.email === 'admin@example.com');
+        // Optionally, fetch more user profile data from Firestore here if needed globally
       } else {
         setIsAdmin(false);
       }
@@ -47,7 +49,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = async (data: AuthFormActionData) => {
     setLoading(true);
-    if (!data.email || !data.passwordBody || !data.username) {
+    if (!data.email || !data.passwordBody || !data.username || !data.phoneNumber) {
       toast({ title: "Sign Up Failed", description: "Missing required fields.", variant: "destructive" });
       setLoading(false);
       return null;
@@ -55,15 +57,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.passwordBody);
       
-      // Update profile with username as displayName
-      if (userCredential.user && data.username) {
+      if (userCredential.user) {
+        // Update Firebase Auth profile
         await updateProfile(userCredential.user, {
           displayName: data.username,
-          // photoURL: can be added later if an avatar upload feature is implemented
         });
-        // Refresh user to get updated profile information
-        // No direct reload needed, onAuthStateChanged will eventually pick it up or can manually update state.
-        setUser(auth.currentUser); // Optimistically update user state
+
+        // Store additional profile info in Firestore
+        const userDocRef = doc(db, "users", userCredential.user.uid);
+        await setDoc(userDocRef, {
+          uid: userCredential.user.uid,
+          email: data.email,
+          username: data.username,
+          phoneNumber: data.phoneNumber,
+          createdAt: new Date().toISOString(),
+        });
+        
+        // Optimistically update user state with new profile info if needed
+        setUser(auth.currentUser); 
       }
       
       toast({ title: "Sign Up Successful", description: `Welcome ${data.username}!` });
@@ -84,22 +95,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
       return null;
     }
+
+    // Client-side pre-check for email format if identifier is not an email
+    // This provides a clearer message before hitting Firebase for non-email identifiers.
+    if (!data.identifier.includes('@')) {
+      // Basic check, not a full email validation
+      // Here, we assume if no "@" it's a username or phone.
+      // Full username/phone login would require backend lookup.
+      toast({ 
+        title: "Sign In Information", 
+        description: "Signing in with a username or phone number directly is not fully supported yet. Please use your email address to sign in.", 
+        variant: "default" // Or "destructive" if preferred
+      });
+      setLoading(false);
+      return null;
+    }
+
     try {
-      // For now, Firebase's signInWithEmailAndPassword expects an email.
-      // A full username/phone sign-in would require a backend lookup to get the email.
-      // We are passing the 'identifier' directly as email.
-      // If 'identifier' is a username, this will fail unless the username is also a valid email format
-      // and happens to be the user's registered email.
+      // Firebase's signInWithEmailAndPassword expects an email.
+      // If data.identifier contains "@", we proceed.
       const userCredential = await signInWithEmailAndPassword(auth, data.identifier, data.passwordBody);
       toast({ title: "Sign In Successful", description: "Welcome back!" });
       return userCredential.user;
     } catch (error: any) {
       console.error("Sign in error:", error);
       let errorMessage = error.message || "Invalid credentials or user not found. Please try again.";
-      if (error.code === 'auth/invalid-email' && data.identifier && !data.identifier.includes('@')) {
-        errorMessage = "If signing in with username, ensure it's linked to your account. For now, try your email."
+      
+      // This specific check might be redundant now due to the pre-check, 
+      // but kept for robustness if data.identifier passes pre-check but is still invalid for Firebase.
+      if (error.code === 'auth/invalid-email') {
+         errorMessage = "The email address provided is not valid. Please check the format and try again."
       } else if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-        errorMessage = "Invalid credentials or user not found. Please check your email/username and password.";
+        errorMessage = "Invalid credentials or user not found. Please check your email and password.";
       }
       toast({ title: "Sign In Failed", description: errorMessage, variant: "destructive" });
       return null;
