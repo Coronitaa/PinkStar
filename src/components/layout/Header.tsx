@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { Logo } from '@/components/shared/Logo';
 import { Button } from '@/components/ui/button';
-import { Gamepad2, Code, TabletSmartphone, Music, User, LogOut, ShieldCheck, Loader2 } from 'lucide-react';
+import { Gamepad2, Code, TabletSmartphone, Music, User, LogOut, ShieldCheck, Loader2, Settings } from 'lucide-react'; // Added Settings
 import { useAuth } from '@/contexts/AuthContext';
 import {
   DropdownMenu,
@@ -73,8 +73,8 @@ export function Header() {
                 <DropdownMenuSeparator />
                 {isAdmin && (
                   <DropdownMenuItem asChild>
-                    <Link href="/admin" className="flex items-center"> {/* Placeholder link */}
-                      <ShieldCheck className="mr-2 h-4 w-4" />
+                    <Link href="/admin" className="flex items-center">
+                      <Settings className="mr-2 h-4 w-4" /> {/* Changed Icon */}
                       Admin Panel
                     </Link>
                   </DropdownMenuItem>

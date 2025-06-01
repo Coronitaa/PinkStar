@@ -55,11 +55,11 @@ export interface BaseItem {
   longDescription?: string;
   bannerUrl: string;
   iconUrl: string;
-  tags?: Tag[];
+  tags?: Tag[]; // For project-level tags
   createdAt?: string;
   updatedAt?: string;
   itemType: ItemType;
-  projectUrl?: string; // For Web, App, ArtMusic to link externally if needed from ItemCard
+  projectUrl?: string; // For WebItem, AppItem, ArtMusicItem to link externally if needed from ItemCard
 }
 
 export interface Game extends BaseItem {
@@ -74,12 +74,14 @@ export interface WebItem extends BaseItem {
 export interface AppItem extends BaseItem {
   itemType: 'app';
   platforms?: Tag[]; // e.g., iOS, Android, Web
+  technologies?: Tag[];
 }
 
 export interface ArtMusicItem extends BaseItem {
   itemType: 'art-music';
   artistName?: string;
   medium?: Tag; // e.g., Digital Painting, Sculpture, Electronic Music
+  technologies?: Tag[];
 }
 
 // GenericListItem can be any of the specific item types
@@ -99,6 +101,7 @@ export interface Category {
   description?: string;
   parentItemSlug?: string; // Slug of the game, web project, etc. this category belongs to
   parentItemType?: ItemType; // Type of the parent item
+  order?: number; // For admin panel ordering
 }
 
 export interface Resource {
@@ -113,7 +116,7 @@ export interface Resource {
   imageUrl: string;
   imageGallery?: string[];
   author: Author;
-  tags: Tag[];
+  tags: Tag[]; // For resource-level tags
   downloads: number; // Or perhaps 'interactions' if more generic
   createdAt: string;
   updatedAt: string;
@@ -177,3 +180,45 @@ export interface AuthFormData extends Partial<AuthFormSignUpData>, Partial<AuthF
   identifier?: string;
   passwordBody: string;
 }
+
+// For Admin Project Form
+export interface ProjectCategoryFormData {
+  id: string; // Can be a temp ID for new categories
+  name: string;
+  slug: string;
+  description?: string;
+  order: number;
+}
+
+export interface ProjectFormData {
+  id?: string; // Present if editing
+  itemType: ItemType;
+  name: string;
+  slug: string;
+  description: string;
+  longDescription?: string;
+  bannerUrl: string;
+  iconUrl: string;
+  projectUrl?: string;
+  tagsString?: string; // Comma-separated tags
+  
+  // Game specific (already in BaseItem if needed, or add here if distinct for form)
+  
+  // Web specific
+  technologiesString?: string; // Comma-separated
+
+  // App specific
+  platformsString?: string; // Comma-separated
+  appTechnologiesString?: string; // Comma-separated, to avoid conflict with web technologies
+
+  // Art/Music specific
+  artistName?: string;
+  mediumId?: string; // ID of the selected medium tag
+  artMusicTechnologiesString?: string; // Comma-separated
+
+  authorId?: string; // ID of existing author, or empty for new author
+  newAuthorName?: string; // If adding a new author
+
+  categories: ProjectCategoryFormData[];
+}
+
