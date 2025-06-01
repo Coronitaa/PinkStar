@@ -20,9 +20,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 export function Header() {
   const { user, isAdmin, signOut, loading } = useAuth();
 
-  const getInitials = (email: string | null | undefined) => {
-    if (!email) return 'PS';
-    return email.substring(0, 2).toUpperCase();
+  const getInitials = (email: string | null | undefined, displayName?: string | null | undefined) => {
+    if (displayName) return displayName.substring(0, 2).toUpperCase();
+    if (email) return email.substring(0, 2).toUpperCase();
+    return 'PS';
   };
 
   return (
@@ -51,10 +52,9 @@ export function Header() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-9 w-9 rounded-full">
                   <Avatar className="h-9 w-9">
-                     {/* Placeholder for user avatar image if available */}
                     {/* <AvatarImage src={user.photoURL || undefined} alt={user.displayName || user.email || "User"} /> */}
                     <AvatarFallback className="bg-primary text-primary-foreground">
-                      {getInitials(user.email)}
+                      {getInitials(user.email, user.displayName)}
                     </AvatarFallback>
                   </Avatar>
                 </Button>
@@ -97,9 +97,12 @@ export function Header() {
               <Button variant="outline" size="sm" asChild>
                 <Link href="/auth/signin">Sign In</Link>
               </Button>
+              {/* Sign Up button is removed as sign-up is suspended */}
+              {/* 
               <Button variant="default" size="sm" asChild className="button-primary-glow">
                 <Link href="/auth/signup">Sign Up</Link>
               </Button>
+              */}
             </>
           )}
         </div>
