@@ -7,11 +7,12 @@ import Image from 'next/image';
 import type { Resource, ResourceFile, Tag } from '@/lib/types'; 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TagBadge } from '@/components/shared/TagBadge';
-import { Download, Eye, User, Tags, Info, ArrowRight, Star } from 'lucide-react';
+import { Download, Eye, User, Tags, Info, ArrowRight, Star, StarHalf, Heart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Carousel as NestedCarousel, CarouselItem as NestedCarouselItem } from '@/components/shared/Carousel';
+import { formatNumberWithSuffix } from '@/lib/data';
 
 interface ResourceCardProps {
   resource: Resource;
@@ -22,17 +23,36 @@ interface ResourceCardProps {
 const MAX_TAGS_COMPACT = 1;
 const MAX_TAGS_OVERLAY = 9; 
 
-const RatingDisplay: React.FC<{ rating?: number, compact?: boolean }> = ({ rating, compact = false }) => {
-  if (typeof rating !== 'number') return null;
-  
-  const starSize = compact ? "w-3 h-3" : "w-4 h-4"; // Increased compact star size slightly for visibility
+const RatingDisplay: React.FC<{ rating?: number; compact?: boolean; fiveStarMode?: boolean }> = ({ rating, compact = false, fiveStarMode = false }) => {
+  if (typeof rating !== 'number' || rating < 0 || rating > 5) return null;
 
-  return (
-    <div className={cn("flex items-center gap-0.5", compact ? "text-xs" : "text-sm")}>
-      <Star className={cn(starSize, "text-amber-400 fill-amber-400 mr-0.5")} />
-      <span className="text-muted-foreground">{rating.toFixed(1)}</span>
-    </div>
-  );
+  if (fiveStarMode) {
+    const stars = [];
+    const starSize = "w-4 h-4"; 
+    for (let i = 0; i < 5; i++) {
+      if (rating >= i + 0.75) {
+        stars.push(<Star key={`star-full-${i}`} className={cn(starSize, "text-amber-400 fill-amber-400")} />);
+      } else if (rating >= i + 0.25) {
+        stars.push(<StarHalf key={`star-half-${i}`} className={cn(starSize, "text-amber-400 fill-amber-400")} />);
+      } else {
+        stars.push(<Star key={`star-empty-${i}`} className={cn(starSize, "text-amber-400/40")} />); 
+      }
+    }
+    return (
+      <div className="flex items-center">
+        {stars}
+        <span className="ml-1.5 text-xs text-muted-foreground">({rating.toFixed(1)})</span>
+      </div>
+    );
+  } else { 
+    const starIconSize = compact ? "w-3 h-3" : "w-4 h-4";
+    return (
+      <div className={cn("flex items-center gap-0.5", compact ? "text-xs" : "text-sm")}>
+        <Star className={cn(starIconSize, "text-amber-400 fill-amber-400 mr-0.5")} />
+        <span className="text-muted-foreground">{rating.toFixed(1)}</span>
+      </div>
+    );
+  }
 };
 
 
@@ -87,11 +107,11 @@ export function ResourceCard({ resource, compact = false, onHoverChange }: Resou
             </CardTitle>
             {!compact && (
               <p className="text-xs text-muted-foreground mb-1 line-clamp-1">
-                For {resource.gameName} / {resource.categoryName}
+                For {resource.parentItemName} / {resource.categoryName}
               </p>
             )}
             <p className={cn("text-muted-foreground flex items-center line-clamp-1", compact ? "text-[10px] mb-1" : "text-xs mb-1.5")}>
-              {!compact && <User className="w-3 h-3 mr-1 text-accent shrink-0" />} 
+              <User className={cn("mr-1 text-accent shrink-0", compact ? "w-2.5 h-2.5" : "w-3 h-3")} />
               By {resource.author.name}
             </p>
             {compact && resource.tags.length > 0 && (
@@ -121,7 +141,7 @@ export function ResourceCard({ resource, compact = false, onHoverChange }: Resou
           </CardContent>
           <div className={cn("text-muted-foreground flex justify-between items-center mt-auto", compact ? 'p-2 pt-0 pb-1.5 text-[10px]' : 'p-4 pt-0 text-xs border-t border-border/20')}>
             <span className="flex items-center" title={`${resource.downloads.toLocaleString()} downloads`}>
-              <Download className={cn("mr-1 text-accent", compact ? "w-3 h-3" : "w-3.5 h-3.5")} /> {resource.downloads.toLocaleString()}
+              <Download className={cn("mr-1 text-accent", compact ? "w-3 h-3" : "w-3.5 h-3.5")} /> {formatNumberWithSuffix(resource.downloads)}
             </span>
             {resource.rating !== undefined && (
               <RatingDisplay rating={resource.rating} compact={compact} />
@@ -184,11 +204,13 @@ export function ResourceCard({ resource, compact = false, onHoverChange }: Resou
           </div>
 
           <h3 className="text-base font-semibold text-primary mb-1 line-clamp-1">{resource.name}</h3>
+          
           {resource.rating !== undefined && (
             <div className="mb-1.5">
-              <RatingDisplay rating={resource.rating} />
+              <RatingDisplay rating={resource.rating} fiveStarMode={true} />
             </div>
           )}
+
           <p className="text-xs text-muted-foreground mb-2 line-clamp-2 h-8">{resource.description}</p>
 
           {resource.tags.length > 0 && (
@@ -207,7 +229,20 @@ export function ResourceCard({ resource, compact = false, onHoverChange }: Resou
             </div>
           )}
 
-          <div className="mt-auto pt-2 border-t border-border/20 flex items-center gap-2">
+          <div className="mt-2 pt-2 border-t border-border/10 flex justify-around text-xs">
+            <div className="flex items-center text-muted-foreground" title={`${resource.downloads.toLocaleString()} downloads`}>
+              <Download className="w-3.5 h-3.5 mr-1 text-accent" />
+              {formatNumberWithSuffix(resource.downloads)}
+            </div>
+            {resource.followers !== undefined && (
+              <div className="flex items-center text-muted-foreground" title={`${resource.followers.toLocaleString()} followers`}>
+                <Heart className="w-3.5 h-3.5 mr-1 text-accent" />
+                {formatNumberWithSuffix(resource.followers)}
+              </div>
+            )}
+          </div>
+
+          <div className="mt-auto pt-3 border-t border-border/20 flex items-center gap-2">
             {latestFile ? (
               <a
                 href={latestFile.url}
