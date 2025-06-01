@@ -7,8 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Download, Tag as TagIcon, User, CalendarDays, Layers, Package, FileText, BarChart3, MessageSquare,
-  ExternalLink, AlertTriangle, ShieldQuestion, Heart, Star, Users, GitBranch, ListChecks, Binary, Palette, MusicIcon, Laptop
-} from 'lucide-react';
+  ExternalLink, AlertTriangle, ShieldQuestion, Star, Users, GitBranch, ListChecks, Binary, Palette, MusicIcon, Laptop
+} from 'lucide-react'; // Changed Heart to Star
 import { format } from 'date-fns';
 import Link from 'next/link'; 
 import { TagBadge } from '../shared/TagBadge';
@@ -57,12 +57,12 @@ const InfoItem: React.FC<InfoItemProps> = ({ label, value, icon: Icon, className
 const RatingDisplay: React.FC<{ rating?: number }> = ({ rating }) => {
   if (typeof rating !== 'number') return <span className="text-muted-foreground">N/A</span>;
   const fullStars = Math.floor(rating);
-  const halfStar = rating % 1 >= 0.5;
+  const halfStar = rating % 1 >= 0.5; // Assuming StarHalf is not used here for simplicity, adjust if needed.
   const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
   return (
     <div className="flex items-center">
       {[...Array(fullStars)].map((_, i) => <Star key={`full-${i}`} className="w-4 h-4 text-amber-400 fill-amber-400" />)}
-      {halfStar && <Star key="half" className="w-4 h-4 text-amber-400 fill-amber-200" />}
+      {/* If you have a StarHalf icon, you can add it here based on 'halfStar' */}
       {[...Array(emptyStars)].map((_, i) => <Star key={`empty-${i}`} className="w-4 h-4 text-amber-400/50" />)}
       <span className="ml-1.5 text-xs text-muted-foreground">({rating.toFixed(1)})</span>
     </div>
@@ -78,7 +78,7 @@ const getItemTypeIcon = (itemType: ItemType) => {
     case 'game': return Package;
     case 'web': return Binary;
     case 'app': return Laptop;
-    case 'art-music': return Palette; // Could be MusicIcon too
+    case 'art-music': return Palette; 
     default: return Package;
   }
 };
@@ -121,7 +121,8 @@ export function ResourceInfoSidebar({ resource }: ResourceInfoSidebarProps) {
     }
   };
 
-  const parentItemPath = `/${resource.parentItemType}s/${resource.parentItemSlug}`; // Simplified, assuming pluralization for 'app' & 'art-music' if needed, or direct type for path
+  const parentItemPath = `/${resource.parentItemType === 'art-music' ? 'art-music' : resource.parentItemType + 's'}/${resource.parentItemSlug}`;
+
 
   return (
     <div className="space-y-5 sticky top-20">
@@ -158,7 +159,7 @@ export function ResourceInfoSidebar({ resource }: ResourceInfoSidebarProps) {
         <InfoItem label="Category" value={<Link href={`${parentItemPath}/${resource.categorySlug}`} className="hover:text-primary transition-colors">{resource.categoryName}</Link>} icon={Layers} />
         <InfoItem label="Downloads" value={formatNumberWithSuffix(resource.downloads)} icon={BarChart3} />
         <InfoItem label="Rating" value={<RatingDisplay rating={resource.rating} />} icon={Star} />
-        <InfoItem label="Followers" value={formatNumberWithSuffix(resource.followers)} icon={Heart} />
+        <InfoItem label="Followers" value={formatNumberWithSuffix(resource.followers)} icon={Star} /> {/* Changed Heart to Star */}
         <InfoItem label="Created" value={format(new Date(resource.createdAt), 'MMM d, yyyy')} icon={CalendarDays} />
         <InfoItem label="Updated" value={updatedAtFormatted} icon={CalendarDays} suppressHydrationWarning={true} />
       </SidebarCard>
@@ -173,11 +174,12 @@ export function ResourceInfoSidebar({ resource }: ResourceInfoSidebarProps) {
                   <div className="flex flex-wrap gap-1.5">
                     {tagsInGroup.map(tag => {
                       const queryParam = getFilterQueryParamForTagType(tag.type);
+                      const categoryPath = `${parentItemPath}/${resource.categorySlug}`;
                       if (queryParam) {
                         return (
                           <Link 
                             key={tag.id} 
-                            href={`${parentItemPath}/${resource.categorySlug}?${queryParam}=${tag.id}`}
+                            href={`${categoryPath}?${queryParam}=${tag.id}`}
                             className="hover:opacity-80 transition-opacity"
                           >
                             <TagBadge tag={tag} />

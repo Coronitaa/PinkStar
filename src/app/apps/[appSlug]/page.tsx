@@ -8,7 +8,7 @@ import { TagBadge } from '@/components/shared/TagBadge';
 import { Card, CardContent } from '@/components/ui/card';
 import { AppItemPageContent } from './AppItemPageContent';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
-import { Layers, Download, Heart, Package, TabletSmartphone } from 'lucide-react';
+import { Layers, Download, Star, Package, TabletSmartphone } from 'lucide-react'; // Changed Heart to Star
 
 interface AppItemPageProps {
   params: { appSlug: string };
@@ -95,8 +95,8 @@ export default async function AppItemPage({ params }: AppItemPageProps) {
                     {formatNumberWithSuffix(stats.totalDownloads)}
                   </span>
                 )}
-                <span className="flex items-center" title={`${stats.totalFollowers.toLocaleString()} followers/likes`}>
-                  <Heart className="w-4 h-4 mr-1.5 text-accent" />
+                <span className="flex items-center" title={`${stats.totalFollowers.toLocaleString()} followers`}>
+                  <Star className="w-4 h-4 mr-1.5 text-accent" /> {/* Changed Heart to Star */}
                   {formatNumberWithSuffix(stats.totalFollowers)}
                 </span>
               </div>

@@ -7,7 +7,7 @@ import Image from 'next/image';
 import type { Resource, ResourceFile, Tag } from '@/lib/types'; 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TagBadge } from '@/components/shared/TagBadge';
-import { Download, Eye, User, Tags, Info, ArrowRight, Star, StarHalf, Heart } from 'lucide-react';
+import { Download, Eye, User, Tags, Info, ArrowRight, Star, StarHalf } from 'lucide-react'; // Removed Heart
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -236,7 +236,7 @@ export function ResourceCard({ resource, compact = false, onHoverChange }: Resou
             </div>
             {resource.followers !== undefined && (
               <div className="flex items-center text-muted-foreground" title={`${resource.followers.toLocaleString()} followers`}>
-                <Heart className="w-3.5 h-3.5 mr-1 text-accent" />
+                <Star className="w-3.5 h-3.5 mr-1 text-accent" /> {/* Changed Heart to Star */}
                 {formatNumberWithSuffix(resource.followers)}
               </div>
             )}

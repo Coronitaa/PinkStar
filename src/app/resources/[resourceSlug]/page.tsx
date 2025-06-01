@@ -10,7 +10,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ResourceFilesTabContent } from '@/components/resource/ResourceFilesTabContent';
-import { FileText, BookOpen, ListChecks, MessageCircle, Eye, Heart } from 'lucide-react';
+import { FileText, BookOpen, ListChecks, MessageCircle, Eye, Star } from 'lucide-react'; // Changed Heart to Star
 import { Carousel, CarouselItem } from '@/components/shared/Carousel';
 import { ResourceCard } from '@/components/resource/ResourceCard';
 
@@ -25,7 +25,7 @@ const getItemTypeSectionPathAndName = (itemType: ItemType): { path: string; name
     case 'web': return { path: '/web', name: 'Web Projects' };
     case 'app': return { path: '/apps', name: 'Apps' };
     case 'art-music': return { path: '/art-music', name: 'Art & Music' };
-    default: return { path: '/', name: 'Projects' }; // Fallback
+    default: return { path: '/', name: 'Projects' }; 
   }
 };
 
@@ -40,7 +40,7 @@ export default async function ResourcePage({ params, searchParams }: ResourcePag
     parentItemSlug: resource.parentItemSlug,
     parentItemType: resource.parentItemType,
     categorySlug: resource.categorySlug,
-    limit: 6 // Fetch a few for related items
+    limit: 6 
   });
 
   const relatedResources = allResourcesInParentCategory
@@ -92,7 +92,7 @@ export default async function ResourcePage({ params, searchParams }: ResourcePag
                   <CardDescription className="text-base text-muted-foreground">{resource.description}</CardDescription>
                 </div>
                 <Button variant="outline" size="sm" className="mt-3 sm:mt-0 button-outline-glow button-follow-sheen shrink-0">
-                  <Heart className="w-4 h-4 mr-2 text-accent" /> Follow
+                  <Star className="w-4 h-4 mr-2 text-accent" /> Follow {/* Changed Heart to Star */}
                 </Button>
               </div>
 
