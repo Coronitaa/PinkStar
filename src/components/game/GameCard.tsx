@@ -51,10 +51,10 @@ export function ItemCard({ item, basePath }: ItemCardProps) {
                 <CardTitle className="text-2xl font-bold text-foreground group-hover:text-primary transition-colors duration-200 line-clamp-2">
                     {item.name}
                 </CardTitle>
+                <p className="text-sm text-muted-foreground mt-1 line-clamp-2 h-10">{item.description}</p>
             </div>
           </div>
-          <p className="text-sm text-muted-foreground mb-4 line-clamp-2 h-10">{item.description}</p>
-
+          
           {itemTags.length > 0 && (
             <div className="mb-4">
               <h4 className="text-xs font-semibold text-primary mb-1.5 flex items-center"><TagIcon className="w-3.5 h-3.5 mr-1.5" /> {item.itemType === 'game' ? 'Game' : 'Project'} Tags</h4>
@@ -98,12 +98,12 @@ export function ItemCard({ item, basePath }: ItemCardProps) {
         <CardFooter className="p-5 pt-0 border-t border-border/20 mt-auto">
           <div className="flex justify-between items-center w-full text-sm text-muted-foreground">
             <div className="flex items-center" title={`${stats.totalResources.toLocaleString()} Resources`}>
-              <Package className="w-4 h-4 mr-1 text-accent" />
+              <Package className="w-4 h-4 mr-1.5 text-accent" />
               <span>{formatNumberWithSuffix(stats.totalResources)}</span>
             </div>
             {stats.totalDownloads !== undefined && (
                  <div className="flex items-center" title={`${stats.totalDownloads.toLocaleString()} Downloads`}>
-                    <Download className="w-4 h-4 mr-1 text-accent" />
+                    <Download className="w-4 h-4 mr-1.5 text-accent" />
                     <span>{formatNumberWithSuffix(stats.totalDownloads)}</span>
                  </div>
             )}

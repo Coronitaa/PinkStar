@@ -247,8 +247,6 @@ export function formatNumberWithSuffix(num: number | undefined | null): string {
 
   const scaledNum = num / Math.pow(1000, i);
   
-  // Use toFixed(1) for one decimal place, but only if it's not .0
-  // e.g., 1.2k, 1M, not 1.0k
   const formattedNum = scaledNum.toFixed(1);
   if (formattedNum.endsWith('.0')) {
     return Math.floor(scaledNum) + suffixes[i];
@@ -335,9 +333,13 @@ export const getCategoriesForItemGeneric = async (itemSlug: string, itemType: It
 export const getItemStatsGeneric = async (itemSlug: string, itemType: ItemType): Promise<ItemStats> => {
   const { resources } = await getResources({ parentItemSlug: itemSlug, parentItemType: itemType, limit: Infinity });
   const totalResources = resources.length;
-  const totalDownloads = itemType === 'game' ? resources.reduce((sum, resource) => sum + resource.downloads, 0) : undefined;
-  const totalFollowers = Math.floor(Math.random() * 1200000) + 50000; // Generic follower count, increased for suffix testing
-  const totalViews = itemType !== 'game' ? Math.floor(Math.random() * 50000000) + 1000000 : undefined;
+  // Calculate totalDownloads by summing downloads of all associated resources for ALL item types
+  const totalDownloads = resources.reduce((sum, resource) => sum + (resource.downloads || 0), 0);
+  const totalFollowers = Math.floor(Math.random() * 1200000) + 50000;
+  // Views might still be relevant for non-game items, or could be derived differently.
+  // For now, let's keep it for non-game types if totalDownloads isn't the primary metric.
+  // However, the request implies totalDownloads for all, so we might not need totalViews as prominently.
+  const totalViews = itemType !== 'game' ? Math.floor(Math.random() * 50000000) + 1000000 : undefined; 
   return delayed({ totalResources, totalDownloads, totalFollowers, totalViews });
 };
 
@@ -383,14 +385,25 @@ export const getResources = async (params: GetResourcesParams): Promise<Paginate
     filteredResources = filteredResources.filter(r => r.categorySlug === params.categorySlug);
   }
   
-  if (params?.searchQuery && params.searchQuery.length > 0) { 
-    const query = params.searchQuery.toLowerCase(); 
+  if (params?.searchQuery && params.searchQuery.length > 0) {
+    const query = params.searchQuery.toLowerCase();
     filteredResources = filteredResources.map(r => {
       let score = 0;
-      if (r.name.toLowerCase().includes(query)) score += 10;
-      if (r.description.toLowerCase().includes(query)) score += 3;
-      if (r.author.name.toLowerCase().includes(query)) score += 2;
-      if (r.tags.some(tag => tag.name.toLowerCase().includes(query))) score +=1;
+      const nameMatch = r.name.toLowerCase().includes(query);
+      const descMatch = r.description.toLowerCase().includes(query);
+      const tagMatch = r.tags.some(tag => tag.name.toLowerCase().includes(query));
+
+      if (nameMatch && descMatch) {
+        score = 50;
+      } else if (nameMatch) {
+        score = 40;
+      } else if (descMatch && tagMatch) {
+        score = 30;
+      } else if (descMatch) {
+        score = 20;
+      } else if (tagMatch) {
+        score = 10;
+      }
       r.searchScore = score;
       return r;
     }).filter(r => r.searchScore! > (params.minScore || 0));
@@ -410,7 +423,6 @@ export const getResources = async (params: GetResourcesParams): Promise<Paginate
       if (params?.searchQuery && params.searchQuery.length > 0) {
         filteredResources.sort((a, b) => (b.searchScore || 0) - (a.searchScore || 0));
       } else {
-        // Default relevance if no search query: combination of downloads, recency, and rating
         filteredResources.sort((a, b) => {
           const scoreA = (a.downloads / 1000) + (new Date(a.updatedAt).getTime() / (1000 * 60 * 60 * 24 * 30)) + (a.rating || 0);
           const scoreB = (b.downloads / 1000) + (new Date(b.updatedAt).getTime() / (1000 * 60 * 60 * 24 * 30)) + (b.rating || 0);
@@ -439,11 +451,10 @@ export const getResources = async (params: GetResourcesParams): Promise<Paginate
     const start = (page - 1) * limit;
     const end = start + limit;
     paginatedResources = filteredResources.slice(start, end);
-  } else if (limit === Infinity) { // Handle case where limit is Infinity explicitly
+  } else if (limit === Infinity) { 
     paginatedResources = filteredResources;
   }
 
-  // Ensure files and changelogs are sorted before returning
   paginatedResources.forEach(resource => {
     if (resource.changelogEntries) {
       resource.changelogEntries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -462,16 +473,16 @@ export const getResources = async (params: GetResourcesParams): Promise<Paginate
 };
 
 export const getBestMatchForCategoryAction = async (parentItemSlug: string, parentItemType: ItemType, categorySlug: string, searchQuery: string, limit: number = 3): Promise<Resource[]> => {
-  if (!searchQuery || searchQuery.length === 0) return []; // Ensure searchQuery is not empty string or undefined
+  if (!searchQuery || searchQuery.length === 0) return [];
   
   const { resources } = await getResources({
     parentItemSlug,
     parentItemType,
     categorySlug,
     searchQuery, 
-    sortBy: 'relevance', // Explicitly sort by relevance
+    sortBy: 'relevance', 
     limit,
-    minScore: 1, // Require at least some match
+    minScore: 1, 
   });
   return delayed(resources);
 };
@@ -480,9 +491,7 @@ export const getBestMatchForCategoryAction = async (parentItemSlug: string, pare
 export const getResourceBySlug = async (slug: string): Promise<Resource | undefined> => {
   const resource = allResources.find(r => r.slug === slug);
   if (resource) {
-    // Make a copy to avoid mutating the original mock data
     const resourceCopy = { ...resource };
-    // Sort changelog entries if they exist
     if (resourceCopy.changelogEntries) {
       resourceCopy.changelogEntries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     }
@@ -524,7 +533,7 @@ export const getAvailableFilterTags = async (parentItemSlug: string, parentItemT
   });
 
   const sortByName = (a: Tag, b: Tag) => a.name.localeCompare(b.name);
-  const sortByVersion = (a: Tag, b: Tag) => b.name.localeCompare(a.name); // newest first approx
+  const sortByVersion = (a: Tag, b: Tag) => b.name.localeCompare(a.name); 
   const sortChannels = (a: Tag, b: Tag) => {
     const order = ['Release', 'Beta', 'Alpha'];
     return order.indexOf(a.name) - order.indexOf(b.name);
@@ -539,7 +548,7 @@ export const getAvailableFilterTags = async (parentItemSlug: string, parentItemT
   if (tagsMap['framework'].size > 0) result.frameworks = Array.from(tagsMap['framework'].values()).sort(sortByName);
   if (tagsMap['language'].size > 0) result.languages = Array.from(tagsMap['language'].values()).sort(sortByName);
   if (tagsMap['tooling'].size > 0) result.tooling = Array.from(tagsMap['tooling'].values()).sort(sortByName);
-  if (tagsMap['platform'].size > 0) result.platforms = Array.from(tagsMap['platform'].values()).sort(sortByName); // Added platforms
+  if (tagsMap['platform'].size > 0) result.platforms = Array.from(tagsMap['platform'].values()).sort(sortByName); 
   if (tagsMap['app-category'].size > 0) result.appCategories = Array.from(tagsMap['app-category'].values()).sort(sortByName);
   if (tagsMap['art-style'].size > 0) result.artStyles = Array.from(tagsMap['art-style'].values()).sort(sortByName);
   if (tagsMap['music-genre'].size > 0) result.musicGenres = Array.from(tagsMap['music-genre'].values()).sort(sortByName);
@@ -551,16 +560,20 @@ export const getAvailableFilterTags = async (parentItemSlug: string, parentItemT
 export const formatTimeAgo = (dateString: string | undefined): string => {
   if (!dateString) return 'N/A';
   try {
+    // Check if running in a browser environment
     if (typeof window === 'undefined') {
-        return new Date(dateString).toLocaleDateString(); 
+      // Fallback for server-side rendering or environments without 'window'
+      return new Date(dateString).toLocaleDateString(); 
     }
     return formatDistanceToNow(new Date(dateString), { addSuffix: true });
   } catch (error) {
     console.error("Error formatting date:", dateString, error);
     // Fallback for invalid date string or other errors during formatting
     try {
+        // Attempt to format as a simple date string if fromDistanceToNow fails
         return new Date(dateString).toLocaleDateString();
     } catch (fallbackError) {
+        // If all else fails, return a generic error message
         return 'Invalid Date';
     }
   }
