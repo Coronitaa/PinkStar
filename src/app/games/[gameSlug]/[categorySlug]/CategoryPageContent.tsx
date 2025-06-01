@@ -6,14 +6,14 @@ import { useState, useEffect, useCallback, useRef, useTransition } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import type { Resource, Tag, Category as CategoryType, PaginatedResourcesResponse, GetResourcesParams, ItemType } from '@/lib/types';
-import { ResourceListItem } from '@/components/resource/ResourceListItem';
+import { ResourceCard } from '@/components/resource/ResourceCard'; // Changed import
 import { ResourceFilterControls, type AvailableTags } from '@/components/resource/ResourceFilterControls';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2, Search, Info } from 'lucide-react';
 import { fetchPaginatedResourcesAction } from '@/app/actions/resourceActions';
 
-const RESOURCES_PER_PAGE = 20;
+const RESOURCES_PER_PAGE = 21; // Adjusted to be divisible by 3 for grid
 const SEARCH_DEBOUNCE_MS = 500;
 
 type SortByType = 'relevance' | 'downloads' | 'updatedAt' | 'name';
@@ -168,12 +168,10 @@ export function CategoryPageContent({
         current.delete(key);
       }
     });
-    // If relevance sort is selected but query is empty, switch to default sort
     if (current.get('sort') === 'relevance' && !current.get('q')) {
         const defaultSort = itemType === 'game' ? 'downloads' : 'updatedAt';
         current.set('sort', defaultSort);
     }
-    // If query is added and sort is not relevance, switch to relevance
     if (current.get('q') && current.get('sort') !== 'relevance') {
         current.set('sort', 'relevance');
     }
@@ -259,9 +257,9 @@ export function CategoryPageContent({
         )}
 
         {!(isNavPending || isLoadingFirstPage) && resources.length > 0 && (
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {resources.map(resource => (
-              <ResourceListItem key={resource.id} resource={resource} />
+              <ResourceCard key={resource.id} resource={resource} compact />
             ))}
           </div>
         )}
@@ -298,5 +296,3 @@ export function CategoryPageContent({
     </div>
   );
 }
-
-    
