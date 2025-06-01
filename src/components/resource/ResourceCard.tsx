@@ -24,19 +24,13 @@ const MAX_TAGS_OVERLAY = 9;
 
 const RatingDisplay: React.FC<{ rating?: number, compact?: boolean }> = ({ rating, compact = false }) => {
   if (typeof rating !== 'number') return null;
-  const fullStars = Math.floor(rating);
-  const halfStar = rating % 1 >= 0.5; 
-  const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
-
-  const starSize = compact ? "w-2.5 h-2.5" : "w-3.5 h-3.5"; 
+  
+  const starSize = compact ? "w-3 h-3" : "w-4 h-4"; // Increased compact star size slightly for visibility
 
   return (
-    <div className={cn("flex items-center", compact ? "gap-0.5" : "gap-1")}>
-      {[...Array(fullStars)].map((_, i) => <Star key={`full-${i}`} className={cn(starSize, "text-amber-400 fill-amber-400")} />)}
-      {halfStar && <Star key="half" className={cn(starSize, "text-amber-400 fill-amber-200")} />} 
-      {[...Array(emptyStars)].map((_, i) => <Star key={`empty-${i}`} className={cn(starSize, "text-amber-400/50")} />)}
-      {!compact && <span className="ml-1.5 text-xs text-muted-foreground">({rating.toFixed(1)})</span>}
-      {compact && <span className="ml-0.5 text-[10px] text-muted-foreground">({rating.toFixed(1)})</span>}
+    <div className={cn("flex items-center gap-0.5", compact ? "text-xs" : "text-sm")}>
+      <Star className={cn(starSize, "text-amber-400 fill-amber-400 mr-0.5")} />
+      <span className="text-muted-foreground">{rating.toFixed(1)}</span>
     </div>
   );
 };

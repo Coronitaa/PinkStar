@@ -8,7 +8,7 @@ import { TagBadge } from '@/components/shared/TagBadge';
 import { Card, CardContent } from '@/components/ui/card';
 import { AppItemPageContent } from './AppItemPageContent';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
-import { Layers, Eye, Heart, Package, TabletSmartphone, Download } from 'lucide-react';
+import { Layers, Download, Heart, Package, TabletSmartphone } from 'lucide-react';
 
 interface AppItemPageProps {
   params: { appSlug: string };
@@ -94,12 +94,6 @@ export default async function AppItemPage({ params }: AppItemPageProps) {
                     <Download className="w-4 h-4 mr-1.5 text-accent" />
                     {formatNumberWithSuffix(stats.totalDownloads)}
                   </span>
-                )}
-                 {stats.totalViews !== undefined && stats.totalDownloads === undefined && (
-                    <span className="flex items-center" title={`${stats.totalViews.toLocaleString()} views`}>
-                        <Eye className="w-4 h-4 mr-1.5 text-accent" />
-                        {formatNumberWithSuffix(stats.totalViews)}
-                    </span>
                 )}
                 <span className="flex items-center" title={`${stats.totalFollowers.toLocaleString()} followers/likes`}>
                   <Heart className="w-4 h-4 mr-1.5 text-accent" />

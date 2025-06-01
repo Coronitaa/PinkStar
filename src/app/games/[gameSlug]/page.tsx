@@ -8,7 +8,7 @@ import { TagBadge } from '@/components/shared/TagBadge';
 import { Card, CardContent } from '@/components/ui/card';
 import { GamePageContent } from './GamePageContent';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
-import { Layers, Download, Heart, Package, Eye } from 'lucide-react';
+import { Layers, Download, Heart, Package } from 'lucide-react';
 
 interface GamePageProps {
   params: { gameSlug: string };
@@ -95,12 +95,6 @@ export default async function GamePage({ params }: GamePageProps) {
                     <Download className="w-4 h-4 mr-1.5 text-accent" />
                     {formatNumberWithSuffix(stats.totalDownloads)}
                   </span>
-                )}
-                 {stats.totalViews !== undefined && stats.totalDownloads === undefined && (
-                    <span className="flex items-center" title={`${stats.totalViews.toLocaleString()} views`}>
-                        <Eye className="w-4 h-4 mr-1.5 text-accent" />
-                        {formatNumberWithSuffix(stats.totalViews)}
-                    </span>
                 )}
                 <span className="flex items-center" title={`${stats.totalFollowers.toLocaleString()} followers/likes`}>
                   <Heart className="w-4 h-4 mr-1.5 text-accent" />
