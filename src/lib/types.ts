@@ -87,7 +87,7 @@ export type GenericListItem = Game | WebItem | AppItem | ArtMusicItem;
 
 export interface ItemStats {
   totalResources: number;
-  totalDownloads?: number; // Downloads might not apply to all types
+  totalDownloads: number; 
   totalViews?: number;    // Views might be more generic
   totalFollowers: number;
 }
@@ -155,3 +155,25 @@ export interface ItemWithDetails extends GenericListItem {
   stats: ItemStats;
 }
 
+// For AuthForm
+export interface AuthFormSignUpData {
+  email: string;
+  username: string;
+  phoneNumber: string;
+  passwordBody: string; // Renamed from password to avoid conflict with AuthFormSignInData if merged
+}
+
+export interface AuthFormSignInData {
+  identifier: string; // Can be email, username, or phone
+  passwordBody: string; // Renamed from password
+}
+
+// Merged type for react-hook-form if using one form component with conditional fields
+export interface AuthFormData extends Partial<AuthFormSignUpData>, Partial<AuthFormSignInData> {
+  // Common fields or make all optional and validate based on mode
+  email?: string;
+  username?: string;
+  phoneNumber?: string;
+  identifier?: string;
+  passwordBody: string;
+}
