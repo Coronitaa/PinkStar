@@ -51,7 +51,8 @@ export function AppItemPageContent({ item, categories, initialCategoryResources 
       const results: Record<string, Resource[] | null> = {};
       for (const category of categories) {
         try {
-          const bestMatches = await fetchBestMatchForCategoryAction(item.slug, category.slug, debouncedSearchQuery, FETCH_CAROUSEL_ITEMS_COUNT);
+          // Pass item.itemType to the server action
+          const bestMatches = await fetchBestMatchForCategoryAction(item.slug, item.itemType, category.slug, debouncedSearchQuery, FETCH_CAROUSEL_ITEMS_COUNT);
           results[category.slug] = bestMatches.length > 0 ? bestMatches : null;
         } catch (error) {
           console.error(`Failed to fetch search results for category ${category.name}:`, error);
@@ -60,7 +61,7 @@ export function AppItemPageContent({ item, categories, initialCategoryResources 
       }
       setCategorySearchResults(results);
     });
-  }, [debouncedSearchQuery, item.slug, categories]);
+  }, [debouncedSearchQuery, item, categories]); // Added item to dependencies
 
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setGlobalSearchQuery(e.target.value);
@@ -198,5 +199,3 @@ export function AppItemPageContent({ item, categories, initialCategoryResources 
     </div>
   );
 }
-
-    

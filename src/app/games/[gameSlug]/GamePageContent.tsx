@@ -1,3 +1,4 @@
+
 'use client';
 
 import type React from 'react';
@@ -55,7 +56,8 @@ export function GamePageContent({ game, categories, initialCategoryResources }: 
       const results: Record<string, Resource[] | null> = {};
       for (const category of categories) {
         try {
-          const bestMatches = await fetchBestMatchForCategoryAction(game.slug, category.slug, debouncedSearchQuery, FETCH_CAROUSEL_ITEMS_COUNT);
+          // Pass game.itemType to the server action
+          const bestMatches = await fetchBestMatchForCategoryAction(game.slug, game.itemType, category.slug, debouncedSearchQuery, FETCH_CAROUSEL_ITEMS_COUNT);
           results[category.slug] = bestMatches.length > 0 ? bestMatches : null;
         } catch (error) {
           console.error(`Failed to fetch search results for category ${category.name}:`, error);
@@ -64,7 +66,7 @@ export function GamePageContent({ game, categories, initialCategoryResources }: 
       }
       setCategorySearchResults(results);
     });
-  }, [debouncedSearchQuery, game.slug, categories]);
+  }, [debouncedSearchQuery, game, categories]); // Added game to dependencies as game.itemType is used
 
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setGlobalSearchQuery(e.target.value);
@@ -84,12 +86,12 @@ export function GamePageContent({ game, categories, initialCategoryResources }: 
       <div className="relative w-full sm:w-auto max-w-md mb-8"> {/* Container for input to control its width */}
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
         <Input
- ref={searchInputRef}
- type="search"
- placeholder={`Search all resources in ${game.name}...`}
- className="pl-10 text-base w-full"
- value={globalSearchQuery}
- onChange={handleSearchInputChange}
+          ref={searchInputRef}
+          type="search"
+          placeholder={`Search all resources in ${game.name}...`}
+          className="pl-10 text-base w-full"
+          value={globalSearchQuery}
+          onChange={handleSearchInputChange}
         />
       </div>
       {isSearching && (
