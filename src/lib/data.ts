@@ -1,5 +1,5 @@
 
-import type { Game, Category, Resource, Author, Tag, ResourceFile, GetResourcesParams, PaginatedResourcesResponse, ResourceLinks, ChangelogEntry, WebItem, AppItem, ArtMusicItem, ItemStats, ItemType, ItemWithDetails, GenericListItem } from './types';
+import type { Game, Category, Resource, Author, Tag, ResourceFile, GetResourcesParams, PaginatedResourcesResponse, ResourceLinks, ChangelogEntry, WebItem, AppItem, ArtMusicItem, ItemStats, ItemType, ItemWithDetails, GenericListItem, TagType } from './types';
 import { formatDistanceToNow } from 'date-fns';
 
 const commonTags: Record<string, Tag> = {
@@ -82,7 +82,7 @@ const baseGames: Game[] = [
     id: 'game1', name: 'PixelVerse Adventures', slug: 'pixelverse-adventures', itemType: 'game',
     description: 'An epic sandbox adventure in a blocky world.',
     longDescription: 'PixelVerse Adventures is a sprawling open-world sandbox game where creativity and exploration know no bounds. Build magnificent structures, embark on daring quests, discover hidden dungeons, and team up with friends in a vibrant, procedurally generated universe. With regular updates and a thriving community, there\'s always something new to discover in PixelVerse.',
-    bannerUrl: 'https://placehold.co/1200x400/D81B60/FFFFFF?text=PixelVerse+Banner&data-ai-hint=game illustration fantasy', iconUrl: 'https://placehold.co/128x128/D81B60/FFFFFF?text=PV&data-ai-hint=game logo pixelated',
+    bannerUrl: 'https://placehold.co/1200x400/D81B60/FFFFFF?text=PixelVerse+Banner', iconUrl: 'https://placehold.co/128x128/D81B60/FFFFFF?text=PV',
     tags: [commonTags.pc, commonTags.sandbox, commonTags.multiplayer, commonTags.adventure, commonTags.rpg],
     createdAt: new Date('2023-01-15T10:00:00Z').toISOString(), updatedAt: new Date('2024-03-10T12:00:00Z').toISOString(),
   },
@@ -90,7 +90,7 @@ const baseGames: Game[] = [
     id: 'game2', name: 'Galaxy Explorers', slug: 'galaxy-explorers', itemType: 'game',
     description: 'Conquer the stars in this vast space simulation.',
     longDescription: 'Galaxy Explorers invites you to chart your own course across a procedurally generated galaxy of trillions of stars. Mine resources, trade commodities, engage in thrilling dogfights, build your own starbases, and unravel the mysteries of ancient alien civilizations. Whether you choose to be a peaceful trader, a notorious pirate, or a renowned explorer, your saga is written in the stars.',
-    bannerUrl: 'https://placehold.co/1200x400/AD1457/FFFFFF?text=Galaxy+Banner&data-ai-hint=space nebula stars', iconUrl: 'https://placehold.co/128x128/AD1457/FFFFFF?text=GE&data-ai-hint=space logo planet',
+    bannerUrl: 'https://placehold.co/1200x400/AD1457/FFFFFF?text=Galaxy+Banner', iconUrl: 'https://placehold.co/128x128/AD1457/FFFFFF?text=GE',
     tags: [commonTags.pc, commonTags.space, commonTags.openWorld, commonTags.simulation, commonTags.singleplayer],
     createdAt: new Date('2022-11-20T14:30:00Z').toISOString(), updatedAt: new Date('2024-02-28T10:00:00Z').toISOString(),
   },
@@ -98,7 +98,7 @@ const baseGames: Game[] = [
     id: 'game3', name: 'Kingdoms Collide', slug: 'kingdoms-collide', itemType: 'game',
     description: 'Lead your armies to victory in this epic RTS.',
     longDescription: 'Kingdoms Collide is a real-time strategy game that blends classic RTS mechanics with deep tactical gameplay. Choose from unique factions, command vast armies, manage your economy, and outwit your opponents on diverse battlefields. Featuring a compelling single-player campaign and intense multiplayer matches, only the shrewdest commanders will prevail.',
-    bannerUrl: 'https://placehold.co/1200x400/F06292/FFFFFF?text=Kingdoms+Banner&data-ai-hint=battle scene medieval', iconUrl: 'https://placehold.co/128x128/F06292/FFFFFF?text=KC&data-ai-hint=shield logo crown',
+    bannerUrl: 'https://placehold.co/1200x400/F06292/FFFFFF?text=Kingdoms+Banner', iconUrl: 'https://placehold.co/128x128/F06292/FFFFFF?text=KC',
     tags: [commonTags.pc, commonTags.rts, commonTags.strategy, commonTags.multiplayer],
     createdAt: new Date('2023-05-01T09:00:00Z').toISOString(), updatedAt: new Date('2023-12-15T16:45:00Z').toISOString(),
   },
@@ -109,7 +109,7 @@ const baseWebItems: WebItem[] = [
     id: 'web1', name: 'Profolio X', slug: 'profolio-x', itemType: 'web',
     description: 'A sleek and modern portfolio template for creatives.',
     longDescription: 'Profolio X is a Next.js and Tailwind CSS powered portfolio template designed for developers, designers, and artists to showcase their work beautifully. It features a clean design, smooth animations, and an easy-to-customize structure. Comes with a built-in blog and project pages.',
-    bannerUrl: 'https://placehold.co/1200x400/1E88E5/FFFFFF?text=ProfolioX+Banner&data-ai-hint=website design modern', iconUrl: 'https://placehold.co/128x128/1E88E5/FFFFFF?text=PX&data-ai-hint=letter P logo',
+    bannerUrl: 'https://placehold.co/1200x400/1E88E5/FFFFFF?text=ProfolioX+Banner', iconUrl: 'https://placehold.co/128x128/1E88E5/FFFFFF?text=PX',
     tags: [commonTags.portfolio, commonTags.react, commonTags.nextjs, commonTags.tailwind],
     technologies: [commonTags.nextjs, commonTags.react, commonTags.tailwind, commonTags.typescript],
     createdAt: new Date('2023-08-10T10:00:00Z').toISOString(), updatedAt: new Date('2024-01-20T11:00:00Z').toISOString(),
@@ -119,7 +119,7 @@ const baseWebItems: WebItem[] = [
     id: 'web2', name: 'E-Shop Starter', slug: 'e-shop-starter', itemType: 'web',
     description: 'A feature-rich e-commerce starter kit with modern tech.',
     longDescription: 'Kickstart your online store with E-Shop Starter. Built with Vue.js, Nuxt, and integrated with Stripe for payments. Includes product listings, cart functionality, user accounts, and an admin dashboard. Fully responsive and SEO-friendly.',
-    bannerUrl: 'https://placehold.co/1200x400/43A047/FFFFFF?text=EShop+Banner&data-ai-hint=online store shopping', iconUrl: 'https://placehold.co/128x128/43A047/FFFFFF?text=ES&data-ai-hint=shopping cart logo',
+    bannerUrl: 'https://placehold.co/1200x400/43A047/FFFFFF?text=EShop+Banner', iconUrl: 'https://placehold.co/128x128/43A047/FFFFFF?text=ES',
     tags: [commonTags.ecommerce, commonTags.vue, commonTags.saas],
     technologies: [commonTags.vue, commonTags.typescript, {id: 'tag-nuxt', name: 'Nuxt.js', type: 'framework'}],
     createdAt: new Date('2023-06-15T14:00:00Z').toISOString(), updatedAt: new Date('2024-02-25T10:00:00Z').toISOString(),
@@ -132,7 +132,7 @@ const baseAppItems: AppItem[] = [
     id: 'app1', name: 'TaskMaster Pro', slug: 'taskmaster-pro', itemType: 'app',
     description: 'Boost your productivity with this intuitive task manager.',
     longDescription: 'TaskMaster Pro helps you organize your life and work with ease. Create projects, set deadlines, track progress, and collaborate with teams. Available on iOS and Android, with cloud sync. Features include subtasks, reminders, priority levels, and customizable views.',
-    bannerUrl: 'https://placehold.co/1200x400/FB8C00/FFFFFF?text=TaskMaster+Banner&data-ai-hint=mobile app interface', iconUrl: 'https://placehold.co/128x128/FB8C00/FFFFFF?text=TM&data-ai-hint=checkmark logo app',
+    bannerUrl: 'https://placehold.co/1200x400/FB8C00/FFFFFF?text=TaskMaster+Banner', iconUrl: 'https://placehold.co/128x128/FB8C00/FFFFFF?text=TM',
     tags: [commonTags.productivity, commonTags.ios, commonTags.android],
     platforms: [commonTags.ios, commonTags.android],
     technologies: [commonTags.flutter, {id: 'tag-dart', name: 'Dart', type: 'language'}],
@@ -147,7 +147,7 @@ const baseArtMusicItems: ArtMusicItem[] = [
     description: 'A collection of futuristic digital paintings.',
     artistName: 'Visionary Void',
     longDescription: 'Dive into "Cybernetic Dreams," a series of digital artworks exploring themes of technology, consciousness, and the future of humanity. Each piece is meticulously crafted with vibrant colors and intricate details, inviting contemplation and wonder.',
-    bannerUrl: 'https://placehold.co/1200x400/6D4C41/FFFFFF?text=Cybernetic+Banner&data-ai-hint=digital art abstract', iconUrl: 'https://placehold.co/128x128/6D4C41/FFFFFF?text=CD&data-ai-hint=eye logo art',
+    bannerUrl: 'https://placehold.co/1200x400/6D4C41/FFFFFF?text=Cybernetic+Banner', iconUrl: 'https://placehold.co/128x128/6D4C41/FFFFFF?text=CD',
     tags: [commonTags.digitalArt, commonTags.illustration],
     medium: commonTags.digitalArt,
     createdAt: new Date('2023-10-01T12:00:00Z').toISOString(), updatedAt: new Date('2023-11-15T10:00:00Z').toISOString(),
@@ -182,11 +182,11 @@ const allResources: Resource[] = [
   // Game Resources (existing)
   {
     id: 'res1', name: 'Ultra Graphics Mod', slug: 'ultra-graphics-mod', parentItemName: 'PixelVerse Adventures', parentItemSlug: 'pixelverse-adventures', parentItemType: 'game', categoryName: 'Visual Enhancements', categorySlug: 'visual-enhancements', 
-    imageUrl: 'https://placehold.co/600x400/D81B60/FFFFFF?text=UltraGFX+Main&data-ai-hint=gameplay cinematic beautiful',
+    imageUrl: 'https://placehold.co/600x400/D81B60/FFFFFF?text=UltraGFX+Main',
     imageGallery: [
-        'https://placehold.co/800x600/D81B60/FFFFFF?text=UltraGFX+Scene+1&data-ai-hint=gameplay environment',
-        'https://placehold.co/800x600/C2185B/FFFFFF?text=UltraGFX+Scene+2&data-ai-hint=gameplay environment',
-        'https://placehold.co/800x600/AD1457/FFFFFF?text=UltraGFX+Character&data-ai-hint=character closeup',
+        'https://placehold.co/800x600/D81B60/FFFFFF?text=UltraGFX+Scene+1',
+        'https://placehold.co/800x600/C2185B/FFFFFF?text=UltraGFX+Scene+2',
+        'https://placehold.co/800x600/AD1457/FFFFFF?text=UltraGFX+Character',
     ],
     author: authors[0], tags: [commonTags.v1_20, commonTags.fabric, commonTags.texturePack, commonTags.pc, commonTags.enhancement], downloads: 15000, createdAt: new Date('2023-05-10T10:00:00Z').toISOString(), updatedAt: new Date('2023-08-15T14:30:00Z').toISOString(), version: '2.1.0', description: 'Breathtaking visual overhaul for PixelVerse. Experience the world like never before.', detailedDescription: `Ultra Graphics Mod transforms your PixelVerse experience with stunning high-resolution textures, advanced lighting effects, and realistic weather systems. Explore familiar landscapes with a newfound sense of awe and immersion. This mod is optimized for performance while delivering top-tier visuals.\n\nFeatures:\n- 4K Texture Support\n- Dynamic Global Illumination\n- Volumetric Clouds & Fog\n- Enhanced Water Shaders\n- Particle Effect Overhaul\n\nThis is a must have graphics mod for any PixelVerse player seeking ultimate immersion. Our team spent months crafting these visuals.`, 
     files: [
@@ -203,7 +203,7 @@ const allResources: Resource[] = [
   // ... (other existing game resources) ...
   {
     id: 'res-web-ui-kit', name: 'Aurora UI Kit', slug: 'aurora-ui-kit', parentItemName: 'Profolio X', parentItemSlug: 'profolio-x', parentItemType: 'web', categoryName: 'UI Components', categorySlug: 'ui-components',
-    imageUrl: 'https://placehold.co/600x400/0288D1/FFFFFF?text=AuroraUI&data-ai-hint=ui kit components',
+    imageUrl: 'https://placehold.co/600x400/0288D1/FFFFFF?text=AuroraUI',
     author: authors[3], tags: [commonTags.react, commonTags.tailwind, commonTags.typescript], downloads: 500, createdAt: new Date('2023-09-01T10:00:00Z').toISOString(), updatedAt: new Date('2024-01-15T11:00:00Z').toISOString(), version: '1.2.0',
     description: 'A comprehensive React component library for Profolio X.',
     detailedDescription: 'Aurora UI Kit provides a set of beautifully designed and accessible React components, perfectly styled for Profolio X using Tailwind CSS. Includes buttons, forms, modals, navigation, and more. Accelerate your Profolio X customization.',
@@ -213,7 +213,7 @@ const allResources: Resource[] = [
   },
   {
     id: 'res-app-auth', name: 'Firebase Auth Starter', slug: 'firebase-auth-starter', parentItemName: 'TaskMaster Pro', parentItemSlug: 'taskmaster-pro', parentItemType: 'app', categoryName: 'SDKs & Libraries', categorySlug: 'sdks-libraries',
-    imageUrl: 'https://placehold.co/600x400/FFA000/FFFFFF?text=FirebaseAuth&data-ai-hint=authentication login mobile',
+    imageUrl: 'https://placehold.co/600x400/FFA000/FFFFFF?text=FirebaseAuth',
     author: authors[4], tags: [commonTags.flutter, {id: 'tag-firebase', name: 'Firebase', type: 'tooling'}], downloads: 800, createdAt: new Date('2023-07-10T14:00:00Z').toISOString(), updatedAt: new Date('2023-12-01T09:00:00Z').toISOString(), version: '1.0.0',
     description: 'Quickly integrate Firebase Authentication into your Flutter app.',
     detailedDescription: 'This starter package provides all necessary boilerplate code to integrate Firebase Authentication (Email/Password, Google Sign-In) into a Flutter application like TaskMaster Pro. Includes UI screens for login, registration, and password reset.',
@@ -222,7 +222,7 @@ const allResources: Resource[] = [
   },
   {
     id: 'res-art-nebula', name: 'Nebula Brush Pack', slug: 'nebula-brush-pack', parentItemName: 'Cybernetic Dreams', parentItemSlug: 'cybernetic-dreams', parentItemType: 'art-music', categoryName: 'Brushes & Presets', categorySlug: 'brushes-presets',
-    imageUrl: 'https://placehold.co/600x400/795548/FFFFFF?text=NebulaBrushes&data-ai-hint=photoshop brushes space',
+    imageUrl: 'https://placehold.co/600x400/795548/FFFFFF?text=NebulaBrushes',
     author: authors[5], tags: [commonTags.digitalArt, {id: 'tag-photoshop', name: 'Photoshop', type: 'tooling'}], downloads: 1200, createdAt: new Date('2023-11-01T15:00:00Z').toISOString(), updatedAt: new Date('2023-11-20T13:00:00Z').toISOString(), version: '1.0',
     description: 'A set of high-resolution brushes for creating stunning space nebulae.',
     detailedDescription: 'Create breathtaking space scenes with the Nebula Brush Pack for Photoshop (and compatible software). Includes over 50 high-resolution brushes for stars, gas clouds, and cosmic dust, perfect for digital artists working on projects like Cybernetic Dreams.',
@@ -236,7 +236,7 @@ const MOCK_DELAY = 0;
 const delayed = <T>(data: T): Promise<T> => new Promise(resolve => setTimeout(() => resolve(data), MOCK_DELAY));
 
 // Generic function to calculate search score
-const calculateGenericItemSearchScore = (item: GenericListItem, query: string): number => {
+export const calculateGenericItemSearchScore = (item: GenericListItem, query: string): number => {
   if (!query) return 0;
   const lowerQuery = query.toLowerCase();
   let score = 0;
@@ -286,24 +286,18 @@ export const getItemBySlugGeneric = async (slug: string, itemType: ItemType): Pr
 // Generic function to get categories for a specific item type and slug
 export const getCategoriesForItemGeneric = async (itemSlug: string, itemType: ItemType): Promise<Category[]> => {
   const itemCategories = allCategories
-    .filter(cat => cat.parentItemType === itemType) // First filter by general item type
-    .map(c => ({ ...c, parentItemSlug: itemSlug, parentItemType: itemType })); // Assign parent slug/type for context
+    .filter(cat => cat.parentItemType === itemType) 
+    .map(c => ({ ...c, parentItemSlug: itemSlug, parentItemType: itemType })); 
 
-  // This simplified version assumes all categories of a type are potentially applicable
-  // A more complex system might link specific categories to specific items.
-  // For now, we will filter resources later based on parentItemSlug.
-  // For display on item cards, we'll pick a few common ones or allow manual assignment.
   
-  // Simulate that an item has a subset of these categories
-  // In a real app, items would have a direct list of their category IDs.
-  // For mock: PixelVerse has cat1, cat2, cat3. ProfolioX has webcat1, webcat2.
   let specificItemCategories: Category[] = [];
   if (itemType === 'game') {
       if (itemSlug === 'pixelverse-adventures') specificItemCategories = itemCategories.filter(c => ['cat1', 'cat2', 'cat3'].includes(c.id));
       else if (itemSlug === 'galaxy-explorers') specificItemCategories = itemCategories.filter(c => ['cat4', 'cat5'].includes(c.id));
-      else specificItemCategories = itemCategories.slice(0,2); // Default to first 2 for other games
+      else specificItemCategories = itemCategories.slice(0,2); 
   } else if (itemType === 'web') {
       if (itemSlug === 'profolio-x') specificItemCategories = itemCategories.filter(c => ['webcat1', 'webcat2'].includes(c.id));
+      else if (itemSlug === 'e-shop-starter') specificItemCategories = itemCategories.filter(c => ['webcat1', 'webcat3'].includes(c.id));
       else specificItemCategories = itemCategories.slice(0,2);
   } else if (itemType === 'app') {
       if (itemSlug === 'taskmaster-pro') specificItemCategories = itemCategories.filter(c => ['appcat1', 'appcat2'].includes(c.id));
@@ -320,9 +314,8 @@ export const getCategoriesForItemGeneric = async (itemSlug: string, itemType: It
 export const getItemStatsGeneric = async (itemSlug: string, itemType: ItemType): Promise<ItemStats> => {
   const { resources } = await getResources({ parentItemSlug: itemSlug, parentItemType: itemType, limit: Infinity });
   const totalResources = resources.length;
-  const totalDownloads = resources.reduce((sum, resource) => sum + resource.downloads, 0);
-  const totalFollowers = resources.reduce((sum, resource) => sum + (resource.followers || 0), 0);
-  // For web/apps/art, "views" might be more appropriate than downloads for the parent item itself.
+  const totalDownloads = itemType === 'game' ? resources.reduce((sum, resource) => sum + resource.downloads, 0) : undefined;
+  const totalFollowers = Math.floor(Math.random() * 1000) + 50; // Generic follower count
   const totalViews = itemType !== 'game' ? Math.floor(Math.random() * 50000) + 1000 : undefined;
   return delayed({ totalResources, totalDownloads, totalFollowers, totalViews });
 };
@@ -370,12 +363,13 @@ export const getResources = async (params: GetResourcesParams): Promise<Paginate
   }
   
   if (params?.searchQuery && params.searchQuery.length > 0) { 
-    const query = params.searchQuery; 
-    // Temporarily use simplified search for resources until a more specific resource search score is needed
+    const query = params.searchQuery.toLowerCase(); 
     filteredResources = filteredResources.map(r => {
       let score = 0;
-      if (r.name.toLowerCase().includes(query.toLowerCase())) score += 10;
-      if (r.description.toLowerCase().includes(query.toLowerCase())) score += 3;
+      if (r.name.toLowerCase().includes(query)) score += 10;
+      if (r.description.toLowerCase().includes(query)) score += 3;
+      if (r.author.name.toLowerCase().includes(query)) score += 2;
+      if (r.tags.some(tag => tag.name.toLowerCase().includes(query))) score +=1;
       r.searchScore = score;
       return r;
     }).filter(r => r.searchScore! > (params.minScore || 0));
@@ -396,8 +390,8 @@ export const getResources = async (params: GetResourcesParams): Promise<Paginate
         filteredResources.sort((a, b) => (b.searchScore || 0) - (a.searchScore || 0));
       } else {
         filteredResources.sort((a, b) => {
-          const scoreA = (a.downloads / 1000) + (new Date(a.updatedAt).getTime() / (1000 * 60 * 60 * 24 * 30));
-          const scoreB = (b.downloads / 1000) + (new Date(b.updatedAt).getTime() / (1000 * 60 * 60 * 24 * 30));
+          const scoreA = (a.downloads / 1000) + (new Date(a.updatedAt).getTime() / (1000 * 60 * 60 * 24 * 30)) + (a.rating || 0);
+          const scoreB = (b.downloads / 1000) + (new Date(b.updatedAt).getTime() / (1000 * 60 * 60 * 24 * 30)) + (b.rating || 0);
           return scoreB - scoreA;
         });
       }
@@ -542,3 +536,6 @@ export const formatTimeAgo = (dateString: string | undefined): string => {
   }
   return formatDistanceToNow(new Date(dateString), { addSuffix: true });
 };
+
+
+    
