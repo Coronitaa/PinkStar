@@ -1,16 +1,15 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import type { GenericListItem, Category, ItemStats, ItemWithDetails } from '@/lib/types';
+import type { ItemWithDetails, Category, ItemStats } from '@/lib/types';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TagBadge } from '@/components/shared/TagBadge';
-import { Package, Download, Layers, Tag as TagIcon, Eye, ExternalLink } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Package, Download, Layers, Tag as TagIcon } from 'lucide-react'; // Removed Eye, ExternalLink
 
 interface ItemCardProps {
-  item: ItemWithDetails; // Using ItemWithDetails which includes categories and stats
-  basePath: string; // e.g., "/games", "/web", "/apps", "/art-music"
+  item: ItemWithDetails;
+  basePath: string;
 }
 
 const MAX_CATEGORIES_DISPLAY = 2;
@@ -21,22 +20,7 @@ export function ItemCard({ item, basePath }: ItemCardProps) {
   const categories = item.categories || [];
   const stats = item.stats;
 
-  const handleProjectLinkClick = (e: React.MouseEvent<HTMLSpanElement>) => {
-    e.stopPropagation(); // Prevent card navigation
-    if (item.projectUrl) {
-      window.open(item.projectUrl, '_blank', 'noopener,noreferrer');
-    }
-  };
-  
-  const handleProjectLinkKeyDown = (e: React.KeyboardEvent<HTMLSpanElement>) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      e.stopPropagation();
-      if (item.projectUrl) {
-        window.open(item.projectUrl, '_blank', 'noopener,noreferrer');
-      }
-    }
-  };
+  // Event handlers for external link removed as the link itself is removed from footer
 
   return (
     <Link href={`${basePath}/${item.slug}`} className="block group h-full">
@@ -56,11 +40,11 @@ export function ItemCard({ item, basePath }: ItemCardProps) {
         </CardHeader>
         <CardContent className="p-5 flex-grow">
           <div className="flex items-start mb-3">
-            <Image 
-              src={item.iconUrl} 
-              alt={`${item.name} icon`} 
-              width={48} 
-              height={48} 
+            <Image
+              src={item.iconUrl}
+              alt={`${item.name} icon`}
+              width={48}
+              height={48}
               className="rounded-lg mr-4 border-2 border-primary/50 shadow-md flex-shrink-0"
               data-ai-hint={`${item.itemType} icon logo`}
             />
@@ -71,15 +55,15 @@ export function ItemCard({ item, basePath }: ItemCardProps) {
             </div>
           </div>
           <p className="text-sm text-muted-foreground mb-4 line-clamp-2 h-10">{item.description}</p>
-          
+
           {itemTags.length > 0 && (
             <div className="mb-4">
               <h4 className="text-xs font-semibold text-primary mb-1.5 flex items-center"><TagIcon className="w-3.5 h-3.5 mr-1.5" /> {item.itemType === 'game' ? 'Game' : 'Project'} Tags</h4>
               <div className="flex flex-wrap gap-1.5">
                 {itemTags.slice(0, MAX_TAGS_DISPLAY).map(tag => (
-                  <TagBadge 
-                    key={tag.id} 
-                    tag={tag} 
+                  <TagBadge
+                    key={tag.id}
+                    tag={tag}
                     className="text-[10px] px-1.5 py-0.5"
                   />
                 ))}
@@ -97,9 +81,9 @@ export function ItemCard({ item, basePath }: ItemCardProps) {
               <h4 className="text-xs font-semibold text-primary mb-1.5 flex items-center"><Layers className="w-3.5 h-3.5 mr-1.5" /> Categories</h4>
               <div className="flex flex-wrap gap-1.5">
                 {categories.slice(0, MAX_CATEGORIES_DISPLAY).map(cat => (
-                  <TagBadge 
-                    key={cat.id} 
-                    tag={{ name: cat.name, id: cat.id, type: 'misc' }} 
+                  <TagBadge
+                    key={cat.id}
+                    tag={{ name: cat.name, id: cat.id, type: 'misc' }} // Assuming categories are misc type for display
                     className="text-xs bg-secondary hover:bg-secondary/80"
                   />
                 ))}
@@ -124,23 +108,7 @@ export function ItemCard({ item, basePath }: ItemCardProps) {
                     <span>{stats.totalDownloads.toLocaleString()} Dls</span>
                  </div>
             )}
-            {stats.totalViews !== undefined && (
-                 <div className="flex items-center" title="Total Views">
-                    <Eye className="w-4 h-4 mr-1.5 text-accent" />
-                    <span>{stats.totalViews.toLocaleString()} Views</span>
-                 </div>
-            )}
-            {item.itemType !== 'game' && item.projectUrl && (
-                 <span 
-                    onClick={handleProjectLinkClick}
-                    onKeyDown={handleProjectLinkKeyDown}
-                    role="link"
-                    tabIndex={0}
-                    className="flex items-center hover:text-primary cursor-pointer" title="Visit Project">
-                    <ExternalLink className="w-4 h-4 mr-1.5 text-accent" />
-                    <span>Visit</span>
-                </span>
-            )}
+            {/* "Views" and "Visit Project" link removed from here */}
           </div>
         </CardFooter>
       </Card>
