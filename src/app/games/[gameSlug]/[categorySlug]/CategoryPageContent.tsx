@@ -5,28 +5,29 @@ import type React from 'react';
 import { useState, useEffect, useCallback, useRef, useTransition } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
-import type { Resource, Tag, Category as CategoryType, PaginatedResourcesResponse, GetResourcesParams } from '@/lib/types';
+import type { Resource, Tag, Category as CategoryType, PaginatedResourcesResponse, GetResourcesParams, ItemType } from '@/lib/types';
 import { ResourceListItem } from '@/components/resource/ResourceListItem';
-import { ResourceFilterControls } from '@/components/resource/ResourceFilterControls';
+import { ResourceFilterControls, type AvailableTags } from '@/components/resource/ResourceFilterControls';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-import { Loader2, Search, ListFilter, Info, Upload } from 'lucide-react';
+import { Loader2, Search, Info } from 'lucide-react';
 import { fetchPaginatedResourcesAction } from '@/app/actions/resourceActions';
 
 const RESOURCES_PER_PAGE = 20;
 const SEARCH_DEBOUNCE_MS = 500;
 
 type SortByType = 'relevance' | 'downloads' | 'updatedAt' | 'name';
+type FilterableTagType = keyof AvailableTags;
 
 interface CategoryPageContentProps {
   initialResources: Resource[];
   initialHasMore: boolean;
   initialTotal: number;
-  gameSlug: string;
+  itemSlug: string;
+  itemType: ItemType;
   categorySlug: string;
-  availableFilterTags: { versions: Tag[]; loaders: Tag[]; genres: Tag[]; misc: Tag[]; channels: Tag[] };
-  gameName: string;
+  availableFilterTags: Partial<AvailableTags>;
+  itemName: string;
   categoryName: string;
 }
 
@@ -34,10 +35,11 @@ export function CategoryPageContent({
   initialResources,
   initialHasMore,
   initialTotal,
-  gameSlug,
+  itemSlug,
+  itemType,
   categorySlug,
   availableFilterTags,
-  gameName,
+  itemName,
   categoryName,
 }: CategoryPageContentProps) {
   const router = useRouter();
@@ -55,15 +57,31 @@ export function CategoryPageContent({
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   const [searchQueryInput, setSearchQueryInput] = useState(searchParams.get('q') || '');
-  const [sortBy, setSortBy] = useState<SortByType>(() => {
+  
+  const getDefaultSortBy = useCallback(() => {
     const qFromUrl = searchParams.get('q') || '';
+    if (qFromUrl) return 'relevance';
+    return itemType === 'game' ? 'downloads' : 'updatedAt';
+  }, [itemType, searchParams]);
+
+  const [sortBy, setSortBy] = useState<SortByType>(() => {
     const sortParam = searchParams.get('sort') as SortByType;
-    return sortParam || (qFromUrl ? 'relevance' : 'downloads');
+    return sortParam || getDefaultSortBy();
   });
   
   const activeTagFiltersRef = useRef<string[]>([]);
 
-  // Sync controlled inputs with URL on initial load or direct URL change
+  const getAllActiveTagIdsFromParams = useCallback((params: URLSearchParams): string[] => {
+    const allIds: string[] = [];
+    const tagKeys: FilterableTagType[] = ['versions', 'loaders', 'genres', 'misc', 'channels', 'frameworks', 'languages', 'tooling', 'platforms', 'appCategories', 'artStyles', 'musicGenres'];
+    tagKeys.forEach(key => {
+      const ids = params.get(key)?.split(',').filter(Boolean) || [];
+      allIds.push(...ids);
+    });
+    return allIds;
+  }, []);
+
+
   useEffect(() => {
     const qFromUrl = searchParams.get('q') || '';
     setSearchQueryInput(qFromUrl); 
@@ -72,33 +90,21 @@ export function CategoryPageContent({
     if (sortParam && ['relevance', 'downloads', 'updatedAt', 'name'].includes(sortParam)) {
       setSortBy(sortParam as SortByType);
     } else {
-      setSortBy(qFromUrl ? 'relevance' : 'downloads');
+      setSortBy(getDefaultSortBy());
     }
-
-    const versionFilters = searchParams.get('versions')?.split(',').filter(Boolean) || [];
-    const loaderFilters = searchParams.get('loaders')?.split(',').filter(Boolean) || [];
-    const genreFilters = searchParams.get('genres')?.split(',').filter(Boolean) || [];
-    const miscFilters = searchParams.get('misc')?.split(',').filter(Boolean) || [];
-    const channelFilters = searchParams.get('channels')?.split(',').filter(Boolean) || [];
-    activeTagFiltersRef.current = [...versionFilters, ...loaderFilters, ...genreFilters, ...miscFilters, ...channelFilters];
-
-  }, [searchParams]);
+    activeTagFiltersRef.current = getAllActiveTagIdsFromParams(searchParams);
+  }, [searchParams, getDefaultSortBy, getAllActiveTagIdsFromParams]);
 
 
   const fetchAndSetResources = useCallback(async (page: number, options?: { isNewSearchOrFilter?: boolean }) => {
     startDataTransition(async () => {
       const currentQ = searchParams.get('q') || '';
-      const currentSort = (searchParams.get('sort') as SortByType) || (currentQ ? 'relevance' : 'downloads');
-      
-      const versionFilters = searchParams.get('versions')?.split(',').filter(Boolean) || [];
-      const loaderFilters = searchParams.get('loaders')?.split(',').filter(Boolean) || [];
-      const genreFilters = searchParams.get('genres')?.split(',').filter(Boolean) || [];
-      const miscFilters = searchParams.get('misc')?.split(',').filter(Boolean) || [];
-      const channelFilters = searchParams.get('channels')?.split(',').filter(Boolean) || [];
-      const currentTags = [...versionFilters, ...loaderFilters, ...genreFilters, ...miscFilters, ...channelFilters];
+      const currentSort = (searchParams.get('sort') as SortByType) || getDefaultSortBy();
+      const currentTags = getAllActiveTagIdsFromParams(searchParams);
 
       const params: GetResourcesParams = {
-        gameSlug,
+        parentItemSlug: itemSlug,
+        parentItemType: itemType,
         categorySlug,
         page,
         limit: RESOURCES_PER_PAGE,
@@ -122,7 +128,7 @@ export function CategoryPageContent({
         console.error("Failed to fetch resources:", error);
       }
     });
-  }, [gameSlug, categorySlug, searchParams, startDataTransition]);
+  }, [itemSlug, itemType, categorySlug, searchParams, startDataTransition, getDefaultSortBy, getAllActiveTagIdsFromParams]);
 
 
    useEffect(() => {
@@ -162,10 +168,21 @@ export function CategoryPageContent({
         current.delete(key);
       }
     });
+    // If relevance sort is selected but query is empty, switch to default sort
+    if (current.get('sort') === 'relevance' && !current.get('q')) {
+        const defaultSort = itemType === 'game' ? 'downloads' : 'updatedAt';
+        current.set('sort', defaultSort);
+    }
+    // If query is added and sort is not relevance, switch to relevance
+    if (current.get('q') && current.get('sort') !== 'relevance') {
+        current.set('sort', 'relevance');
+    }
+
+
     startNavTransition(() => {
       router.push(`${pathname}?${current.toString()}`, { scroll: false });
     });
-  }, [searchParams, pathname, router]);
+  }, [searchParams, pathname, router, itemType]);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -185,34 +202,30 @@ export function CategoryPageContent({
     updateUrlParams({ sort: value });
   };
 
-  const handleFilterChange = useCallback((tags: { versions?: string; loaders?: string; genres?: string; misc?: string, channels?:string }) => {
-    updateUrlParams({ 
-      versions: tags.versions, 
-      loaders: tags.loaders,
-      genres: tags.genres,
-      misc: tags.misc,
-      channels: tags.channels
-    });
+  const handleFilterChange = useCallback((newFilters: Record<FilterableTagType, string | undefined>) => {
+    updateUrlParams(newFilters);
   }, [updateUrlParams]);
   
   const isLoadingFirstPage = isDataLoading && currentPage === 1;
   const isLoadingMore = isDataLoading && currentPage > 1;
   const totalPages = Math.ceil(totalResources / RESOURCES_PER_PAGE) || 1;
 
-  const hasActiveFiltersOrSearch = activeTagFiltersRef.current.length > 0 || (searchParams.get('q') || '');
+  const hasAnyAvailableFilters = Object.values(availableFilterTags).some(tagsArray => tagsArray && tagsArray.length > 0);
+  const hasActiveSearchOrFilters = activeTagFiltersRef.current.length > 0 || (searchParams.get('q') || '');
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-      {(availableFilterTags.versions.length > 0 || availableFilterTags.loaders.length > 0 || availableFilterTags.genres.length > 0 || availableFilterTags.misc.length > 0 || availableFilterTags.channels.length > 0) && (
+      {hasAnyAvailableFilters && (
         <aside className="md:col-span-3 lg:col-span-3 space-y-6">
           <ResourceFilterControls 
             availableTags={availableFilterTags} 
+            itemType={itemType}
             onFilterChangeCallback={handleFilterChange}
           />
         </aside>
       )}
 
-      <main className={(availableFilterTags.versions.length > 0 || availableFilterTags.loaders.length > 0 || availableFilterTags.genres.length > 0 || availableFilterTags.misc.length > 0 || availableFilterTags.channels.length > 0) ? "md:col-span-9 lg:col-span-9" : "md:col-span-12"}>
+      <main className={hasAnyAvailableFilters ? "md:col-span-9 lg:col-span-9" : "md:col-span-12"}>
         <div className="mb-6 p-4 border rounded-lg bg-card shadow">
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
             <div className="relative w-full sm:w-auto"> 
@@ -231,7 +244,7 @@ export function CategoryPageContent({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="relevance">Relevance</SelectItem>
-                <SelectItem value="downloads">Downloads</SelectItem>
+                {itemType === 'game' && <SelectItem value="downloads">Downloads</SelectItem>}
                 <SelectItem value="updatedAt">Last Updated</SelectItem>
                 <SelectItem value="name">Name</SelectItem>
               </SelectContent>
@@ -258,7 +271,7 @@ export function CategoryPageContent({
             <Image src="https://placehold.co/128x128/1f1f1f/E64A8B?text=:(" alt="No results" width={128} height={128} className="mx-auto mb-4 rounded-lg opacity-70" data-ai-hint="sad face emoji"/>
             <p className="text-xl font-semibold text-foreground">No resources found</p>
             <p className="text-muted-foreground">
-              {hasActiveFiltersOrSearch ? "Try adjusting your filters or search terms." : `No resources in ${categoryName} for ${gameName} yet.`}
+              {hasActiveSearchOrFilters ? "Try adjusting your filters or search terms." : `No resources in ${categoryName} for ${itemName} yet.`}
             </p>
           </div>
         )}
