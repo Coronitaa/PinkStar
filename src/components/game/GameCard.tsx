@@ -98,13 +98,13 @@ export function ItemCard({ item, basePath }: ItemCardProps) {
         <CardFooter className="p-5 pt-0 border-t border-border/20 mt-auto">
           <div className="flex justify-between items-center w-full text-sm text-muted-foreground">
             <div className="flex items-center" title={`${stats.totalResources.toLocaleString()} Resources`}>
-              <Package className="w-4 h-4 mr-1.5 text-accent" />
-              <span>{formatNumberWithSuffix(stats.totalResources)} Resources</span>
+              <Package className="w-4 h-4 mr-1 text-accent" />
+              <span>{formatNumberWithSuffix(stats.totalResources)}</span>
             </div>
             {stats.totalDownloads !== undefined && (
                  <div className="flex items-center" title={`${stats.totalDownloads.toLocaleString()} Downloads`}>
-                    <Download className="w-4 h-4 mr-1.5 text-accent" />
-                    <span>{formatNumberWithSuffix(stats.totalDownloads)} Dls</span>
+                    <Download className="w-4 h-4 mr-1 text-accent" />
+                    <span>{formatNumberWithSuffix(stats.totalDownloads)}</span>
                  </div>
             )}
           </div>
