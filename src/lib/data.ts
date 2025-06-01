@@ -339,7 +339,7 @@ export const getWebItemsWithDetails = async (): Promise<ItemWithDetails[]> => ge
 export const getAppItemsWithDetails = async (): Promise<ItemWithDetails[]> => getItemsWithDetailsGeneric('app');
 export const getArtMusicItemsWithDetails = async (): Promise<ItemWithDetails[]> => getItemsWithDetailsGeneric('art-music');
 
-// Specific getters for individual items (can use getItemBySlugGeneric)
+// Specific getters for individual items
 export const getGameBySlug = async (slug: string): Promise<Game | undefined> => getItemBySlugGeneric(slug, 'game') as Promise<Game | undefined>;
 export const getWebItemBySlug = async (slug: string): Promise<WebItem | undefined> => getItemBySlugGeneric(slug, 'web') as Promise<WebItem | undefined>;
 export const getAppItemBySlug = async (slug: string): Promise<AppItem | undefined> => getItemBySlugGeneric(slug, 'app') as Promise<AppItem | undefined>;
@@ -541,4 +541,6 @@ export const formatTimeAgo = (dateString: string | undefined): string => {
     return new Date(dateString).toLocaleDateString(); // Fallback for invalid date string
   }
 };
+    
+
     
