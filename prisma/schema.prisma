@@ -1,12 +1,10 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql" // Cambiado de sqlite a postgresql
+  provider = "postgresql" // Asegurarse de que sea postgresql
   url      = env("DATABASE_URL")
 }
 
@@ -20,232 +18,255 @@ enum ItemTypeEnum {
 enum TagTypeEnum {
   VERSION
   LOADER
-  GENRE // For game genres
-  PLATFORM // For game platforms & app platforms
-  MISC // For game misc tags, web project types, app features, art/music mediums
-  CHANNEL // For resource file release channels (Release, Beta, Alpha)
-  FRAMEWORK // For web frameworks (React, Vue, Next.js)
-  LANGUAGE // For programming languages (JS, TS, Python)
-  TOOLING // For development tools (Webpack, Docker, Figma)
-  APP_CATEGORY // For app-specific categories (Productivity, Social)
-  ART_STYLE // For art styles (Digital, Pixel Art)
-  MUSIC_GENRE // For music genres (Electronic, Ambient)
+  GENRE
+  PLATFORM
+  MISC
+  CHANNEL
+  FRAMEWORK
+  LANGUAGE
+  TOOLING
+  APP_CATEGORY
+  ART_STYLE
+  MUSIC_GENRE
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  avatarUrl String?
-  isAdmin   Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  authoredResources Resource[] @relation("AuthoredBy")
-  // Add other OAuth provider fields if needed
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  isAdmin       Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  accounts      Account[]
+  sessions      Session[]
+  authorProfile Author? // Un usuario puede ser un autor
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
 }
 
 model Author {
-  id        String   @id @default(cuid())
-  name      String
-  avatarUrl String?
-  userId    String?  @unique // Optional: link to a User account
-  user      User?    @relation(fields: [userId], references: [id])
-  resources Resource[]
+  id          String     @id @default(cuid())
+  name        String
+  avatarUrl   String?
+  userId      String?    @unique // Un autor puede estar vinculado a un User
+  user        User?      @relation(fields: [userId], references: [id])
+  resources   Resource[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 }
 
 model Tag {
-  id        String      @id @default(cuid())
-  name      String
-  type      TagTypeEnum
-  color     String?
-  textColor String?
-
-  games           Game[]           @relation("GameTags")
-  webItems        WebItem[]        @relation("WebItemTags")
-  appItems        AppItem[]        @relation("AppItemTags")
-  artMusicItems   ArtMusicItem[]   @relation("ArtMusicItemTags")
-  resources       Resource[]       @relation("ResourceTags")
-  resourceFiles   ResourceFile[]   @relation("ResourceFileTags") // For file-specific tags like version/loader if stored denormalized, or use specific relation tables
+  id                  String        @id @default(cuid())
+  name                String
+  type                TagTypeEnum
+  color               String?
+  textColor           String?
+  games               Game[]        @relation("GameTags")
+  resources           Resource[]    @relation("ResourceTags")
+  webItems            WebItem[]     @relation("WebItemTags")
+  webItemsTechnology  WebItem[]     @relation("WebItemTechnologies") // Inversa para WebItem.technologies
+  appItems            AppItem[]     @relation("AppItemTags")
+  appItemsPlatform    AppItem[]     @relation("AppItemPlatforms")   // Inversa para AppItem.platforms
+  artMusicItems       ArtMusicItem[] @relation("ArtMusicItemTags")
+  artMusicItemsMedium ArtMusicItem[] @relation("ArtMusicItemMedium")  // Inversa para ArtMusicItem.medium
+  resourceFilesVersion ResourceFile[] @relation("ResourceFileVersions")
+  resourceFilesLoader  ResourceFile[] @relation("ResourceFileLoaders")
+  resourceFilesChannel ResourceFile[] @relation("ResourceFileChannels")
+  changelogVersions    ChangelogEntry[] @relation("ChangelogVersions")
+  changelogLoaders     ChangelogEntry[] @relation("ChangelogLoaders")
+  changelogChannels    ChangelogEntry[] @relation("ChangelogChannels")
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
 
   @@unique([name, type])
 }
 
 model Category {
-  id              String       @id @default(cuid())
+  id              String        @id @default(cuid())
   name            String
-  slug            String       @unique
+  slug            String        @unique
   description     String?
-  parentItemType  ItemTypeEnum // To know if it's a game category, web category etc.
-  
-  games           Game[]           @relation("GameCategories")
-  webItems        WebItem[]        @relation("WebItemCategories")
-  appItems        AppItem[]        @relation("AppItemCategories")
-  artMusicItems   ArtMusicItem[]   @relation("ArtMusicItemCategories")
+  parentItemType  ItemTypeEnum // Para saber a qué tipo de item pertenece esta categoría
+  games           Game[]        @relation("GameCategories")
+  webItems        WebItem[]     @relation("WebItemCategories")
+  appItems        AppItem[]     @relation("AppItemCategories")
+  artMusicItems   ArtMusicItem[] @relation("ArtMusicItemCategories")
   resources       Resource[]
-
-  @@index([parentItemType])
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 }
 
 model Game {
-  id              String    @id @default(cuid())
+  id              String        @id @default(cuid())
   name            String
-  slug            String    @unique
+  slug            String        @unique
   description     String
-  longDescription String?   @db.Text
+  longDescription String?
   bannerUrl       String
   iconUrl         String
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  itemType        ItemTypeEnum @default(GAME)
-
-  tags            Tag[]     @relation("GameTags")
-  categories      Category[] @relation("GameCategories")
-  resources       Resource[] @relation("GameResources")
+  tags            Tag[]         @relation("GameTags")
+  categories      Category[]    @relation("GameCategories")
+  resources       Resource[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  itemType        ItemTypeEnum  @default(GAME)
 }
 
 model WebItem {
-  id              String    @id @default(cuid())
+  id              String        @id @default(cuid())
   name            String
-  slug            String    @unique
+  slug            String        @unique
   description     String
-  longDescription String?   @db.Text
+  longDescription String?
   bannerUrl       String
   iconUrl         String
-  projectUrl      String?   // External URL for the web project
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  itemType        ItemTypeEnum @default(WEB)
-
-  tags            Tag[]     @relation("WebItemTags")
-  categories      Category[] @relation("WebItemCategories")
-  resources       Resource[] @relation("WebItemResources")
-  // technologies    Tag[]     @relation("WebItemTechnologies") // Could be a subset of Tags or a separate relation
+  tags            Tag[]         @relation("WebItemTags")
+  technologies    Tag[]         @relation("WebItemTechnologies")
+  categories      Category[]    @relation("WebItemCategories")
+  resources       Resource[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  itemType        ItemTypeEnum  @default(WEB)
+  projectUrl      String?
 }
 
 model AppItem {
-  id              String    @id @default(cuid())
+  id              String        @id @default(cuid())
   name            String
-  slug            String    @unique
+  slug            String        @unique
   description     String
-  longDescription String?   @db.Text
+  longDescription String?
   bannerUrl       String
   iconUrl         String
-  projectUrl      String?   // External URL (e.g., app store)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  itemType        ItemTypeEnum @default(APP)
-
-  tags            Tag[]     @relation("AppItemTags")
-  categories      Category[] @relation("AppItemCategories")
-  resources       Resource[] @relation("AppItemResources")
-  // platforms       Tag[]     @relation("AppItemPlatforms")
+  tags            Tag[]         @relation("AppItemTags")
+  platforms       Tag[]         @relation("AppItemPlatforms")
+  categories      Category[]    @relation("AppItemCategories")
+  resources       Resource[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  itemType        ItemTypeEnum  @default(APP)
+  projectUrl      String?
 }
 
 model ArtMusicItem {
-  id              String    @id @default(cuid())
+  id              String        @id @default(cuid())
   name            String
-  slug            String    @unique
+  slug            String        @unique
   description     String
-  longDescription String?   @db.Text
+  longDescription String?
   bannerUrl       String
   iconUrl         String
+  tags            Tag[]         @relation("ArtMusicItemTags")
   artistName      String?
-  projectUrl      String?   // External URL (e.g., gallery, streaming)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  itemType        ItemTypeEnum @default(ART_MUSIC)
-
-  tags            Tag[]     @relation("ArtMusicItemTags")
-  categories      Category[] @relation("ArtMusicItemCategories")
-  resources       Resource[] @relation("ArtMusicItemResources")
-  // medium          Tag?      @relation("ArtMusicMedium") // Could be a specific Tag type
+  mediumId        String?       // Suponiendo que "medium" es una etiqueta Tag
+  medium          Tag?          @relation("ArtMusicItemMedium", fields: [mediumId], references: [id])
+  categories      Category[]    @relation("ArtMusicItemCategories")
+  resources       Resource[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  itemType        ItemTypeEnum  @default(ART_MUSIC)
+  projectUrl      String?
 }
 
 model Resource {
-  id                  String    @id @default(cuid())
+  id                  String            @id @default(cuid())
   name                String
-  slug                String    @unique
-  version             String
-  description         String    @db.Text
-  detailedDescription String?   @db.Text
-  imageUrl            String
-  
-  downloads           Int       @default(0)
-  rating              Float?
-  reviewCount         Int?      @default(0)
-  followers           Int?      @default(0)
-  
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
-  
-  requirements        String?   @db.Text
-  
-  authorId            String
-  author              Author    @relation(fields: [authorId], references: [id])
-  
-  tags                Tag[]     @relation("ResourceTags")
-  
-  parentItemType      ItemTypeEnum
-  gameId              String?   // Foreign key for Game
-  webItemId           String?   // Foreign key for WebItem
-  appItemId           String?   // Foreign key for AppItem
-  artMusicItemId      String?   // Foreign key for ArtMusicItem
-  
-  game                Game?     @relation("GameResources", fields: [gameId], references: [id])
-  webItem             WebItem?  @relation("WebItemResources", fields: [webItemId], references: [id])
-  appItem             AppItem?  @relation("AppItemResources", fields: [appItemId], references: [id])
-  artMusicItem        ArtMusicItem? @relation("ArtMusicItemResources", fields: [artMusicItemId], references: [id])
-
+  slug                String            @unique
+  parentItemId        String            // ID del Game, WebItem, AppItem o ArtMusicItem
+  parentItemType      ItemTypeEnum      // Tipo del item padre
+  game                Game?             @relation(fields: [parentItemId], references: [id], onDelete: Cascade)
+  webItem             WebItem?          @relation(fields: [parentItemId], references: [id], onDelete: Cascade)
+  appItem             AppItem?          @relation(fields: [parentItemId], references: [id], onDelete: Cascade)
+  artMusicItem        ArtMusicItem?     @relation(fields: [parentItemId], references: [id], onDelete: Cascade)
   categoryId          String
-  category            Category  @relation(fields: [categoryId], references: [id])
-
+  category            Category          @relation(fields: [categoryId], references: [id])
+  imageUrl            String
+  imageGallery        Json?             // Storing as JSON array of strings (PostgreSQL soporta Json)
+  downloads           Int               @default(0)
+  version             String
+  description         String
+  detailedDescription String
+  requirements        String?
+  authorId            String
+  author              Author            @relation(fields: [authorId], references: [id])
+  tags                Tag[]             @relation("ResourceTags")
   files               ResourceFile[]
   changelogEntries    ChangelogEntry[]
-
-  creatorId           String?   // If linking to a User directly
-  creator             User?     @relation("AuthoredBy", fields: [creatorId], references: [id])
-
-  // ResourceLinks (Consider embedding or a separate model if complex)
-  linkDiscord         String?
-  linkWiki            String?
-  linkIssues          String?
-  linkSource          String?
-  linkProjectUrl      String?
-
-  @@index([parentItemType])
-  @@index([authorId])
-  @@index([categoryId])
-  @@index([gameId])
-  @@index([webItemId])
-  @@index([appItemId])
-  @@index([artMusicItemId])
+  rating              Float?
+  reviewCount         Int?              @default(0)
+  followers           Int?              @default(0)
+  discordLink         String?
+  wikiLink            String?
+  issuesLink          String?
+  sourceLink          String?
+  projectUrl          String?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
 }
 
 model ResourceFile {
-  id        String   @id @default(cuid())
-  name      String
-  url       String   // URL to the file (e.g., CDN, S3)
-  size      String   // e.g., "5.5 MB"
-  channel   String?  // e.g., Release, Beta, Alpha (could link to a Tag of type CHANNEL)
-  date      DateTime @default(now())
-
-  resourceId String
-  resource  Resource @relation(fields: [resourceId], references: [id])
-
-  tags      Tag[]    @relation("ResourceFileTags") // For specific versions, loaders linked to this file
-
-  @@index([resourceId])
+  id                String    @id @default(cuid())
+  name              String
+  url               String
+  size              String
+  resourceId        String
+  resource          Resource  @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  supportedVersions Tag[]     @relation("ResourceFileVersions")
+  supportedLoaders  Tag[]     @relation("ResourceFileLoaders")
+  channelId         String?
+  channel           Tag?      @relation("ResourceFileChannels", fields: [channelId], references: [id])
+  date              DateTime? @default(now())
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 }
 
 model ChangelogEntry {
-  id            String   @id @default(cuid())
-  versionName   String
-  date          DateTime
-  notes         String   @db.Text
-  relatedFileId String?  // Optionally link to a specific ResourceFile
-
-  resourceId    String
-  resource      Resource @relation(fields: [resourceId], references: [id])
-
-  @@index([resourceId])
+  id                String    @id @default(cuid())
+  versionName       String
+  date              DateTime
+  notes             String
+  resourceId        String
+  resource          Resource  @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  relatedFileId     String?   // Opcional, si el changelog es para un archivo específico
+  gameVersionTagId  String?
+  gameVersionTag    Tag?      @relation("ChangelogVersions", fields: [gameVersionTagId], references: [id])
+  channelTagId      String?
+  channelTag        Tag?      @relation("ChangelogChannels", fields: [channelTagId], references: [id])
+  loaderTags        Tag[]     @relation("ChangelogLoaders")
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 }
