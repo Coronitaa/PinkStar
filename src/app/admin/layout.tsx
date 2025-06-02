@@ -14,7 +14,8 @@ export default async function AdminLayout({
   children: React.ReactNode;
 }) {
   const session = await auth(); // Get the session
-  if (!session?.user || !session.user.isAdmin) {
+  // Updated admin check to use role
+  if (!session?.user || session.user.role !== 'admin') {
     redirect('/api/auth/signin?callbackUrl=/admin'); // Redirect to sign-in if not admin
   }
 
