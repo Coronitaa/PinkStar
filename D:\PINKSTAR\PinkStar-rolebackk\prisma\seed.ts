@@ -186,7 +186,7 @@ async function main() {
       followers: 1250,
       rating: 4.8,
       reviewCount: 285,
-      linksJson: { // Prisma expects a JSON object for Json fields // Changed from 'links' to 'linksJson'
+      linksJson: { 
         discord: 'https://discord.gg/example',
         wiki: 'https://wiki.example.com/ultragfx',
       },
@@ -234,7 +234,7 @@ async function main() {
       rating: 4.5,
       reviewCount: 150,
       tags: { connect: [{ id: tag_v1_20.id }, { id: tag_v1_21.id }, { id: tag_fabric.id }, { id: tag_forge.id }, {id: tag_utility.id}] },
-      // No linksJson for this resource in the original seed, so it will be null/undefined in the DB
+      // No linksJson for this resource, it will be null/undefined in the DB
     },
   });
    const resourceFile2_1 = await prisma.resourceFile.create({
@@ -277,7 +277,7 @@ async function main() {
       rating: 4.9,
       reviewCount: 12,
       tags: { connect: [{ id: tag_react.id }, {id: tag_tailwind.id}] },
-      linksJson: { // Added example links for web resource
+      linksJson: { 
         projectUrl: 'https://example.com/profolio-x-components-demo',
         source: 'https://github.com/example/profolio-x-components'
       }
@@ -297,3 +297,5 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+
+    
