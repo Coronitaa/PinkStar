@@ -1,8 +1,8 @@
 
 'use server';
 
-import { getResources, getBestMatchResourcesData } from '@/lib/data';
-import type { GetResourcesParams, PaginatedResourcesResponse, Resource } from '@/lib/types';
+import { getResources, getBestMatchForCategoryAction as getBestMatchForCategoryFromLib } from '@/lib/data';
+import type { GetResourcesParams, PaginatedResourcesResponse, Resource, ItemType } from '@/lib/types';
 
 export async function fetchPaginatedResourcesAction(
   params: GetResourcesParams
@@ -17,14 +17,13 @@ export async function fetchPaginatedResourcesAction(
 }
 
 export async function fetchBestMatchForCategoryAction(
-  gameSlug: string,
+  parentItemSlug: string, // Renamed for clarity and consistency
+  parentItemType: ItemType, // Added parentItemType
   categorySlug: string,
-  searchQuery: string, // Expect raw search query
+  searchQuery: string, 
   limit: number = 3
 ): Promise<Resource[]> {
-  // Do not trim searchQuery here. If it's empty or just spaces, getBestMatchResourcesData handles it.
-  // The previous check `if (!searchQuery.trim())` is removed to allow searches with spaces
-  // if the underlying data function `getBestMatchResourcesData` is designed to handle them.
-  // `getBestMatchResourcesData` now also checks `!searchQuery || searchQuery.length === 0`.
-  return getBestMatchResourcesData(gameSlug, categorySlug, searchQuery, limit);
+  // Call the correctly imported and aliased function from lib/data
+  return getBestMatchForCategoryFromLib(parentItemSlug, parentItemType, categorySlug, searchQuery, limit);
 }
+

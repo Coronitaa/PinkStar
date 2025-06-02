@@ -1,39 +1,39 @@
 
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getGameBySlug, getCategoryDetails, getResources, getAvailableFilterTags, getCategoriesForItemGeneric } from '@/lib/data';
-import type { Game, Category, Resource, Tag, ItemType } from '@/lib/types';
+import { getWebItemBySlug, getCategoryDetails, getResources, getAvailableFilterTags, getCategoriesForItemGeneric } from '@/lib/data';
+import type { WebItem, Category, ItemType } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Layers, PlusCircle } from 'lucide-react';
-import { CategoryPageContent } from './CategoryPageContent'; // Remains the same, now generic
+import { Layers, PlusCircle, Code } from 'lucide-react';
+import { CategoryPageContent } from '@/app/games/[gameSlug]/[categorySlug]/CategoryPageContent'; // Re-using the generic component
 import { cn } from '@/lib/utils';
 
 const RESOURCES_PER_PAGE = 20;
 const MAX_VISIBLE_CATEGORY_TABS = 5;
 
-interface CategoryPageProps {
-  params: { gameSlug: string; categorySlug: string };
+interface WebCategoryPageProps {
+  params: { webSlug: string; categorySlug: string };
   searchParams: { [key: string]: string | string[] | undefined };
 }
 
-type SortByType = 'relevance' | 'downloads' | 'updatedAt' | 'name';
+type SortByType = 'relevance' | 'updatedAt' | 'name'; // No 'downloads' for web items
 
-export default async function GameCategoryPage({ params, searchParams }: CategoryPageProps) {
-  const game = await getGameBySlug(params.gameSlug);
-  if (!game) {
+export default async function WebCategoryPage({ params, searchParams }: WebCategoryPageProps) {
+  const webItem = await getWebItemBySlug(params.webSlug);
+  if (!webItem) {
     notFound();
   }
-  const itemType: ItemType = 'game';
-  const currentCategory = await getCategoryDetails(params.gameSlug, itemType, params.categorySlug);
-  const allItemCategories = await getCategoriesForItemGeneric(params.gameSlug, itemType);
+  const itemType: ItemType = 'web';
+  const currentCategory = await getCategoryDetails(params.webSlug, itemType, params.categorySlug);
+  const allItemCategories = await getCategoriesForItemGeneric(params.webSlug, itemType);
 
   if (!currentCategory) {
     notFound();
   }
-
-  const tagKeys = ['versions', 'loaders', 'genres', 'misc', 'channels'];
+  
+  const tagKeys = ['frameworks', 'languages', 'tooling', 'misc', 'channels'];
   const activeTagFilters: string[] = [];
   tagKeys.forEach(key => {
     const value = searchParams[key];
@@ -41,13 +41,13 @@ export default async function GameCategoryPage({ params, searchParams }: Categor
       activeTagFilters.push(...value.split(','));
     }
   });
-  
+
   const searchQuery = typeof searchParams.q === 'string' ? searchParams.q : undefined;
-  const defaultSort = searchQuery ? 'relevance' : (itemType === 'game' ? 'downloads' : 'updatedAt');
+  const defaultSort = searchQuery ? 'relevance' : 'updatedAt';
   const sortBy = (typeof searchParams.sort === 'string' ? searchParams.sort : defaultSort) as SortByType;
 
   const { resources: initialResources, total: initialTotal, hasMore: initialHasMore } = await getResources({
-    parentItemSlug: params.gameSlug,
+    parentItemSlug: params.webSlug,
     parentItemType: itemType,
     categorySlug: params.categorySlug,
     tags: activeTagFilters.length > 0 ? activeTagFilters : undefined,
@@ -57,13 +57,12 @@ export default async function GameCategoryPage({ params, searchParams }: Categor
     limit: RESOURCES_PER_PAGE,
   });
 
-  const availableFilterTags = await getAvailableFilterTags(params.gameSlug, itemType, params.categorySlug);
+  const availableFilterTags = await getAvailableFilterTags(params.webSlug, itemType, params.categorySlug);
 
   const visibleCategories = allItemCategories.length > MAX_VISIBLE_CATEGORY_TABS
     ? allItemCategories.slice(0, MAX_VISIBLE_CATEGORY_TABS)
     : allItemCategories;
   const showMoreCategoriesButton = allItemCategories.length > MAX_VISIBLE_CATEGORY_TABS;
-
 
   return (
     <div className="space-y-8">
@@ -71,9 +70,9 @@ export default async function GameCategoryPage({ params, searchParams }: Categor
         <BreadcrumbList>
           <BreadcrumbItem><BreadcrumbLink href="/">Home</BreadcrumbLink></BreadcrumbItem>
           <BreadcrumbSeparator />
-          <BreadcrumbItem><BreadcrumbLink href="/games">Games</BreadcrumbLink></BreadcrumbItem>
+          <BreadcrumbItem><BreadcrumbLink href="/web">Web</BreadcrumbLink></BreadcrumbItem>
           <BreadcrumbSeparator />
-          <BreadcrumbItem><BreadcrumbLink href={`/games/${game.slug}`}>{game.name}</BreadcrumbLink></BreadcrumbItem>
+          <BreadcrumbItem><BreadcrumbLink href={`/web/${webItem.slug}`}>{webItem.name}</BreadcrumbLink></BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem><BreadcrumbPage>{currentCategory.name}</BreadcrumbPage></BreadcrumbItem>
         </BreadcrumbList>
@@ -102,19 +101,19 @@ export default async function GameCategoryPage({ params, searchParams }: Categor
                       cat.slug === currentCategory.slug && "bg-primary text-primary-foreground shadow-md"
                     )}
                   >
-                    <Link href={`/games/${game.slug}/${cat.slug}`}>{cat.name}</Link>
+                    <Link href={`/web/${webItem.slug}/${cat.slug}`}>{cat.name}</Link>
                   </TabsTrigger>
                 ))}
                 {showMoreCategoriesButton && (
                   <Button variant="ghost" size="sm" asChild className="ml-2 text-sm h-auto py-1.5 px-2.5 hover:bg-muted/50">
-                     <Link href={`/games/${game.slug}`} title={`View all categories for ${game.name}`}>
+                     <Link href={`/web/${webItem.slug}`} title={`View all categories for ${webItem.name}`}>
                         <PlusCircle className="w-4 h-4 mr-1.5" /> More
                     </Link>
                   </Button>
                 )}
               </TabsList>
             </Tabs>
-            <Button variant="outline" className="ml-4 shrink-0">
+             <Button variant="outline" className="ml-4 shrink-0">
               <PlusCircle className="w-4 h-4 mr-2" /> Add Resource
             </Button>
           </div>
@@ -125,11 +124,11 @@ export default async function GameCategoryPage({ params, searchParams }: Categor
         initialResources={initialResources}
         initialHasMore={initialHasMore}
         initialTotal={initialTotal}
-        itemSlug={params.gameSlug}
+        itemSlug={params.webSlug}
         itemType={itemType}
         categorySlug={params.categorySlug}
         availableFilterTags={availableFilterTags}
-        itemName={game.name}
+        itemName={webItem.name}
         categoryName={currentCategory.name}
       />
     </div>

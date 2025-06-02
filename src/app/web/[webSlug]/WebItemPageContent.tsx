@@ -8,21 +8,21 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Carousel, CarouselItem } from '@/components/shared/Carousel';
 import { ResourceCard } from '@/components/resource/ResourceCard';
-import { Loader2, Search, Layers, ChevronRight, Upload, Info } from 'lucide-react';
-import type { Game, Category, Resource } from '@/lib/types';
+import { Loader2, Search, Layers, ChevronRight, Code } from 'lucide-react';
+import type { WebItem, Category, Resource } from '@/lib/types';
 import { fetchBestMatchForCategoryAction } from '@/app/actions/resourceActions';
 
-interface GamePageContentProps {
-  game: Game;
+interface WebItemPageContentProps {
+  item: WebItem;
   categories: Category[];
   initialCategoryResources: Record<string, Resource[]>; // slug -> resources[]
 }
 
-const DEBOUNCE_DELAY = 300; // milliseconds
+const DEBOUNCE_DELAY = 300;
 const CAROUSEL_ITEMS_TO_SHOW = 5;
 const FETCH_CAROUSEL_ITEMS_COUNT = CAROUSEL_ITEMS_TO_SHOW + 5;
 
-export function GamePageContent({ game, categories, initialCategoryResources }: GamePageContentProps) {
+export function WebItemPageContent({ item, categories, initialCategoryResources }: WebItemPageContentProps) {
   const [globalSearchQuery, setGlobalSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [isSearching, startSearchTransition] = useTransition();
@@ -32,32 +32,27 @@ export function GamePageContent({ game, categories, initialCategoryResources }: 
 
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Debounce global search query
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchQuery(globalSearchQuery);
     }, DEBOUNCE_DELAY);
-
-    return () => {
-      clearTimeout(handler);
-    };
+    return () => clearTimeout(handler);
   }, [globalSearchQuery]);
 
-  // Effect to fetch search results when debounced query changes
   useEffect(() => {
     if (!debouncedSearchQuery.trim()) {
-      setCategorySearchResults({}); // Clear results if search is empty
+      setCategorySearchResults({});
       setIsAutoplayActive(true);
       return;
     }
 
-    setIsAutoplayActive(false); // Stop autoplay when search is active
+    setIsAutoplayActive(false);
     startSearchTransition(async () => {
       const results: Record<string, Resource[] | null> = {};
       for (const category of categories) {
         try {
-          // Pass game.itemType to the server action
-          const bestMatches = await fetchBestMatchForCategoryAction(game.slug, game.itemType, category.slug, debouncedSearchQuery, FETCH_CAROUSEL_ITEMS_COUNT);
+          // Pass item.itemType to the server action
+          const bestMatches = await fetchBestMatchForCategoryAction(item.slug, item.itemType, category.slug, debouncedSearchQuery, FETCH_CAROUSEL_ITEMS_COUNT);
           results[category.slug] = bestMatches.length > 0 ? bestMatches : null;
         } catch (error) {
           console.error(`Failed to fetch search results for category ${category.name}:`, error);
@@ -66,7 +61,7 @@ export function GamePageContent({ game, categories, initialCategoryResources }: 
       }
       setCategorySearchResults(results);
     });
-  }, [debouncedSearchQuery, game, categories]); // Added game to dependencies as game.itemType is used
+  }, [debouncedSearchQuery, item, categories]); // Added item to dependencies
 
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setGlobalSearchQuery(e.target.value);
@@ -82,13 +77,12 @@ export function GamePageContent({ game, categories, initialCategoryResources }: 
 
   return (
     <div className="space-y-8">
-      {/* Global Search Bar - Standalone, aligned left */}
-      <div className="relative w-full sm:w-auto max-w-md mb-8"> {/* Container for input to control its width */}
+      <div className="relative w-full sm:w-auto max-w-md mb-8">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
         <Input
           ref={searchInputRef}
           type="search"
-          placeholder={`Search all resources in ${game.name}...`}
+          placeholder={`Search all resources in ${item.name}...`}
           className="pl-10 text-base w-full"
           value={globalSearchQuery}
           onChange={handleSearchInputChange}
@@ -103,7 +97,7 @@ export function GamePageContent({ game, categories, initialCategoryResources }: 
 
       {!isSearching && hasActiveSearch && Object.values(categorySearchResults).every(res => res === null || res?.length === 0) && (
          <div className="text-center py-12">
-            <Layers className="w-16 h-16 text-primary mx-auto mb-4" />
+            <Code className="w-16 h-16 text-primary mx-auto mb-4" /> {/* Changed Icon */}
             <p className="text-xl font-semibold text-foreground">No resources found for "{debouncedSearchQuery}"</p>
             <p className="text-muted-foreground">Try a different search term.</p>
           </div>
@@ -111,7 +105,7 @@ export function GamePageContent({ game, categories, initialCategoryResources }: 
 
       {!isSearching && categories.length > 0 ? (
         categories.map((category) => {
-          const categoryPageLink = `/games/${game.slug}/${category.slug}`;
+          const categoryPageLink = `/web/${item.slug}/${category.slug}`; // Adapted Link
           const resourcesForCarousel = (hasActiveSearch
             ? categorySearchResults[category.slug]
             : initialCategoryResources[category.slug]) || [];
@@ -137,7 +131,7 @@ export function GamePageContent({ game, categories, initialCategoryResources }: 
               </section>
             );
           }
-
+          
           if (!resourcesForCarousel || resourcesForCarousel.length === 0) {
              return (
                 <section key={category.id} className="space-y-6 py-6 border-t border-border/40 first:border-t-0">
@@ -176,7 +170,6 @@ export function GamePageContent({ game, categories, initialCategoryResources }: 
                     <Link href={categoryPageLink}>View all in {category.name} <ChevronRight className="w-4 h-4 ml-2" /></Link>
                 </Button>
               </div>
-
               <div className="mt-4">
                  <Carousel
                     autoplay={isAutoplayActive && !isCarouselHovered && resourcesForCarousel.length > CAROUSEL_ITEMS_TO_SHOW}
@@ -200,7 +193,7 @@ export function GamePageContent({ game, categories, initialCategoryResources }: 
         })
       ) : (
          !isSearching && <section className="py-6 border-t border-border/40 first:border-t-0">
-            <p className="text-muted-foreground text-center">No categories available for this game yet.</p>
+            <p className="text-muted-foreground text-center">No categories available for this web project yet.</p>
         </section>
       )}
     </div>

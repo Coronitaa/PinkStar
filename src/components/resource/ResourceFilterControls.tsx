@@ -1,117 +1,142 @@
 
 "use client";
 
-import type { Tag } from '@/lib/types';
+import type { Tag, ItemType, TagType } from '@/lib/types';
 import { useState, useEffect, useTransition, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ListFilter, X, Check } from 'lucide-react'; // Changed icon
+import { ListFilter, X, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-interface ResourceFilterControlsProps {
-  availableTags: {
-    versions: Tag[];
-    loaders: Tag[];
-    genres: Tag[];
-    misc: Tag[];
-  };
-  onFilterChangeCallback: (tags: { versions?: string; loaders?: string; genres?: string; misc?: string }) => void;
+export interface AvailableTags {
+  versions: Tag[];
+  loaders: Tag[];
+  genres: Tag[]; // Game genres
+  misc: Tag[];
+  channels: Tag[];
+  // Web specific
+  frameworks: Tag[];
+  languages: Tag[];
+  tooling: Tag[];
+  // App specific
+  platforms: Tag[]; // Re-using 'platform' type for app platforms if defined in commonTags
+  appCategories: Tag[]; // App specific genres/categories
+  // Art & Music specific
+  artStyles: Tag[];
+  musicGenres: Tag[];
 }
 
-export function ResourceFilterControls({ availableTags, onFilterChangeCallback }: ResourceFilterControlsProps) {
+type FilterableTagType = keyof AvailableTags;
+
+interface ResourceFilterControlsProps {
+  availableTags: Partial<AvailableTags>; // Use Partial as not all item types will have all tags
+  itemType: ItemType;
+  onFilterChangeCallback: (newFilters: Record<FilterableTagType, string | undefined>) => void;
+}
+
+const tagTypeToLabelMapping: Record<FilterableTagType, string> = {
+  versions: "Version",
+  loaders: "Loader",
+  genres: "Genre",
+  misc: "Type", // For game 'misc' tags
+  channels: "Channel",
+  frameworks: "Framework",
+  languages: "Language",
+  tooling: "Tooling",
+  platforms: "Platform",
+  appCategories: "App Category",
+  artStyles: "Art Style",
+  musicGenres: "Music Genre",
+};
+
+
+export function ResourceFilterControls({ availableTags, itemType, onFilterChangeCallback }: ResourceFilterControlsProps) {
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
-  const [selectedVersions, setSelectedVersions] = useState<string[]>([]);
-  const [selectedLoaders, setSelectedLoaders] = useState<string[]>([]);
-  const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
-  const [selectedMisc, setSelectedMisc] = useState<string[]>([]);
-
+  const [selectedFilters, setSelectedFilters] = useState<Record<FilterableTagType, string[]>>(() => {
+    const initialFilters: Record<FilterableTagType, string[]> = {} as any;
+    for (const key in tagTypeToLabelMapping) {
+      initialFilters[key as FilterableTagType] = [];
+    }
+    return initialFilters;
+  });
 
   useEffect(() => {
-    const versionParams = searchParams.get('versions')?.split(',').filter(Boolean) || [];
-    const loaderParams = searchParams.get('loaders')?.split(',').filter(Boolean) || [];
-    const genreParams = searchParams.get('genres')?.split(',').filter(Boolean) || [];
-    const miscParams = searchParams.get('misc')?.split(',').filter(Boolean) || [];
-    setSelectedVersions(versionParams);
-    setSelectedLoaders(loaderParams);
-    setSelectedGenres(genreParams);
-    setSelectedMisc(miscParams);
+    const newSelectedFilters: Record<FilterableTagType, string[]> = {} as any;
+    let hasInitialParams = false;
+    for (const key in tagTypeToLabelMapping) {
+      const filterKey = key as FilterableTagType;
+      const params = searchParams.get(filterKey)?.split(',').filter(Boolean) || [];
+      newSelectedFilters[filterKey] = params;
+      if (params.length > 0) hasInitialParams = true;
+    }
+    setSelectedFilters(newSelectedFilters);
   }, [searchParams]);
 
-  const updateFilters = useCallback((
-    newVersions: string[], 
-    newLoaders: string[],
-    newGenres: string[],
-    newMisc: string[]
-    ) => {
+  const updateFiltersInUrl = useCallback((updatedSelectedFilters: Record<FilterableTagType, string[]>) => {
     startTransition(() => {
-      const paramsToUpdate: { versions?: string; loaders?: string; genres?: string; misc?: string } = {};
-      
-      paramsToUpdate.versions = newVersions.length > 0 ? newVersions.join(',') : undefined;
-      paramsToUpdate.loaders = newLoaders.length > 0 ? newLoaders.join(',') : undefined;
-      paramsToUpdate.genres = newGenres.length > 0 ? newGenres.join(',') : undefined;
-      paramsToUpdate.misc = newMisc.length > 0 ? newMisc.join(',') : undefined;
-      
+      const paramsToUpdate: Record<FilterableTagType, string | undefined> = {} as any;
+      for (const key in updatedSelectedFilters) {
+        const filterKey = key as FilterableTagType;
+        const ids = updatedSelectedFilters[filterKey];
+        paramsToUpdate[filterKey] = ids.length > 0 ? ids.join(',') : undefined;
+      }
       onFilterChangeCallback(paramsToUpdate);
     });
   }, [onFilterChangeCallback]);
   
   const handleClearFilters = () => {
-    setSelectedVersions([]);
-    setSelectedLoaders([]);
-    setSelectedGenres([]);
-    setSelectedMisc([]);
-    updateFilters([], [], [], []);
-  };
-
-  const toggleTagSelection = (tagId: string, type: 'version' | 'loader' | 'genre' | 'misc') => {
-    let currentVersions = [...selectedVersions];
-    let currentLoaders = [...selectedLoaders];
-    let currentGenres = [...selectedGenres];
-    let currentMisc = [...selectedMisc];
-
-
-    switch(type) {
-      case 'version':
-        currentVersions = selectedVersions.includes(tagId) 
-          ? selectedVersions.filter(id => id !== tagId) 
-          : [...selectedVersions, tagId];
-        setSelectedVersions(currentVersions);
-        break;
-      case 'loader':
-        currentLoaders = selectedLoaders.includes(tagId)
-          ? selectedLoaders.filter(id => id !== tagId)
-          : [...selectedLoaders, tagId];
-        setSelectedLoaders(currentLoaders);
-        break;
-      case 'genre':
-        currentGenres = selectedGenres.includes(tagId)
-          ? selectedGenres.filter(id => id !== tagId)
-          : [...selectedGenres, tagId];
-        setSelectedGenres(currentGenres);
-        break;
-      case 'misc':
-        currentMisc = selectedMisc.includes(tagId)
-          ? selectedMisc.filter(id => id !== tagId)
-          : [...selectedMisc, tagId];
-        setSelectedMisc(currentMisc);
-        break;
+    const clearedFilters: Record<FilterableTagType, string[]> = {} as any;
+    for (const key in tagTypeToLabelMapping) {
+      clearedFilters[key as FilterableTagType] = [];
     }
-    updateFilters(currentVersions, currentLoaders, currentGenres, currentMisc);
+    setSelectedFilters(clearedFilters);
+    updateFiltersInUrl(clearedFilters);
   };
 
-  const hasActiveFilters = selectedVersions.length > 0 || selectedLoaders.length > 0 || selectedGenres.length > 0 || selectedMisc.length > 0;
+  const toggleTagSelection = (tagId: string, type: FilterableTagType) => {
+    const newSelectedFilters = { ...selectedFilters };
+    const currentSelection = newSelectedFilters[type] || [];
+    
+    newSelectedFilters[type] = currentSelection.includes(tagId)
+      ? currentSelection.filter(id => id !== tagId)
+      : [...currentSelection, tagId];
+    
+    setSelectedFilters(newSelectedFilters);
+    updateFiltersInUrl(newSelectedFilters);
+  };
 
-  const renderTagGroup = (title: string, tags: Tag[], selectedTags: string[], type: 'version' | 'loader' | 'genre' | 'misc') => {
-    if (tags.length === 0) return null;
+  const hasActiveFilters = Object.values(selectedFilters).some(arr => arr.length > 0);
+
+  const relevantTagTypesForItem: FilterableTagType[] = (() => {
+    switch (itemType) {
+      case 'game':
+        return ['versions', 'loaders', 'genres', 'misc', 'channels'];
+      case 'web':
+        return ['frameworks', 'languages', 'tooling', 'misc', 'channels']; // misc could be 'template type' etc.
+      case 'app':
+        return ['platforms', 'appCategories', 'languages', 'tooling', 'channels']; // platforms from commonTags (iOS, Android), appCategories for 'Productivity' etc.
+      case 'art-music':
+        return ['artStyles', 'musicGenres', 'tooling', 'misc', 'channels']; // tooling for 'Photoshop', misc for 'Brush pack' etc.
+      default:
+        return [];
+    }
+  })();
+
+  const renderTagGroup = (type: FilterableTagType, tags: Tag[] | undefined) => {
+    if (!tags || tags.length === 0) return null;
+    
+    const title = tagTypeToLabelMapping[type] || type.charAt(0).toUpperCase() + type.slice(1);
+    const currentSelectedTags = selectedFilters[type] || [];
+
     return (
-      <div>
+      <div key={type}>
         <h4 className="font-semibold mb-2 text-foreground/90 text-sm">{title}</h4>
         <div className="flex flex-wrap gap-2">
           {tags.map(tag => {
-            const isSelected = selectedTags.includes(tag.id);
+            const isSelected = currentSelectedTags.includes(tag.id);
             return (
               <Button
                 key={tag.id}
@@ -135,6 +160,7 @@ export function ResourceFilterControls({ availableTags, onFilterChangeCallback }
     );
   };
 
+  const activeFilterGroups = relevantTagTypesForItem.filter(type => availableTags[type] && (availableTags[type] as Tag[]).length > 0);
 
   return (
     <Card className="shadow-md sticky top-24 bg-card/80 backdrop-blur-sm border-border/40">
@@ -142,20 +168,19 @@ export function ResourceFilterControls({ availableTags, onFilterChangeCallback }
         <CardTitle className="text-lg flex items-center"><ListFilter className="w-5 h-5 mr-2 text-primary" /> Filters</CardTitle>
         {hasActiveFilters && (
              <Button onClick={handleClearFilters} variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-primary" disabled={isPending}>
-                <X className="w-3.5 h-3.5 mr-1" /> Clear
+                <X className="w-3.5 h-3.5 mr-1" /> Clear All
             </Button>
           )}
       </CardHeader>
       <CardContent className="space-y-5 pt-2 pb-4">
-        {renderTagGroup('Version', availableTags.versions, selectedVersions, 'version')}
-        {renderTagGroup('Loader', availableTags.loaders, selectedLoaders, 'loader')}
-        {renderTagGroup('Genre', availableTags.genres, selectedGenres, 'genre')}
-        {renderTagGroup('Type', availableTags.misc, selectedMisc, 'misc')}
-        
-        {availableTags.versions.length === 0 && availableTags.loaders.length === 0 && availableTags.genres.length === 0 && availableTags.misc.length === 0 && (
-          <p className="text-xs text-muted-foreground">No filters available for this category.</p>
+        {activeFilterGroups.length > 0 ? (
+            activeFilterGroups.map(type => renderTagGroup(type, availableTags[type]))
+        ) : (
+            <p className="text-xs text-muted-foreground">No filters available for this category.</p>
         )}
       </CardContent>
     </Card>
   );
 }
+
+    

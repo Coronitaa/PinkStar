@@ -2,18 +2,18 @@
 "use client"; 
 
 import * as React from 'react';
-import type { Resource, Tag } from '@/lib/types';
+import type { Resource, Tag, ItemType } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Download, Tag as TagIcon, User, CalendarDays, Layers, Package, FileText, BarChart3, MessageSquare,
-  ExternalLink, AlertTriangle, ShieldQuestion, Heart, Star, Users, GitBranch, ListChecks
+  ExternalLink, AlertTriangle, ShieldQuestion, Star, Users, GitBranch, ListChecks, Binary, Palette, MusicIcon, Laptop, Heart, StarHalf
 } from 'lucide-react';
 import { format } from 'date-fns';
-import Link from 'next/link'; // Added Link import
+import Link from 'next/link'; 
 import { TagBadge } from '../shared/TagBadge';
 import { Separator } from '@/components/ui/separator';
-import { formatTimeAgo } from '@/lib/data'; 
+import { formatTimeAgo, formatNumberWithSuffix } from '@/lib/data'; 
 import { cn } from '@/lib/utils';
 
 interface SidebarCardProps extends React.PropsWithChildren<{ title?: string; icon?: React.ElementType; className?: string }> {}
@@ -54,24 +54,44 @@ const InfoItem: React.FC<InfoItemProps> = ({ label, value, icon: Icon, className
   </div>
 );
 
-const RatingDisplay: React.FC<{ rating?: number }> = ({ rating }) => {
-  if (typeof rating !== 'number') return <span className="text-muted-foreground">N/A</span>;
-  const fullStars = Math.floor(rating);
-  const halfStar = rating % 1 >= 0.5;
-  const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+const RatingDisplaySidebar: React.FC<{ rating?: number; reviewCount?: number }> = ({ rating, reviewCount }) => {
+  if (typeof rating !== 'number' || rating < 0 || rating > 5) return <span className="text-muted-foreground">N/A</span>;
+
+  const stars = [];
+  const starSize = "w-4 h-4"; 
+  for (let i = 0; i < 5; i++) {
+    if (rating >= i + 0.75) {
+      stars.push(<Star key={`star-full-${i}`} className={cn(starSize, "text-amber-400 fill-amber-400")} />);
+    } else if (rating >= i + 0.25) {
+      stars.push(<StarHalf key={`star-half-${i}`} className={cn(starSize, "text-amber-400 fill-amber-400")} />);
+    } else {
+      stars.push(<Star key={`star-empty-${i}`} className={cn(starSize, "text-amber-400/40")} />); 
+    }
+  }
   return (
     <div className="flex items-center">
-      {[...Array(fullStars)].map((_, i) => <Star key={`full-${i}`} className="w-4 h-4 text-amber-400 fill-amber-400" />)}
-      {halfStar && <Star key="half" className="w-4 h-4 text-amber-400 fill-amber-200" />}
-      {[...Array(emptyStars)].map((_, i) => <Star key={`empty-${i}`} className="w-4 h-4 text-amber-400/50" />)}
-      <span className="ml-1.5 text-xs text-muted-foreground">({rating.toFixed(1)})</span>
+      {stars}
+      <span className="ml-1.5 text-xs text-muted-foreground">
+        ({rating.toFixed(1)})
+        {reviewCount !== undefined && <span className="ml-1">({formatNumberWithSuffix(reviewCount)} reviews)</span>}
+      </span>
     </div>
   );
 };
 
-interface ResourceInfoSidebarProps { // Defined props interface
+interface ResourceInfoSidebarProps { 
   resource: Resource;
 }
+
+const getItemTypeIcon = (itemType: ItemType) => {
+  switch (itemType) {
+    case 'game': return Package;
+    case 'web': return Binary;
+    case 'app': return Laptop;
+    case 'art-music': return Palette; 
+    default: return Package;
+  }
+};
 
 export function ResourceInfoSidebar({ resource }: ResourceInfoSidebarProps) {
   const latestFile = resource.files.length > 0 ? resource.files[0] : null;
@@ -99,11 +119,20 @@ export function ResourceInfoSidebar({ resource }: ResourceInfoSidebarProps) {
       case 'loader': return 'loaders';
       case 'genre': return 'genres';
       case 'misc': return 'misc';
-      case 'channel': return 'channels'; // Assuming 'channels' is a filter type for category page
-      // 'platform' tags might not have a direct filter on the category page
+      case 'channel': return 'channels';
+      case 'framework': return 'frameworks';
+      case 'language': return 'languages';
+      case 'tooling': return 'tooling';
+      case 'platform': return 'platforms';
+      case 'app-category': return 'appCategories';
+      case 'art-style': return 'artStyles';
+      case 'music-genre': return 'musicGenres';
       default: return null;
     }
   };
+
+  const parentItemPath = `/${resource.parentItemType === 'art-music' ? 'art-music' : resource.parentItemType + 's'}/${resource.parentItemSlug}`;
+
 
   return (
     <div className="space-y-5 sticky top-20">
@@ -129,7 +158,6 @@ export function ResourceInfoSidebar({ resource }: ResourceInfoSidebarProps) {
           )}
           <div>
             <p className="font-semibold text-foreground">{resource.author.name}</p>
-            
             <p className="text-xs text-muted-foreground">Creator of this resource</p>
           </div>
         </div>
@@ -137,11 +165,11 @@ export function ResourceInfoSidebar({ resource }: ResourceInfoSidebarProps) {
 
       <SidebarCard title="Details" icon={ListChecks}>
         <InfoItem label="Version" value={resource.version} icon={GitBranch} />
-        <InfoItem label="Game" value={<Link href={`/games/${resource.gameSlug}`} className="hover:text-primary transition-colors">{resource.gameName}</Link>} icon={Package} />
-        <InfoItem label="Category" value={<Link href={`/games/${resource.gameSlug}/${resource.categorySlug}`} className="hover:text-primary transition-colors">{resource.categoryName}</Link>} icon={Layers} />
-        <InfoItem label="Downloads" value={resource.downloads.toLocaleString()} icon={BarChart3} />
-        <InfoItem label="Rating" value={<RatingDisplay rating={resource.rating} />} icon={Star} />
-        <InfoItem label="Followers" value={(resource.followers || 0).toLocaleString()} icon={Heart} />
+        <InfoItem label="Project" value={<Link href={parentItemPath} className="hover:text-primary transition-colors">{resource.parentItemName}</Link>} icon={getItemTypeIcon(resource.parentItemType)} />
+        <InfoItem label="Category" value={<Link href={`${parentItemPath}/${resource.categorySlug}`} className="hover:text-primary transition-colors">{resource.categoryName}</Link>} icon={Layers} />
+        <InfoItem label="Downloads" value={formatNumberWithSuffix(resource.downloads)} icon={BarChart3} />
+        <InfoItem label="Rating" value={<RatingDisplaySidebar rating={resource.rating} reviewCount={resource.reviewCount} />} icon={Star} />
+        <InfoItem label="Followers" value={formatNumberWithSuffix(resource.followers)} icon={Heart} />
         <InfoItem label="Created" value={format(new Date(resource.createdAt), 'MMM d, yyyy')} icon={CalendarDays} />
         <InfoItem label="Updated" value={updatedAtFormatted} icon={CalendarDays} suppressHydrationWarning={true} />
       </SidebarCard>
@@ -156,11 +184,12 @@ export function ResourceInfoSidebar({ resource }: ResourceInfoSidebarProps) {
                   <div className="flex flex-wrap gap-1.5">
                     {tagsInGroup.map(tag => {
                       const queryParam = getFilterQueryParamForTagType(tag.type);
+                      const categoryPath = `${parentItemPath}/${resource.categorySlug}`;
                       if (queryParam) {
                         return (
                           <Link 
                             key={tag.id} 
-                            href={`/games/${resource.gameSlug}/${resource.categorySlug}?${queryParam}=${tag.id}`}
+                            href={`${categoryPath}?${queryParam}=${tag.id}`}
                             className="hover:opacity-80 transition-opacity"
                           >
                             <TagBadge tag={tag} />
@@ -184,6 +213,7 @@ export function ResourceInfoSidebar({ resource }: ResourceInfoSidebarProps) {
                 {resource.links.wiki && <Button variant="outline" size="sm" asChild className="w-full justify-start"><Link href={resource.links.wiki} target="_blank"><ShieldQuestion className="mr-2 h-4 w-4 text-green-400"/>Wiki / Guide</Link></Button>}
                 {resource.links.issues && <Button variant="outline" size="sm" asChild className="w-full justify-start"><Link href={resource.links.issues} target="_blank"><AlertTriangle className="mr-2 h-4 w-4 text-yellow-400"/>Issue Tracker</Link></Button>}
                 {resource.links.source && <Button variant="outline" size="sm" asChild className="w-full justify-start"><Link href={resource.links.source} target="_blank"><GitBranch className="mr-2 h-4 w-4 text-gray-400"/>Source Code</Link></Button>}
+                {resource.links.projectUrl && <Button variant="outline" size="sm" asChild className="w-full justify-start"><Link href={resource.links.projectUrl} target="_blank"><ExternalLink className="mr-2 h-4 w-4 text-blue-400"/>Visit Resource Site</Link></Button>}
             </div>
         </SidebarCard>
       )}
@@ -197,3 +227,4 @@ export function ResourceInfoSidebar({ resource }: ResourceInfoSidebarProps) {
     </div>
   );
 }
+
