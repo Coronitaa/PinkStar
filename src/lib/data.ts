@@ -1,7 +1,11 @@
 
 import type { Game, Category, Resource, Author, Tag, ResourceFile, GetResourcesParams, PaginatedResourcesResponse, ResourceLinks, ChangelogEntry, WebItem, AppItem, ArtMusicItem, ItemStats, ItemType, ItemWithDetails, GenericListItem, TagType } from './types';
 import { formatDistanceToNow } from 'date-fns';
+// import { adminDb } from './firebase/adminApp'; // Firebase dependency removed
 
+console.warn("data.ts: Firestore (adminDb) dependencies are being removed. Data will be mocked or empty.");
+
+// --- Mock Data (to replace Firestore calls) ---
 const commonTags: Record<string, Tag> = {
   // Game Specific
   v1_19: { id: 'tag1', name: '1.19.X', type: 'version', color: 'bg-blue-500' },
@@ -86,22 +90,7 @@ const baseGames: Game[] = [
     tags: [commonTags.pc, commonTags.sandbox, commonTags.multiplayer, commonTags.adventure, commonTags.rpg],
     createdAt: new Date('2023-01-15T10:00:00Z').toISOString(), updatedAt: new Date('2024-03-10T12:00:00Z').toISOString(),
   },
-  {
-    id: 'game2', name: 'Galaxy Explorers', slug: 'galaxy-explorers', itemType: 'game',
-    description: 'Conquer the stars in this vast space simulation.',
-    longDescription: 'Galaxy Explorers invites you to chart your own course across a procedurally generated galaxy of trillions of stars. Mine resources, trade commodities, engage in thrilling dogfights, build your own starbases, and unravel the mysteries of ancient alien civilizations. Whether you choose to be a peaceful trader, a notorious pirate, or a renowned explorer, your saga is written in the stars.',
-    bannerUrl: 'https://placehold.co/1200x400/AD1457/FFFFFF?text=Galaxy+Banner', iconUrl: 'https://placehold.co/128x128/AD1457/FFFFFF?text=GE',
-    tags: [commonTags.pc, commonTags.space, commonTags.openWorld, commonTags.simulation, commonTags.singleplayer],
-    createdAt: new Date('2022-11-20T14:30:00Z').toISOString(), updatedAt: new Date('2024-02-28T10:00:00Z').toISOString(),
-  },
-  {
-    id: 'game3', name: 'Kingdoms Collide', slug: 'kingdoms-collide', itemType: 'game',
-    description: 'Lead your armies to victory in this epic RTS.',
-    longDescription: 'Kingdoms Collide is a real-time strategy game that blends classic RTS mechanics with deep tactical gameplay. Choose from unique factions, command vast armies, manage your economy, and outwit your opponents on diverse battlefields. Featuring a compelling single-player campaign and intense multiplayer matches, only the shrewdest commanders will prevail.',
-    bannerUrl: 'https://placehold.co/1200x400/F06292/FFFFFF?text=Kingdoms+Banner', iconUrl: 'https://placehold.co/128x128/F06292/FFFFFF?text=KC',
-    tags: [commonTags.pc, commonTags.rts, commonTags.strategy, commonTags.multiplayer],
-    createdAt: new Date('2023-05-01T09:00:00Z').toISOString(), updatedAt: new Date('2023-12-15T16:45:00Z').toISOString(),
-  },
+  // Add more mock games if needed
 ];
 
 const baseWebItems: WebItem[] = [
@@ -114,16 +103,6 @@ const baseWebItems: WebItem[] = [
     technologies: [commonTags.nextjs, commonTags.react, commonTags.tailwind, commonTags.typescript],
     createdAt: new Date('2023-08-10T10:00:00Z').toISOString(), updatedAt: new Date('2024-01-20T11:00:00Z').toISOString(),
     projectUrl: 'https://example.com/profolio-x-demo'
-  },
-  {
-    id: 'web2', name: 'E-Shop Starter', slug: 'e-shop-starter', itemType: 'web',
-    description: 'A feature-rich e-commerce starter kit with modern tech.',
-    longDescription: 'Kickstart your online store with E-Shop Starter. Built with Vue.js, Nuxt, and integrated with Stripe for payments. Includes product listings, cart functionality, user accounts, and an admin dashboard. Fully responsive and SEO-friendly.',
-    bannerUrl: 'https://placehold.co/1200x400/43A047/FFFFFF?text=EShop+Banner', iconUrl: 'https://placehold.co/128x128/43A047/FFFFFF?text=ES',
-    tags: [commonTags.ecommerce, commonTags.vue, commonTags.saas],
-    technologies: [commonTags.vue, commonTags.typescript, {id: 'tag-nuxt', name: 'Nuxt.js', type: 'framework'}],
-    createdAt: new Date('2023-06-15T14:00:00Z').toISOString(), updatedAt: new Date('2024-02-25T10:00:00Z').toISOString(),
-    projectUrl: 'https://example.com/eshop-demo'
   },
 ];
 
@@ -199,59 +178,15 @@ const allResources: Resource[] = [
       { id: 'cl1-3', versionName: 'Ultra Graphics v2.0.0 Alpha 1', date: '2023-06-15T10:00:00Z', notes: 'Alpha release of v2.0.0. Includes new lighting engine.\nPlease report any bugs found.', gameVersionTag: commonTags.v1_19, channelTag: commonTags.channelAlpha, loaderTags: [commonTags.fabric] }
     ], rating: 4.8, reviewCount: 285, followers: 1250, links: { discord: 'https://discord.gg/example', wiki: 'https://wiki.example.com/ultragfx', issues: 'https://github.com/example/ultragfx', source: 'https://github.com/example/ultragfx' }
   },
-  {
-    id: 'res-web-ui-kit', name: 'Aurora UI Kit', slug: 'aurora-ui-kit', parentItemName: 'Profolio X', parentItemSlug: 'profolio-x', parentItemType: 'web', categoryName: 'UI Components', categorySlug: 'ui-components',
-    imageUrl: 'https://placehold.co/600x400/0288D1/FFFFFF?text=AuroraUI',
-    author: authors[3], tags: [commonTags.react, commonTags.tailwind, commonTags.typescript], downloads: 500, createdAt: new Date('2023-09-01T10:00:00Z').toISOString(), updatedAt: new Date('2024-01-15T11:00:00Z').toISOString(), version: '1.2.0',
-    description: 'A comprehensive React component library for Profolio X.',
-    detailedDescription: 'Aurora UI Kit provides a set of beautifully designed and accessible React components, perfectly styled for Profolio X using Tailwind CSS. Includes buttons, forms, modals, navigation, and more. Accelerate your Profolio X customization.',
-    files: [{ id: 'file-web-uikit', name: 'aurora-ui-kit-v1.2.0.zip', url: '#', size: '1.2 MB', supportedVersions: [], supportedLoaders: [], channel: commonTags.channelRelease, date: '2024-01-15T11:00:00Z' }],
-    requirements: 'React 18+, Tailwind CSS 3+', rating: 4.9, reviewCount: 75, followers: 150,
-    links: { source: 'https://github.com/webweaver/aurora-ui', projectUrl: 'https://example.com/profolio-x-demo/aurora-ui'}
-  },
-  {
-    id: 'res-app-auth', name: 'Firebase Auth Starter', slug: 'firebase-auth-starter', parentItemName: 'TaskMaster Pro', parentItemSlug: 'taskmaster-pro', parentItemType: 'app', categoryName: 'SDKs & Libraries', categorySlug: 'sdks-libraries',
-    imageUrl: 'https://placehold.co/600x400/FFA000/FFFFFF?text=FirebaseAuth',
-    author: authors[4], tags: [commonTags.flutter, {id: 'tag-firebase', name: 'Firebase', type: 'tooling'}], downloads: 800, createdAt: new Date('2023-07-10T14:00:00Z').toISOString(), updatedAt: new Date('2023-12-01T09:00:00Z').toISOString(), version: '1.0.0',
-    description: 'Quickly integrate Firebase Authentication into your Flutter app.',
-    detailedDescription: 'This starter package provides all necessary boilerplate code to integrate Firebase Authentication (Email/Password, Google Sign-In) into a Flutter application like TaskMaster Pro. Includes UI screens for login, registration, and password reset.',
-    files: [{ id: 'file-app-auth', name: 'firebase-auth-starter-flutter.zip', url: '#', size: '800 KB', supportedVersions: [], supportedLoaders: [], channel: commonTags.channelRelease, date: '2023-12-01T09:00:00Z' }],
-    requirements: 'Flutter 3+, Firebase project configured.', rating: 4.7, reviewCount: 120, followers: 200,
-    links: { source: 'https://github.com/apparchitect/firebase-auth-starter', projectUrl: 'https://example.com/taskmaster-app/auth-starter'}
-  },
-  {
-    id: 'res-art-nebula', name: 'Nebula Brush Pack', slug: 'nebula-brush-pack', parentItemName: 'Cybernetic Dreams', parentItemSlug: 'cybernetic-dreams', parentItemType: 'art-music', categoryName: 'Brushes & Presets', categorySlug: 'brushes-presets',
-    imageUrl: 'https://placehold.co/600x400/795548/FFFFFF?text=NebulaBrushes',
-    author: authors[5], tags: [commonTags.digitalArt, {id: 'tag-photoshop', name: 'Photoshop', type: 'tooling'}], downloads: 1200, createdAt: new Date('2023-11-01T15:00:00Z').toISOString(), updatedAt: new Date('2023-11-20T13:00:00Z').toISOString(), version: '1.0',
-    description: 'A set of high-resolution brushes for creating stunning space nebulae.',
-    detailedDescription: 'Create breathtaking space scenes with the Nebula Brush Pack for Photoshop (and compatible software). Includes over 50 high-resolution brushes for stars, gas clouds, and cosmic dust, perfect for digital artists working on projects like Cybernetic Dreams.',
-    files: [{ id: 'file-art-brushes', name: 'nebula-brush-pack.abr', url: '#', size: '15 MB', supportedVersions: [], supportedLoaders: [], channel: commonTags.channelRelease, date: '2023-11-20T13:00:00Z' }],
-    requirements: 'Adobe Photoshop CC or compatible graphics software.', rating: 4.9, reviewCount: 95, followers: 350,
-    links: { projectUrl: 'https://example.com/cybernetic-dreams-gallery/brushes'}
-  },
-  {
-    id: 'res2', name: 'Inventory Sorter', slug: 'inventory-sorter', parentItemName: 'PixelVerse Adventures', parentItemSlug: 'pixelverse-adventures', parentItemType: 'game', categoryName: 'Utilities', categorySlug: 'utilities',
-    imageUrl: 'https://placehold.co/600x400/F48FB1/121212?text=InvSort',
-    author: authors[1], tags: [commonTags.v1_19, commonTags.fabric, commonTags.utility, commonTags.pc], downloads: 7500, createdAt: new Date('2023-02-20T11:00:00Z').toISOString(), updatedAt: new Date('2023-06-01T16:00:00Z').toISOString(), version: '1.2.3', description: 'Automatically sorts your inventory with a single click.', detailedDescription: 'Tired of messy inventories? Inventory Sorter adds a smart button to your inventory screen that intelligently organizes all your items by category and name. Customizable sorting profiles coming soon!', 
-    files: [
-      { id: 'file2_1', name: 'inventory-sorter-v1.2.3-fabric-1.19.jar', url: '#', size: '250 KB', supportedVersions: [commonTags.v1_19], supportedLoaders: [commonTags.fabric], channel: commonTags.channelRelease, date: '2023-06-01T16:00:00Z' }
-    ], 
-    requirements: 'Fabric API.', rating: 4.5, reviewCount: 150, followers: 500, links: { source: 'https://github.com/example/invsort' }
-  },
-  {
-    id: 'res3', name: 'The Lost Mines Adventure Map', slug: 'lost-mines-map', parentItemName: 'PixelVerse Adventures', parentItemSlug: 'pixelverse-adventures', parentItemType: 'game', categoryName: 'Maps & Worlds', categorySlug: 'maps-and-worlds',
-    imageUrl: 'https://placehold.co/600x400/880E4F/FFFFFF?text=LostMines',
-    author: authors[2], tags: [commonTags.map, commonTags.adventure, commonTags.pc], downloads: 3200, createdAt: new Date('2023-09-05T09:00:00Z').toISOString(), updatedAt: new Date('2023-10-10T12:30:00Z').toISOString(), version: '1.0.0', description: 'A challenging adventure map with puzzles and boss fights.', detailedDescription: 'Embark on a perilous journey through The Lost Mines! This custom adventure map features intricate puzzles, challenging parkour sections, unique boss encounters, and a captivating story. Can you uncover the secrets hidden deep within?', 
-    files: [
-      { id: 'file3_1', name: 'lost-mines-adventure-map-v1.0.zip', url: '#', size: '12.1 MB', supportedVersions: [commonTags.v1_20], supportedLoaders: [], channel: commonTags.channelRelease, date: '2023-10-10T12:30:00Z' }
-    ], 
-    rating: 4.2, reviewCount: 88, followers: 300, links: { discord: 'https://discord.gg/pixelperfectmaps' }
-  },
+  // Add more mock resources here
 ];
-
+// --- End of Mock Data ---
 
 const MOCK_DELAY = 0; 
-const delayed = <T>(data: T): Promise<T> => new Promise(resolve => setTimeout(() => resolve(data), MOCK_DELAY));
+const delayed = <T>(data: T): Promise<T> => {
+  // console.log(`data.ts: Returning delayed mock data for: ${data ? (data as any).name || (data as any).length || typeof data : 'undefined'}`);
+  return new Promise(resolve => setTimeout(() => resolve(data), MOCK_DELAY))
+};
 
 // Function to format numbers with suffixes (K, M, B)
 export function formatNumberWithSuffix(num: number | undefined | null): string {
@@ -316,12 +251,14 @@ export const calculateGenericItemSearchScore = (item: GenericListItem, query: st
 
 // Generic function to get an item by slug and type
 export const getItemBySlugGeneric = async (slug: string, itemType: ItemType): Promise<GenericListItem | undefined> => {
+  console.warn(`getItemBySlugGeneric: Called for ${slug} (${itemType}). Using MOCK DATA.`);
   const item = allGenericItems.find(g => g.slug === slug && g.itemType === itemType);
   return delayed(item ? {...item} : undefined);
 };
 
 // Generic function to get categories for a specific item type and slug
 export const getCategoriesForItemGeneric = async (itemSlug: string, itemType: ItemType): Promise<Category[]> => {
+  console.warn(`getCategoriesForItemGeneric: Called for ${itemSlug} (${itemType}). Using MOCK DATA.`);
   const itemCategories = allCategories
     .filter(cat => cat.parentItemType === itemType) 
     .map(c => ({ ...c, parentItemSlug: itemSlug, parentItemType: itemType })); 
@@ -349,16 +286,18 @@ export const getCategoriesForItemGeneric = async (itemSlug: string, itemType: It
 
 // Generic function to get stats for an item
 export const getItemStatsGeneric = async (itemSlug: string, itemType: ItemType): Promise<ItemStats> => {
+  console.warn(`getItemStatsGeneric: Called for ${itemSlug} (${itemType}). Using MOCK DATA.`);
   const { resources } = await getResources({ parentItemSlug: itemSlug, parentItemType: itemType, limit: Infinity });
   const totalResources = resources.length;
   const totalDownloads = resources.reduce((sum, resource) => sum + (resource.downloads || 0), 0);
-  const totalFollowers = Math.floor(Math.random() * 1200000) + 50000;
-  const totalViews = itemType !== 'game' ? Math.floor(Math.random() * 50000000) + 1000000 : undefined; 
+  const totalFollowers = Math.floor(Math.random() * 1200000) + 50000; // Mocked
+  const totalViews = itemType !== 'game' ? Math.floor(Math.random() * 50000000) + 1000000 : undefined; // Mocked
   return delayed({ totalResources, totalDownloads, totalFollowers, totalViews });
 };
 
 // Generic function to get items with their details
 const getItemsWithDetailsGeneric = async (itemType: ItemType): Promise<ItemWithDetails[]> => {
+  console.warn(`getItemsWithDetailsGeneric: Called for ${itemType}. Using MOCK DATA.`);
   const baseItems = allGenericItems.filter(item => item.itemType === itemType);
   const itemsWithDetails = await Promise.all(
     baseItems.map(async (item) => {
@@ -382,14 +321,22 @@ export const getWebItemBySlug = async (slug: string): Promise<WebItem | undefine
 export const getAppItemBySlug = async (slug: string): Promise<AppItem | undefined> => getItemBySlugGeneric(slug, 'app') as Promise<AppItem | undefined>;
 export const getArtMusicItemBySlug = async (slug: string): Promise<ArtMusicItem | undefined> => getItemBySlugGeneric(slug, 'art-music') as Promise<ArtMusicItem | undefined>;
 
+export const getAllItemsForAdmin = async (): Promise<GenericListItem[]> => {
+  console.warn("getAllItemsForAdmin: Called. Using MOCK DATA.");
+  // This function would need to be completely rewritten for a new DB.
+  // For now, returning a combined list of mock items.
+  return delayed([...allGenericItems]);
+};
 
 export const getCategoryDetails = async (parentItemSlug: string, parentItemType: ItemType, categorySlug: string): Promise<Category | undefined> => {
+  console.warn(`getCategoryDetails: Called for ${parentItemSlug}/${categorySlug} (${parentItemType}). Using MOCK DATA.`);
   const itemCategories = await getCategoriesForItemGeneric(parentItemSlug, parentItemType);
   const category = itemCategories.find(c => c.slug === categorySlug);
   return delayed(category);
 };
 
 export const getResources = async (params: GetResourcesParams): Promise<PaginatedResourcesResponse> => {
+  console.warn(`getResources: Called with params: ${JSON.stringify(params)}. Using MOCK DATA.`);
   let filteredResources = [...allResources].map(r => ({...r, searchScore: 0}));
 
   if (params?.parentItemSlug && params?.parentItemType) {
@@ -407,17 +354,11 @@ export const getResources = async (params: GetResourcesParams): Promise<Paginate
       const descMatch = r.description.toLowerCase().includes(query);
       const tagMatch = r.tags.some(tag => tag.name.toLowerCase().includes(query));
 
-      if (nameMatch && descMatch) {
-        score = 50;
-      } else if (nameMatch) {
-        score = 40;
-      } else if (descMatch && tagMatch) {
-        score = 30;
-      } else if (descMatch) {
-        score = 20;
-      } else if (tagMatch) {
-        score = 10;
-      }
+      if (nameMatch && descMatch) score = 50;
+      else if (nameMatch) score = 40;
+      else if (descMatch && tagMatch) score = 30;
+      else if (descMatch) score = 20;
+      else if (tagMatch) score = 10;
       r.searchScore = score;
       return r;
     }).filter(r => r.searchScore! > (params.minScore || 0));
@@ -436,12 +377,8 @@ export const getResources = async (params: GetResourcesParams): Promise<Paginate
     case 'relevance':
       if (params?.searchQuery && params.searchQuery.length > 0) {
         filteredResources.sort((a, b) => (b.searchScore || 0) - (a.searchScore || 0));
-      } else {
-        filteredResources.sort((a, b) => {
-          const scoreA = (a.downloads / 1000) + (new Date(a.updatedAt).getTime() / (1000 * 60 * 60 * 24 * 30)) + (a.rating || 0);
-          const scoreB = (b.downloads / 1000) + (new Date(b.updatedAt).getTime() / (1000 * 60 * 60 * 24 * 30)) + (b.rating || 0);
-          return scoreB - scoreA;
-        });
+      } else { // Fallback sort if no search query
+        filteredResources.sort((a, b) => b.downloads - a.downloads);
       }
       break;
     case 'downloads':
@@ -487,7 +424,8 @@ export const getResources = async (params: GetResourcesParams): Promise<Paginate
 };
 
 export const getBestMatchForCategoryAction = async (parentItemSlug: string, parentItemType: ItemType, categorySlug: string, searchQuery: string, limit: number = 3): Promise<Resource[]> => {
-  if (!searchQuery || searchQuery.length === 0) return [];
+  console.warn(`getBestMatchForCategoryAction: Called for ${parentItemSlug}/${categorySlug} (${parentItemType}), query: "${searchQuery}". Using MOCK DATA.`);
+  if (!searchQuery || searchQuery.length === 0) return delayed([]);
   
   const { resources } = await getResources({
     parentItemSlug,
@@ -503,6 +441,7 @@ export const getBestMatchForCategoryAction = async (parentItemSlug: string, pare
 
 
 export const getResourceBySlug = async (slug: string): Promise<Resource | undefined> => {
+  console.warn(`getResourceBySlug: Called for ${slug}. Using MOCK DATA.`);
   const resource = allResources.find(r => r.slug === slug);
   if (resource) {
     const resourceCopy = { ...resource };
@@ -518,11 +457,13 @@ export const getResourceBySlug = async (slug: string): Promise<Resource | undefi
 };
 
 export const getHighlightedResources = async (parentItemSlug: string, parentItemType: ItemType, categorySlug: string, limit: number = 5): Promise<Resource[]> => {
+  console.warn(`getHighlightedResources: Called for ${parentItemSlug}/${categorySlug} (${parentItemType}). Using MOCK DATA.`);
   const { resources } = await getResources({ parentItemSlug, parentItemType, categorySlug, sortBy: 'downloads', page: 1, limit });
   return delayed(resources);
 };
 
 export const getAvailableFilterTags = async (parentItemSlug: string, parentItemType: ItemType, categorySlug?: string): Promise<Partial<AvailableTags>> => {
+  console.warn(`getAvailableFilterTags: Called for ${parentItemSlug} (${parentItemType}), category: ${categorySlug}. Using MOCK DATA.`);
   const { resources: allFilteredResources } = await getResources({ parentItemSlug, parentItemType, categorySlug, limit: Infinity }); 
   
   const tagsMap: Record<TagType, Map<string, Tag>> = {
@@ -574,24 +515,16 @@ export const getAvailableFilterTags = async (parentItemSlug: string, parentItemT
 export const formatTimeAgo = (dateString: string | undefined): string => {
   if (!dateString) return 'N/A';
   try {
-    // Check if running in a browser environment
     if (typeof window === 'undefined') {
-      // Fallback for server-side rendering or environments without 'window'
       return new Date(dateString).toLocaleDateString(); 
     }
     return formatDistanceToNow(new Date(dateString), { addSuffix: true });
   } catch (error) {
     console.error("Error formatting date:", dateString, error);
-    // Fallback for invalid date string or other errors during formatting
     try {
-        // Attempt to format as a simple date string if fromDistanceToNow fails
         return new Date(dateString).toLocaleDateString();
     } catch (fallbackError) {
-        // If all else fails, return a generic error message
         return 'Invalid Date';
     }
   }
 };
-    
-    
-
