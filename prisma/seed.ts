@@ -1,5 +1,5 @@
 
-import { PrismaClient, ItemTypeEnum, TagTypeEnum } from '@prisma/client';
+import { PrismaClient, ItemTypeEnum, TagTypeEnum, Role } from '@prisma/client'; // Added Role import
 
 const prisma = new PrismaClient();
 
@@ -11,14 +11,14 @@ async function main() {
     data: {
       email: 'admin@example.com',
       name: 'Admin User',
-      role: 'admin', // Assign 'admin' role
+      role: Role.ADMIN, // Use Enum value
     },
   });
   const regularUser = await prisma.user.create({
     data: {
       email: 'user@example.com',
       name: 'Regular User',
-      role: 'user', // Default role is 'user'
+      role: Role.USER, // Use Enum value
     },
   });
   console.log('Created users.');
@@ -221,3 +221,5 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+
+    
