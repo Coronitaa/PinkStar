@@ -2,43 +2,17 @@
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
-import type { GameWithDetails } from './page'; 
-import { GameCard } from '@/components/game/GameCard';
+import type { ItemWithDetails, GenericListItem } from '@/lib/types'; // Changed GameWithDetails to ItemWithDetails
+import { ItemCard } from '@/components/game/GameCard'; // GameCard is now generic ItemCard
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search, ListFilter, Gamepad2 } from 'lucide-react';
+import { calculateGenericItemSearchScore } from '@/lib/data'; // Use generic search score
 
 type SortOption = 'popularity' | 'name_asc' | 'name_desc' | 'created_desc' | 'created_asc' | 'updated_desc' | 'default';
 
-const calculateGameSearchScore = (game: GameWithDetails, query: string): number => {
-  if (!query) return 0;
-  const lowerQuery = query.toLowerCase();
-  let score = 0;
 
-  // Name scoring (highest priority)
-  if (game.name.toLowerCase().includes(lowerQuery)) {
-    score += 10;
-    if (game.name.toLowerCase().startsWith(lowerQuery)) score += 5; // Boost for starting match
-    if (game.name.toLowerCase() === lowerQuery) score += 10; // Major boost for exact match
-  }
-
-  // Description scoring
-  if (game.description.toLowerCase().includes(lowerQuery)) {
-    score += 3;
-  }
-
-  // Tags scoring
-  if (game.tags) {
-    game.tags.forEach(tag => {
-      if (tag.name.toLowerCase().includes(lowerQuery)) {
-        score += 1;
-      }
-    });
-  }
-  return score;
-};
-
-export function HomePageContent({ initialGames }: { initialGames: GameWithDetails[] }) {
+export function HomePageContent({ initialGames }: { initialGames: ItemWithDetails[] }) { // Changed GameWithDetails to ItemWithDetails
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('default');
@@ -46,7 +20,7 @@ export function HomePageContent({ initialGames }: { initialGames: GameWithDetail
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
-    }, 300); // Debounce search input
+    }, 300); 
 
     return () => {
       clearTimeout(handler);
@@ -54,24 +28,23 @@ export function HomePageContent({ initialGames }: { initialGames: GameWithDetail
   }, [searchQuery]);
 
   const filteredAndSortedGames = useMemo(() => {
-    let gamesToProcess = [...initialGames];
+    let gamesToProcess = [...initialGames] as (GenericListItem & { searchScore?: number; stats: ItemWithDetails['stats'] })[];
 
-    // Apply search filter
+
     if (debouncedSearchQuery.trim()) {
       gamesToProcess = gamesToProcess
         .map(game => ({
           ...game,
-          searchScore: calculateGameSearchScore(game, debouncedSearchQuery),
+          searchScore: calculateGenericItemSearchScore(game, debouncedSearchQuery),
         }))
-        .filter(game => game.searchScore && game.searchScore > 0) // Ensure positive score
-        .sort((a, b) => (b.searchScore || 0) - (a.searchScore || 0)); // Sort by score descending
+        .filter(game => game.searchScore && game.searchScore > 0) 
+        .sort((a, b) => (b.searchScore || 0) - (a.searchScore || 0)); 
     }
 
-    // Apply sorting unless already sorted by search relevance
     if (!debouncedSearchQuery.trim() || sortBy !== 'default') {
         switch (sortBy) {
         case 'popularity':
-            gamesToProcess.sort((a, b) => b.stats.totalDownloads - a.stats.totalDownloads);
+            gamesToProcess.sort((a, b) => (b.stats.totalDownloads ?? b.stats.totalViews ?? 0) - (a.stats.totalDownloads ?? a.stats.totalViews ?? 0));
             break;
         case 'name_asc':
             gamesToProcess.sort((a, b) => a.name.localeCompare(b.name));
@@ -79,21 +52,19 @@ export function HomePageContent({ initialGames }: { initialGames: GameWithDetail
         case 'name_desc':
             gamesToProcess.sort((a, b) => b.name.localeCompare(a.name));
             break;
-        case 'created_desc': // Latest Added
+        case 'created_desc': 
             gamesToProcess.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
             break;
-        case 'created_asc': // Oldest Added
+        case 'created_asc': 
             gamesToProcess.sort((a, b) => new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime());
             break;
-        case 'updated_desc': // Recently Updated
+        case 'updated_desc': 
             gamesToProcess.sort((a, b) => new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime());
             break;
         case 'default':
-            // If no search and default sort, sort by popularity
             if (!debouncedSearchQuery.trim()) {
-                gamesToProcess.sort((a, b) => b.stats.totalDownloads - a.stats.totalDownloads);
+                gamesToProcess.sort((a, b) => (b.stats.totalDownloads ?? b.stats.totalViews ?? 0) - (a.stats.totalDownloads ?? a.stats.totalViews ?? 0));
             }
-            // If there was a search, it's already sorted by relevance (searchScore)
             break;
         }
     }
@@ -125,7 +96,7 @@ export function HomePageContent({ initialGames }: { initialGames: GameWithDetail
             />
           </div>
           <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
-            <SelectTrigger className="w-full sm:w-auto min-w-[200px]"> {/* Increased min-width */}
+            <SelectTrigger className="w-full sm:w-auto min-w-[200px]"> 
               <ListFilter className="w-4 h-4 mr-2 opacity-70" />
               <SelectValue placeholder="Sort by..." />
             </SelectTrigger>
@@ -149,11 +120,10 @@ export function HomePageContent({ initialGames }: { initialGames: GameWithDetail
         {filteredAndSortedGames.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredAndSortedGames.map((game) => (
-              <GameCard 
+              <ItemCard 
                 key={game.id} 
-                game={game} 
-                categories={game.categories} 
-                stats={game.stats} 
+                item={game} 
+                basePath="/games" // Explicitly set base path for games
               />
             ))}
           </div>
