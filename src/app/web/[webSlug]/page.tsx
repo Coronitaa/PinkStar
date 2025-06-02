@@ -61,7 +61,7 @@ export default async function WebItemPage({ params }: WebItemPageProps) {
             alt={`${webItem.name} banner`}
             fill
             style={{objectFit:"cover"}}
-            priority
+            priority // Added for LCP optimization
             data-ai-hint="web project screenshot modern"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent" />
@@ -74,6 +74,7 @@ export default async function WebItemPage({ params }: WebItemPageProps) {
               width={128}
               height={128}
               className="rounded-lg border-4 border-background shadow-xl"
+              priority // Added for LCP optimization
               data-ai-hint="website logo abstract"
             />
             <div>
@@ -125,4 +126,3 @@ export default async function WebItemPage({ params }: WebItemPageProps) {
 }
 
 export const revalidate = 3600;
-

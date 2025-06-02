@@ -61,7 +61,7 @@ export default async function ArtMusicItemPage({ params }: ArtMusicItemPageProps
             alt={`${artMusicItem.name} banner`}
             fill
             style={{objectFit:"cover"}}
-            priority
+            priority // Added for LCP optimization
             data-ai-hint="abstract art music visual"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent" />
@@ -74,6 +74,7 @@ export default async function ArtMusicItemPage({ params }: ArtMusicItemPageProps
               width={128}
               height={128}
               className="rounded-lg border-4 border-background shadow-xl"
+              priority // Added for LCP optimization
               data-ai-hint="album art illustration"
             />
             <div>
@@ -126,4 +127,3 @@ export default async function ArtMusicItemPage({ params }: ArtMusicItemPageProps
 }
 
 export const revalidate = 3600;
-

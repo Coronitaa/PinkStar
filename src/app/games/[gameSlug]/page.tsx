@@ -62,7 +62,7 @@ export default async function GamePage({ params }: GamePageProps) {
             alt={`${game.name} banner`}
             fill
             style={{objectFit:"cover"}}
-            priority
+            priority // Added for LCP optimization
             data-ai-hint="game wallpaper splash"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent" />
@@ -75,6 +75,7 @@ export default async function GamePage({ params }: GamePageProps) {
               width={128}
               height={128}
               className="rounded-lg border-4 border-background shadow-xl"
+              priority // Added for LCP optimization
               data-ai-hint="game icon avatar"
             />
             <div>
@@ -127,4 +128,3 @@ export default async function GamePage({ params }: GamePageProps) {
 }
 
 export const revalidate = 3600;
-
