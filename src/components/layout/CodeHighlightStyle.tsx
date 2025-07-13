@@ -1,25 +1,28 @@
 
+'use client';
+
 import { getActiveCodeHighlightTheme } from '@/lib/data';
-import type { HighlightTheme, HighlightStyle } from '@/lib/types';
+import type { HighlightTheme } from '@/lib/types';
 import { unstable_noStore as noStore } from 'next/cache';
 
 function generateHighlightCss(theme: HighlightTheme, selectorPrefix: string): string {
+  if (!theme) return '';
   const styles: { [key: string]: string } = {
     // Base styles
     [`${selectorPrefix}`]: `background-color: ${theme.background}; color: ${theme.text};`,
-    // Specific token styles
+    // Specific token styles from highlight.js
     [`${selectorPrefix} .hljs-comment, ${selectorPrefix} .hljs-quote`]: `color: ${theme.comment}; font-style: italic;`,
-    [`${selectorPrefix} .hljs-doctag, ${selectorPrefix} .hljs-keyword, ${selectorPrefix} .hljs-formula`]: `color: ${theme.keyword};`,
-    [`${selectorPrefix} .hljs-section, ${selectorPrefix} .hljs-name, ${selectorPrefix} .hljs-selector-tag, ${selectorPrefix} .hljs-deletion, ${selectorPrefix} .hljs-subst`]: `color: ${theme.tag};`, // Using 'tag' for this group
-    [`${selectorPrefix} .hljs-literal`]: `color: ${theme.number};`, // Using 'number' for literals
-    [`${selectorPrefix} .hljs-string, ${selectorPrefix} .hljs-regexp, ${selectorPrefix} .hljs-addition, ${selectorPrefix} .hljs-attribute, ${selectorPrefix} .hljs-meta-string`]: `color: ${theme.string};`,
-    [`${selectorPrefix} .hljs-built_in, ${selectorPrefix} .hljs-class .hljs-title`]: `color: ${theme.class};`,
-    [`${selectorPrefix} .hljs-attr, ${selectorPrefix} .hljs-variable, ${selectorPrefix} .hljs-template-variable, ${selectorPrefix} .hljs-type, ${selectorPrefix} .hljs-selector-class, ${selectorPrefix} .hljs-selector-attr, ${selectorPrefix} .hljs-selector-pseudo, ${selectorPrefix} .hljs-number`]: `color: ${theme.attr};`, // Using 'attr' for this group
-    [`${selectorPrefix} .hljs-symbol, ${selectorPrefix} .hljs-bullet, ${selectorPrefix} .hljs-link, ${selectorPrefix} .hljs-meta, ${selectorPrefix} .hljs-selector-id, ${selectorPrefix} .hljs-title`]: `color: ${theme.function};`, // Using 'function' for titles/links
+    [`${selectorPrefix} .hljs-keyword, ${selectorPrefix} .hljs-selector-tag, ${selectorPrefix} .hljs-doctag`]: `color: ${theme.keyword};`,
+    [`${selectorPrefix} .hljs-string, ${selectorPrefix} .hljs-regexp`]: `color: ${theme.string};`,
+    [`${selectorPrefix} .hljs-number, ${selectorPrefix} .hljs-literal, ${selectorPrefix} .hljs-bullet, ${selectorPrefix} .hljs-link`]: `color: ${theme.number};`,
+    [`${selectorPrefix} .hljs-function .hljs-title, ${selectorPrefix} .hljs-title.function_, ${selectorPrefix} .hljs-title.function_.invoke__`]: `color: ${theme.function};`,
+    [`${selectorPrefix} .hljs-class .hljs-title, ${selectorPrefix} .hljs-type`]: `color: ${theme.class};`,
+    [`${selectorPrefix} .hljs-tag, ${selectorPrefix} .hljs-name, ${selectorPrefix} .hljs-section`]: `color: ${theme.tag};`,
+    [`${selectorPrefix} .hljs-attr, ${selectorPrefix} .hljs-attribute`]: `color: ${theme.attr};`,
+    [`${selectorPrefix} .hljs-variable, ${selectorPrefix} .hljs-template-variable, ${selectorPrefix} .hljs-params`]: `color: ${theme.variable};`,
+    [`${selectorPrefix} .hljs-operator, ${selectorPrefix} .hljs-punctuation, ${selectorPrefix} .hljs-meta`]: `color: ${theme.punctuation};`, // Grouping operator with punctuation
     [`${selectorPrefix} .hljs-emphasis`]: `font-style: italic;`,
     [`${selectorPrefix} .hljs-strong`]: `font-weight: bold;`,
-    [`${selectorPrefix} .hljs-punctuation`]: `color: ${theme.punctuation};`,
-    [`${selectorPrefix} .hljs-operator`]: `color: ${theme.operator};`,
   };
 
   return Object.entries(styles)
