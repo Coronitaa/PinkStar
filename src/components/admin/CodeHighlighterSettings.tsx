@@ -23,6 +23,8 @@ const codeSnippets: Record<string, string> = {
   css: `body {\n  background-color: #f0f0f0;\n  font-family: Arial, sans-serif;\n  line-height: 1.6;\n}`,
   json: `{\n  "name": "PinkStar",\n  "version": "1.0.0",\n  "active": true,\n  "features": ["themes", "previews"]\n}`,
   bash: `#!/bin/bash\n# A simple script to greet\nNAME="World"\necho "Hello, $NAME!"\n`,
+  java: `public class HelloWorld {\n    public static void main(String[] args) {\n        System.out.println("Hello, World!"); \n    }\n}`,
+  cpp: `#include <iostream>\n\nint main() {\n    std::cout << "Hello World!";\n    return 0;\n}`,
 };
 
 const SimpleSyntaxHighlight = ({ code, theme }: { code: string; theme: Partial<HighlightTheme> }) => {
@@ -34,7 +36,7 @@ const SimpleSyntaxHighlight = ({ code, theme }: { code: string; theme: Partial<H
     // This is a very simplified tokenizer for preview purposes only
     return code.split(/(\s+|\b)/).map((token, i) => {
       if (token.startsWith('//') || token.startsWith('#')) return <span key={i} style={highlightStyle('comment')}>{token}</span>;
-      if (['function', 'class', 'const', 'def', 'div', 'h1', 'p'].includes(token)) return <span key={i} style={highlightStyle('keyword')}>{token}</span>;
+      if (['function', 'class', 'const', 'def', 'div', 'h1', 'p', 'public', 'static', 'void', 'int', 'include'].includes(token)) return <span key={i} style={highlightStyle('keyword')}>{token}</span>;
       if (token.match(/^[`"']/)) return <span key={i} style={highlightStyle('string')}>{token}</span>;
       if (!isNaN(parseFloat(token))) return <span key={i} style={highlightStyle('number')}>{token}</span>;
       if (token.match(/<[a-z/]+(>)?/)) return <span key={i} style={highlightStyle('tag')}>{token}</span>;
@@ -148,7 +150,12 @@ export function CodeHighlighterSettings({ initialThemes, initialActiveThemeId }:
                     </CardHeader>
                     <CardContent className="space-y-4">
                         {selectedThemeData ? (
-                            <SimpleSyntaxHighlight code={codeSnippets[previewLanguage]} theme={selectedThemeData.styles} />
+                             <div className="border rounded-lg bg-card overflow-hidden">
+                                <div className="px-3 py-1.5 bg-card-foreground/5 text-xs text-muted-foreground border-b">
+                                    {previewLanguage}
+                                </div>
+                                <SimpleSyntaxHighlight code={codeSnippets[previewLanguage]} theme={selectedThemeData.styles} />
+                             </div>
                         ) : (
                             <p className="text-muted-foreground text-center py-8">No theme selected for preview.</p>
                         )}
@@ -234,6 +241,8 @@ function ThemeEditorDialog({ theme, isOpen, onOpenChange, onSave, isSaving }: Th
         name: theme.name,
         styles: { ...theme.styles },
     });
+    const [previewLanguage, setPreviewLanguage] = useState<string>('javascript');
+
 
     useEffect(() => {
         setFormData({
@@ -264,44 +273,58 @@ function ThemeEditorDialog({ theme, isOpen, onOpenChange, onSave, isSaving }: Th
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="flex-grow contents">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 p-6 overflow-y-auto">
-                        <div className="md:col-span-2">
-                            <Label htmlFor="themeName">Theme Name</Label>
-                            <Input id="themeName" value={formData.name} onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))} disabled={theme.isReadonly} />
-                        </div>
-                        
                         <div className="space-y-4">
-                            {HIGHLIGHT_STYLE_KEYS.filter(key => key !== 'background').map(styleKey => (
-                                <div key={styleKey}>
-                                    <Label htmlFor={`style-${styleKey}`}>{HIGHLIGHT_STYLE_NAMES[styleKey]}</Label>
-                                    <div className="flex items-center gap-2 mt-1">
-                                        <Input 
-                                            type="color" 
-                                            id={`style-color-${styleKey}`}
-                                            value={formData.styles[styleKey] || '#000000'}
-                                            onChange={(e) => handleStyleChange(styleKey, e.target.value)}
-                                            className="w-10 h-10 p-1"
-                                            disabled={theme.isReadonly}
-                                        />
-                                        <Input
-                                            id={`style-${styleKey}`}
-                                            value={formData.styles[styleKey] || ''}
-                                            onChange={(e) => handleStyleChange(styleKey, e.target.value)}
-                                            placeholder="#RRGGBB"
-                                            className="h-10"
-                                            disabled={theme.isReadonly}
-                                        />
+                             <div>
+                                <Label htmlFor="themeName">Theme Name</Label>
+                                <Input id="themeName" value={formData.name} onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))} disabled={theme.isReadonly} />
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+                                {HIGHLIGHT_STYLE_KEYS.filter(key => key !== 'background').map(styleKey => (
+                                    <div key={styleKey}>
+                                        <Label htmlFor={`style-${styleKey}`}>{HIGHLIGHT_STYLE_NAMES[styleKey]}</Label>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <Input 
+                                                type="color" 
+                                                id={`style-color-${styleKey}`}
+                                                value={formData.styles[styleKey] || '#000000'}
+                                                onChange={(e) => handleStyleChange(styleKey, e.target.value)}
+                                                className="w-10 h-10 p-1"
+                                                disabled={theme.isReadonly}
+                                            />
+                                            <Input
+                                                id={`style-${styleKey}`}
+                                                value={formData.styles[styleKey] || ''}
+                                                onChange={(e) => handleStyleChange(styleKey, e.target.value)}
+                                                placeholder="#RRGGBB"
+                                                className="h-10"
+                                                disabled={theme.isReadonly}
+                                            />
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                ))}
+                            </div>
                         </div>
 
                         <div className="space-y-4 sticky top-0">
-                            <Label>Live Preview</Label>
+                             <div className="flex items-center justify-between">
+                                <Label>Live Preview</Label>
+                                 <Select value={previewLanguage} onValueChange={setPreviewLanguage}>
+                                    <SelectTrigger className="w-[150px] h-8 text-xs">
+                                        <SelectValue placeholder="Language..." />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {Object.keys(codeSnippets).map(lang => (
+                                            <SelectItem key={lang} value={lang} className="text-xs">{lang.charAt(0).toUpperCase() + lang.slice(1)}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
                             <div className="border rounded-lg bg-card overflow-hidden">
                                 <div className="px-3 py-1.5 bg-card-foreground/5 text-xs text-muted-foreground border-b">
-                                    javascript
+                                    {previewLanguage}
                                 </div>
-                                <SimpleSyntaxHighlight code={codeSnippets['javascript']} theme={formData.styles} />
+                                <SimpleSyntaxHighlight code={codeSnippets[previewLanguage]} theme={formData.styles} />
                             </div>
                         </div>
                     </div>
@@ -319,3 +342,5 @@ function ThemeEditorDialog({ theme, isOpen, onOpenChange, onSave, isSaving }: Th
         </Dialog>
     );
 }
+
+    
