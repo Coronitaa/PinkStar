@@ -154,7 +154,7 @@ export function ResourcePageContent({ resource, relatedResources }: ResourcePage
                     
                     if (codeElement) {
                         const title = domNode.attribs['data-title'] || '';
-                        const language = codeElement.attribs['class']?.replace('language-', '') || 'plaintext';
+                        const language = domNode.attribs['data-language'] || codeElement.attribs['class']?.replace('language-', '') || 'plaintext';
                         const maxHeight = domNode.attribs['data-max-height'] || '400px';
                         const isCollapsible = domNode.attribs['data-is-collapsible'] === 'true';
                         const isCollapsed = domNode.attribs['data-is-collapsed'] === 'true';

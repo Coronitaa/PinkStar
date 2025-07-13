@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useMemo } from 'react';
@@ -6,8 +7,6 @@ import parse from 'html-react-parser';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Check, ClipboardCopy, ChevronUp, ChevronDown } from 'lucide-react';
-
-// Corrected import syntax for lowlight v3+
 import { createLowlight } from 'lowlight';
 import { toHtml } from 'hast-util-to-html';
 
@@ -19,9 +18,6 @@ import css from 'highlight.js/lib/languages/css';
 import json from 'highlight.js/lib/languages/json';
 import bash from 'highlight.js/lib/languages/bash';
 
-// Removed the 'github-dark.css' import to use the global theme.
-
-// Create and configure the lowlight instance
 const lowlight = createLowlight();
 lowlight.register('js', javascript);
 lowlight.register('ts', typescript);

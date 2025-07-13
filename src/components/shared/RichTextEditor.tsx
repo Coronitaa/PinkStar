@@ -684,6 +684,11 @@ const CustomCodeBlock = CodeBlockLowlight.extend({
                 parseHTML: element => element.getAttribute('data-title'),
                 renderHTML: attributes => (attributes.title ? { 'data-title': attributes.title } : {}),
             },
+            language: {
+                default: null,
+                parseHTML: element => element.getAttribute('data-language'),
+                renderHTML: attributes => (attributes.language ? { 'data-language': attributes.language } : {}),
+            },
             maxHeight: {
                 default: '400px',
                 parseHTML: element => element.getAttribute('data-max-height') || '400px',
@@ -735,14 +740,33 @@ const CustomCodeBlock = CodeBlockLowlight.extend({
     parseHTML() {
       return [
         {
-          tag: 'div[data-custom-code-block] > pre',
+          tag: 'div[data-custom-code-block]',
           preserveWhitespace: 'full',
+          getAttrs: element => {
+             const pre = element.querySelector('pre');
+             const code = pre?.querySelector('code');
+             if (!code) return false;
+             return {
+                language: element.getAttribute('data-language'),
+                title: element.getAttribute('data-title'),
+                maxHeight: element.getAttribute('data-max-height'),
+                isCollapsible: element.getAttribute('data-is-collapsible') === 'true',
+                isCollapsed: element.getAttribute('data-is-collapsed') === 'true',
+             }
+          }
         },
       ]
     },
 
     renderHTML({ node, HTMLAttributes }) {
-      return ['div', { 'data-custom-code-block': '', 'data-title': node.attrs.title, 'data-max-height': node.attrs.maxHeight, 'data-is-collapsible': node.attrs.isCollapsible, 'data-is-collapsed': node.attrs.isCollapsed }, ['pre', HTMLAttributes, ['code', 0]]]
+      return ['div', { 
+        'data-custom-code-block': '', 
+        'data-language': node.attrs.language,
+        'data-title': node.attrs.title, 
+        'data-max-height': node.attrs.maxHeight,
+        'data-is-collapsible': node.attrs.isCollapsible,
+        'data-is-collapsed': node.attrs.isCollapsed,
+      }, ['pre', HTMLAttributes, ['code', 0]]]
     },
 
     addNodeView() {
@@ -1310,11 +1334,11 @@ const ImageCarouselComponent = (props: NodeViewProps) => {
               </Button>
               <div className="w-px h-5 bg-border mx-1 self-center" />
               <Button type="button" size="icon" variant={float === 'left' ? 'default' : 'ghost'} className="h-7 w-7" onClick={() => setAlignment('left')} title="Align left"><AlignLeft className="h-4 w-4" /></Button>
-              <Button type="button" size="icon" variant={!float || float === 'center' ? 'default' : 'ghost'} className="h-7 w-7" onClick={() => setAlignment('center')} title="Align center"><AlignCenter className="w-4 h-4" /></Button>
-              <Button type="button" size="icon" variant={float === 'right' ? 'default' : 'ghost'} className="h-7 w-7" onClick={() => setAlignment('right')} title="Align right"><AlignRight className="w-4 w-4" /></Button>
+              <Button type="button" size="icon" variant={!float || float === 'center' ? 'default' : 'ghost'} className="h-7 w-7" onClick={() => setAlignment('center')} title="Align center"><AlignCenter className="h-4 w-4" /></Button>
+              <Button type="button" size="icon" variant={float === 'right' ? 'default' : 'ghost'} className="h-7 w-7" onClick={() => setAlignment('right')} title="Align right"><AlignRight className="h-4 w-4" /></Button>
               <div className="w-px h-5 bg-border mx-1 self-center" />
               <Button type="button" size="icon" variant="ghost" className="h-7 w-7" onClick={() => rotateByAxis(90)} title="Rotate 90°">
-                  <RotateCw className="w-4 w-4" />
+                  <RotateCw className="w-4 h-4" />
               </Button>
           </div>
       )}
