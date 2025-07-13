@@ -1,6 +1,7 @@
+
 "use client";
 
-import React, { useState, useMemo, useTransition } from 'react';
+import React, { useState, useMemo, useTransition, useEffect } from 'react';
 import type { CodeHighlightTheme, CodeHighlightThemeFormData, HighlightTheme, HighlightStyle } from '@/lib/types';
 import { HIGHLIGHT_STYLE_KEYS, HIGHLIGHT_STYLE_NAMES } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -298,4 +299,3 @@ function ThemeEditorDialog({ theme, isOpen, onOpenChange, onSave, isSaving }: Th
         </Card>
     );
 }
-
