@@ -38,6 +38,7 @@ interface RenderedCodeBlockProps {
   maxHeight?: string;
   isCollapsible?: boolean;
   isCollapsed?: boolean;
+  children: React.ReactNode;
 }
 
 export const RenderedCodeBlock: React.FC<RenderedCodeBlockProps> = ({
@@ -47,6 +48,7 @@ export const RenderedCodeBlock: React.FC<RenderedCodeBlockProps> = ({
   maxHeight = '400px',
   isCollapsible = false,
   isCollapsed = false,
+  children
 }) => {
   const [isCopied, setIsCopied] = useState(false);
   const [collapsedState, setCollapsedState] = useState(isCollapsed);
@@ -58,22 +60,7 @@ export const RenderedCodeBlock: React.FC<RenderedCodeBlockProps> = ({
     });
   };
 
-  const highlightedHtml = useMemo(() => {
-    try {
-      if (lowlight.registered(language)) {
-        const tree = lowlight.highlight(language, rawCodeContent);
-        return toHtml(tree);
-      }
-      // Fallback for unregistered languages
-      return rawCodeContent.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-    } catch (error) {
-      console.error('Highlighting error:', error);
-      return rawCodeContent.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-    }
-  }, [language, rawCodeContent]);
-
   const displayLanguage = title || language || 'code';
-  const shouldRenderHtml = lowlight.registered(language);
 
   return (
     <div className="not-prose my-4 relative group/code-block">
@@ -95,19 +82,10 @@ export const RenderedCodeBlock: React.FC<RenderedCodeBlockProps> = ({
         </div>
         {!collapsedState && (
           <pre
-            className="tiptap-code-block hljs"
+            className="tiptap-code-block hljs m-0"
             style={{ maxHeight: maxHeight, overflowY: 'auto' }}
           >
-            {shouldRenderHtml ? (
-              <code
-                className={`language-${language}`}
-                dangerouslySetInnerHTML={{ __html: highlightedHtml }}
-              />
-            ) : (
-              <code className={`language-${language}`}>
-                {rawCodeContent}
-              </code>
-            )}
+            {children}
           </pre>
         )}
       </div>
