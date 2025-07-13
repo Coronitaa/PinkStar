@@ -1,11 +1,11 @@
 
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useMemo } from 'react';
+import parse from 'html-react-parser';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Check, ClipboardCopy, ChevronUp, ChevronDown } from 'lucide-react';
-import parse from 'html-react-parser';
 
 // Corrected import syntax for lowlight v3+
 import { createLowlight } from 'lowlight';
@@ -19,8 +19,7 @@ import css from 'highlight.js/lib/languages/css';
 import json from 'highlight.js/lib/languages/json';
 import bash from 'highlight.js/lib/languages/bash';
 
-// Import the stylesheet for the theme
-import 'highlight.js/styles/github-dark.css';
+// Removed the 'github-dark.css' import to use the global theme.
 
 // Create and configure the lowlight instance
 const lowlight = createLowlight();
@@ -39,7 +38,7 @@ interface RenderedCodeBlockProps {
   maxHeight?: string;
   isCollapsible?: boolean;
   isCollapsed?: boolean;
-  children: React.ReactNode; // Keep children for compatibility, but we won't use it for rendering code.
+  children: React.ReactNode; 
 }
 
 export const RenderedCodeBlock: React.FC<RenderedCodeBlockProps> = ({
@@ -51,8 +50,8 @@ export const RenderedCodeBlock: React.FC<RenderedCodeBlockProps> = ({
   isCollapsed = false,
   children
 }) => {
-  const [isCopied, setIsCopied] = useState(false);
-  const [collapsedState, setCollapsedState] = useState(isCollapsed);
+  const [isCopied, setIsCopied] = React.useState(false);
+  const [collapsedState, setCollapsedState] = React.useState(isCollapsed);
 
   const highlightedHtml = useMemo(() => {
     try {
@@ -65,7 +64,7 @@ export const RenderedCodeBlock: React.FC<RenderedCodeBlockProps> = ({
       return toHtml(tree);
     } catch (error) {
       console.error("Syntax highlighting failed:", error);
-      return rawCodeContent; // Fallback to raw code
+      return rawCodeContent;
     }
   }, [rawCodeContent, language]);
 
@@ -98,7 +97,7 @@ export const RenderedCodeBlock: React.FC<RenderedCodeBlockProps> = ({
         </div>
         {!collapsedState && (
           <pre
-            className="tiptap-code-block hljs m-0"
+            className="tiptap-code-block m-0"
             style={{ maxHeight: maxHeight, overflowY: 'auto' }}
           >
             <code className={`language-${language}`}>

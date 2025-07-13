@@ -600,7 +600,7 @@ const CodeBlockComponent = (props: NodeViewProps) => {
                     <div className="flex items-center gap-1 shrink-0">
                         <Select 
                             value={node.attrs.language || 'auto'}
-                            onValueChange={language => updateAttributes({ language })}
+                            onValueChange={(language) => updateAttributes({ language })}
                         >
                             <SelectTrigger className="h-6 text-xs w-28 border-0 bg-transparent focus:ring-0 focus:ring-offset-0">
                                 <SelectValue placeholder="Language"/>
@@ -1314,7 +1314,7 @@ const ImageCarouselComponent = (props: NodeViewProps) => {
               <Button type="button" size="icon" variant={float === 'right' ? 'default' : 'ghost'} className="h-7 w-7" onClick={() => setAlignment('right')} title="Align right"><AlignRight className="w-4 w-4" /></Button>
               <div className="w-px h-5 bg-border mx-1 self-center" />
               <Button type="button" size="icon" variant="ghost" className="h-7 w-7" onClick={() => rotateByAxis(90)} title="Rotate 90°">
-                  <RotateCw className="w-4 h-4" />
+                  <RotateCw className="w-4 w-4" />
               </Button>
           </div>
       )}
