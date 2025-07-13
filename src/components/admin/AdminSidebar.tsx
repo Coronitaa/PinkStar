@@ -22,7 +22,7 @@ const sidebarNavItems = [
   { title: 'Projects', href: '/admin/projects', icon: Package },
   { title: 'Users', href: '/admin/users', icon: Users, disabled: true, adminOnly: true },
   { title: 'Analytics', href: '/admin/analytics', icon: BarChart3, disabled: true, adminOnly: true },
-  { title: 'Settings', href: '/admin/settings', icon: Settings, disabled: true, adminOnly: true },
+  { title: 'Settings', href: '/admin/settings', icon: Settings, disabled: false, adminOnly: false },
 ];
 
 export function AdminSidebar() {

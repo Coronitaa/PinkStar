@@ -192,10 +192,20 @@ async function initDbSchema(db: Database): Promise<void> {
     '  PRIMARY KEY (project_id, section_tag_id),' +
     '  FOREIGN KEY (project_id) REFERENCES items(id) ON DELETE CASCADE,' +
     '  FOREIGN KEY (section_tag_id) REFERENCES section_tags(id) ON DELETE CASCADE' +
-    ');'
+    ');' +
+
+    'CREATE TABLE IF NOT EXISTS code_highlight_themes (' +
+    '  id TEXT PRIMARY KEY,' +
+    '  name TEXT NOT NULL UNIQUE,' +
+    '  is_active BOOLEAN NOT NULL DEFAULT FALSE,' +
+    '  is_readonly BOOLEAN NOT NULL DEFAULT FALSE,' +
+    '  styles TEXT NOT NULL,' +
+    '  created_at TEXT DEFAULT CURRENT_TIMESTAMP,' +
+    '  updated_at TEXT' +
+    ');' 
   );
   
-  const tablesWithUpdatedAtTrigger = ['items', 'categories', 'profiles', 'resources', 'reviews', 'changelog_entries', 'section_tags', 'project_section_tags', 'user_review_sentiments', 'resource_authors'];
+  const tablesWithUpdatedAtTrigger = ['items', 'categories', 'profiles', 'resources', 'reviews', 'changelog_entries', 'section_tags', 'project_section_tags', 'user_review_sentiments', 'resource_authors', 'code_highlight_themes'];
   for (const tableName of tablesWithUpdatedAtTrigger) {
     const tableInfo = await db.all(`PRAGMA table_info(${tableName});`);
     const pkColumns = tableInfo.filter(col => col.pk > 0).map(col => col.name);
@@ -320,6 +330,37 @@ async function initDbSchema(db: Database): Promise<void> {
     await db.exec("CREATE TABLE IF NOT EXISTS _first_run_check_stats_v3_review_fix (id INTEGER PRIMARY KEY); INSERT INTO _first_run_check_stats_v3_review_fix (id) VALUES (1);");
     console.log("First run (v3 - review fix): Initialized resource downloads, follower counts, and review aggregates.");
   }
+  
+  const codeThemeCheck = await db.get("SELECT name FROM sqlite_master WHERE type='table' AND name='_code_theme_init_check'");
+  if (!codeThemeCheck) {
+    const atomOneDarkStyles = {
+        "background": "#282c34",
+        "text": "#abb2bf",
+        "comment": "#5c6370",
+        "keyword": "#c678dd",
+        "string": "#98c379",
+        "number": "#d19a66",
+        "function": "#61afef",
+        "class": "#e6c07b",
+        "tag": "#e06c75",
+        "attr": "#d19a66",
+        "variable": "#e06c75",
+        "punctuation": "#abb2bf",
+        "operator": "#56b6c2"
+    };
+    const defaultThemeId = 'theme_atom_one_dark_default';
+    await db.run(
+      "INSERT OR IGNORE INTO code_highlight_themes (id, name, is_active, is_readonly, styles) VALUES (?, ?, ?, ?, ?)",
+      defaultThemeId,
+      "Atom One Dark (Default)",
+      true,
+      true,
+      JSON.stringify(atomOneDarkStyles)
+    );
+    await db.exec("CREATE TABLE IF NOT EXISTS _code_theme_init_check (id INTEGER PRIMARY KEY); INSERT INTO _code_theme_init_check (id) VALUES (1);");
+    console.log("Initialized default code highlight theme.");
+  }
+
 
   console.log("SQLite database schema initialized/verified. Mock profiles ensured (with social links).");
 }

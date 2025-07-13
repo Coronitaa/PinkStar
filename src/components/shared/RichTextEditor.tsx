@@ -23,7 +23,7 @@ import xml from 'highlight.js/lib/languages/xml';
 import json from 'highlight.js/lib/languages/json';
 import bash from 'highlight.js/lib/languages/bash';
 import python from 'highlight.js/lib/languages/python';
-import java from 'highlight.js/lib/languages/java';
+import javaLang from 'highlight.js/lib/languages/java';
 import cpp from 'highlight.js/lib/languages/cpp';
 import plaintext from 'highlight.js/lib/languages/plaintext';
 import { 
@@ -52,7 +52,7 @@ import { ResourceImageEditor } from '@/components/admin/ResourceImageEditor';
 import { useToast } from '@/hooks/use-toast';
 import { Checkbox } from '../ui/checkbox';
 
-const lowlight = createLowlight({ javascript, typescript, css, xml, json, bash, python, java, cpp, plaintext });
+const lowlight = createLowlight({ javascript, typescript, css, xml, json, bash, python, java: javaLang, cpp, plaintext });
 
 
 declare global {
@@ -1039,10 +1039,11 @@ const ImageCarouselModal = ({
                     <Carousel itemsToShow={1} showArrows={images.filter(url => url).length > 1} autoplay>
                         {images.filter(url => url).map((url, i) => {
                             const media = parseMediaUrl(url);
+                            if (!media) return null;
                             return (
                                 <CarouselItem key={i}>
                                     <div className="relative w-full h-full bg-black rounded-md overflow-hidden">
-                                        {media?.type === 'video' ? (
+                                        {media.type === 'video' ? (
                                             <iframe
                                                 src={media.src}
                                                 title={`Preview ${i + 1}`}
@@ -1052,7 +1053,7 @@ const ImageCarouselModal = ({
                                                 allowFullScreen
                                             />
                                         ) : (
-                                            <img src={media?.src || 'https://placehold.co/800x450/211F25/EBEAF2?text=Invalid+URL'} alt={`Preview ${i + 1}`} className="w-full h-full object-cover" />
+                                            <img src={media.src || 'https://placehold.co/800x450/211F25/EBEAF2?text=Invalid+URL'} alt={`Preview ${i + 1}`} className="w-full h-full object-cover" />
                                         )}
                                     </div>
                                 </CarouselItem>
@@ -1333,9 +1334,9 @@ const ImageCarouselComponent = (props: NodeViewProps) => {
                 <ImageIcon className="h-4 w-4" />
               </Button>
               <div className="w-px h-5 bg-border mx-1 self-center" />
-              <Button type="button" size="icon" variant={float === 'left' ? 'default' : 'ghost'} className="h-7 w-7" onClick={() => setAlignment('left')} title="Align left"><AlignLeft className="h-4 w-4" /></Button>
+              <Button type="button" size="icon" variant={float === 'left' ? 'default' : 'ghost'} className="h-7 w-7" onClick={() => setAlignment('left')} title="Align left"><AlignLeft className="w-4 h-4" /></Button>
               <Button type="button" size="icon" variant={!float || float === 'center' ? 'default' : 'ghost'} className="h-7 w-7" onClick={() => setAlignment('center')} title="Align center"><AlignCenter className="w-4 h-4" /></Button>
-              <Button type="button" size="icon" variant={float === 'right' ? 'default' : 'ghost'} className="h-7 w-7" onClick={() => setAlignment('right')} title="Align right"><AlignRight className="w-4 w-4" /></Button>
+              <Button type="button" size="icon" variant={float === 'right' ? 'default' : 'ghost'} className="h-7 w-7" onClick={() => setAlignment('right')} title="Align right"><AlignRight className="w-4 h-4" /></Button>
               <div className="w-px h-5 bg-border mx-1 self-center" />
               <Button type="button" size="icon" variant="ghost" className="h-7 w-7" onClick={() => rotateByAxis(90)} title="Rotate 90°">
                   <RotateCw className="w-4 h-4" />

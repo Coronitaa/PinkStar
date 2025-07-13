@@ -17,11 +17,11 @@ import xml from 'highlight.js/lib/languages/xml';
 import css from 'highlight.js/lib/languages/css';
 import json from 'highlight.js/lib/languages/json';
 import bash from 'highlight.js/lib/languages/bash';
-import java from 'highlight.js/lib/languages/java';
+import javaLang from 'highlight.js/lib/languages/java';
 import cpp from 'highlight.js/lib/languages/cpp';
 import plaintext from 'highlight.js/lib/languages/plaintext';
 
-const lowlight = createLowlight({ javascript, typescript, css, xml, json, bash, python, java, cpp, plaintext });
+const lowlight = createLowlight({ javascript, typescript, css, xml, json, bash, java: javaLang, cpp, plaintext });
 
 interface RenderedCodeBlockProps {
   rawCodeContent: string;
@@ -30,7 +30,6 @@ interface RenderedCodeBlockProps {
   maxHeight?: string;
   isCollapsible?: boolean;
   isCollapsed?: boolean;
-  children: React.ReactNode; 
 }
 
 export const RenderedCodeBlock: React.FC<RenderedCodeBlockProps> = ({
@@ -40,7 +39,6 @@ export const RenderedCodeBlock: React.FC<RenderedCodeBlockProps> = ({
   maxHeight = '400px',
   isCollapsible = false,
   isCollapsed = false,
-  children
 }) => {
   const [isCopied, setIsCopied] = React.useState(false);
   const [collapsedState, setCollapsedState] = React.useState(isCollapsed);
@@ -89,7 +87,7 @@ export const RenderedCodeBlock: React.FC<RenderedCodeBlockProps> = ({
         </div>
         {!collapsedState && (
           <pre
-            className="tiptap-code-block m-0"
+            className="rendered-code-block m-0"
             style={{ maxHeight: maxHeight, overflowY: 'auto' }}
           >
             <code className={`language-${language}`}>

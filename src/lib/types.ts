@@ -434,4 +434,39 @@ export interface UserSentimentForReview {
   isFunny: boolean;
 }
 
+// For Code Highlight Theme
+export type HighlightStyle = 'text' | 'background' | 'comment' | 'keyword' | 'string' | 'number' | 'function' | 'class' | 'tag' | 'attr' | 'variable' | 'punctuation' | 'operator';
 
+export type HighlightTheme = {
+    [K in HighlightStyle]: string;
+} & { name?: string; };
+
+export interface CodeHighlightTheme {
+    id: string;
+    name: string;
+    isActive: boolean;
+    isReadonly: boolean;
+    styles: HighlightTheme;
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+export type CodeHighlightThemeFormData = Pick<CodeHighlightTheme, 'id' | 'name' | 'styles'>;
+
+export const HIGHLIGHT_STYLE_KEYS: HighlightStyle[] = ['background', 'text', 'comment', 'keyword', 'string', 'number', 'function', 'class', 'tag', 'attr', 'variable', 'punctuation', 'operator'];
+
+export const HIGHLIGHT_STYLE_NAMES: Record<HighlightStyle, string> = {
+    background: 'Background',
+    text: 'Normal Text',
+    comment: 'Comments',
+    keyword: 'Keywords',
+    string: 'Strings',
+    number: 'Numbers & Constants',
+    'function': 'Functions & Methods',
+    'class': 'Classes & Types',
+    tag: 'HTML/XML Tags',
+    attr: 'Attributes',
+    variable: 'Variables',
+    punctuation: 'Punctuation',
+    operator: 'Operators'
+};

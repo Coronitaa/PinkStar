@@ -3,7 +3,7 @@
 'use server';
 
 import { getDb } from './db';
-import type { Game, Category, Resource, Author, Tag, ResourceFile, GetResourcesParams, PaginatedResourcesResponse, ResourceLinks, ChangelogEntry, WebItem, AppItem, ArtMusicItem, ItemStats, ItemType, ItemWithDetails, GenericListItem, ProjectStatus, UserAppRole, CategoryTagGroupConfig, ProjectCategoryTagConfigurations, ProjectTagGroupSource, DynamicAvailableFilterTags, DynamicTagGroup, TagInGroupConfig, Review, ReviewInteractionCounts, UserStats, UserBadge, RankedResource, ProjectFormData, CategoryFormData, ResourceFormData, MainFileDetails, DynamicTagSelection, RawCategoryProjectDetails, FileChannelId, ResourceFileFormData, SectionTagFormData, ProfileUpdateFormData, ResourceAuthor } from './types';
+import type { Game, Category, Resource, Author, Tag, ResourceFile, GetResourcesParams, PaginatedResourcesResponse, ResourceLinks, ChangelogEntry, WebItem, AppItem, ArtMusicItem, ItemStats, ItemType, ItemWithDetails, GenericListItem, ProjectStatus, UserAppRole, CategoryTagGroupConfig, ProjectCategoryTagConfigurations, ProjectTagGroupSource, DynamicAvailableFilterTags, DynamicTagGroup, TagInGroupConfig, Review, ReviewInteractionCounts, UserStats, UserBadge, RankedResource, ProjectFormData, CategoryFormData, ResourceFormData, MainFileDetails, DynamicTagSelection, RawCategoryProjectDetails, FileChannelId, ResourceFileFormData, SectionTagFormData, ProfileUpdateFormData, ResourceAuthor, CodeHighlightTheme, CodeHighlightThemeFormData, HighlightTheme } from './types';
 import { ITEM_TYPES_CONST, PROJECT_STATUSES_CONST, PROJECT_STATUS_NAMES, USER_APP_ROLES_CONST, FILE_CHANNELS } from './types';
 import { calculateGenericItemSearchScore, mapConfigToTagInterface } from './utils';
 
@@ -1431,4 +1431,38 @@ export const incrementResourceFileDownloadCount = async (fileId: string): Promis
   const db = await getDb();
   const result = await db.run('UPDATE resource_files SET downloads = downloads + 1 WHERE id = ?', fileId);
   return (result.changes ?? 0) > 0;
+};
+
+// --- Code Highlight Theme Functions ---
+export const getActiveCodeHighlightTheme = async (): Promise<CodeHighlightTheme | null> => {
+  const db = await getDb();
+  const row = await db.get("SELECT * FROM code_highlight_themes WHERE is_active = TRUE LIMIT 1");
+  const fallback = !row ? await db.get("SELECT * FROM code_highlight_themes WHERE name = 'Atom One Dark (Default)' LIMIT 1") : null;
+  const themeData = row || fallback;
+
+  if (!themeData) return null;
+
+  return {
+    id: themeData.id,
+    name: themeData.name,
+    isActive: Boolean(themeData.is_active),
+    isReadonly: Boolean(themeData.is_readonly),
+    styles: JSON.parse(themeData.styles),
+    createdAt: themeData.created_at,
+    updatedAt: themeData.updated_at,
+  };
+};
+
+export const getAllCodeHighlightThemes = async (): Promise<CodeHighlightTheme[]> => {
+    const db = await getDb();
+    const rows = await db.all("SELECT * FROM code_highlight_themes ORDER BY is_readonly DESC, name ASC");
+    return rows.map(row => ({
+        id: row.id,
+        name: row.name,
+        isActive: Boolean(row.is_active),
+        isReadonly: Boolean(row.is_readonly),
+        styles: JSON.parse(row.styles),
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+    }));
 };

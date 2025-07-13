@@ -8,6 +8,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { cn } from '@/lib/utils';
 import { createSupabaseClient } from '@/lib/supabase/client'; // For potential server-side session access
 import Script from 'next/script';
+import { CodeHighlightStyle } from '@/components/layout/CodeHighlightStyle';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -44,6 +45,9 @@ export default async function RootLayout({
 
   return (
     <html lang="en" className="dark">
+       <head>
+        <CodeHighlightStyle />
+      </head>
       <body className={cn(
         geistSans.variable,
         geistMono.variable,
