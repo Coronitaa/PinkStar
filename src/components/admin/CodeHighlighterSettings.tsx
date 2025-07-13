@@ -13,43 +13,37 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, Save, Trash2, PlusCircle, Palette } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
 
-// Dummy code snippets for preview
-const codeSnippets = {
+
+const codeSnippets: Record<string, string> = {
   javascript: `function greet(name) {\n  // A simple greeting function\n  const message = \`Hello, \${name}!\`;\n  console.log(message);\n  return 42;\n}`,
   python: `class Greeter:\n    # A simple greeter class\n    def __init__(self, name):\n        self.name = name\n\n    def greet(self):\n        print(f"Hello, {self.name}!")\n        return True`,
   html: `<div class="container">\n  <h1>Welcome!</h1>\n  <p>This is a sample.</p>\n</div>`,
+  css: `body {\n  background-color: #f0f0f0;\n  font-family: Arial, sans-serif;\n  line-height: 1.6;\n}`,
+  json: `{\n  "name": "PinkStar",\n  "version": "1.0.0",\n  "active": true,\n  "features": ["themes", "previews"]\n}`,
+  bash: `#!/bin/bash\n# A simple script to greet\nNAME="World"\necho "Hello, $NAME!"\n`,
 };
 
-// Mock highlighter for client-side preview. A full implementation would be heavier.
-const SimpleSyntaxHighlight = ({ code, theme }: { code: string; theme: HighlightTheme }) => {
-  const highlightStyle = (tokenType: string) => {
-    switch (tokenType) {
-      case 'comment': return { color: theme.comment };
-      case 'keyword': return { color: theme.keyword };
-      case 'string': return { color: theme.string };
-      case 'number': return { color: theme.number };
-      case 'function': return { color: theme.function };
-      case 'class': return { color: theme.class };
-      case 'tag': return { color: theme.tag };
-      case 'attr': return { color: theme.attr };
-      case 'punctuation': return { color: theme.punctuation };
-      default: return { color: theme.text };
-    }
+const SimpleSyntaxHighlight = ({ code, theme }: { code: string; theme: Partial<HighlightTheme> }) => {
+  const highlightStyle = (tokenType: keyof HighlightTheme) => {
+    return { color: theme[tokenType] || theme.text };
   };
-  
-  // This is a very simplified tokenizer for preview purposes only
-  const tokens = code.split(/(\s+|\b)/).map((token, i) => {
-    if (token.startsWith('//') || token.startsWith('#')) return <span key={i} style={highlightStyle('comment')}>{token}</span>;
-    if (['function', 'class', 'const', 'def'].includes(token)) return <span key={i} style={highlightStyle('keyword')}>{token}</span>;
-    if (token.match(/^[`"']/)) return <span key={i} style={highlightStyle('string')}>{token}</span>;
-    if (!isNaN(parseFloat(token))) return <span key={i} style={highlightStyle('number')}>{token}</span>;
-    if (token.match(/<[a-z/]+(>)?/)) return <span key={i} style={highlightStyle('tag')}>{token}</span>
-    return <span key={i}>{token}</span>;
-  });
+
+  const tokens = useMemo(() => {
+    // This is a very simplified tokenizer for preview purposes only
+    return code.split(/(\s+|\b)/).map((token, i) => {
+      if (token.startsWith('//') || token.startsWith('#')) return <span key={i} style={highlightStyle('comment')}>{token}</span>;
+      if (['function', 'class', 'const', 'def', 'div', 'h1', 'p'].includes(token)) return <span key={i} style={highlightStyle('keyword')}>{token}</span>;
+      if (token.match(/^[`"']/)) return <span key={i} style={highlightStyle('string')}>{token}</span>;
+      if (!isNaN(parseFloat(token))) return <span key={i} style={highlightStyle('number')}>{token}</span>;
+      if (token.match(/<[a-z/]+(>)?/)) return <span key={i} style={highlightStyle('tag')}>{token}</span>;
+      return <span key={i} style={{ color: theme.text }}>{token}</span>;
+    });
+  }, [code, theme]);
 
   return (
-    <pre style={{ background: theme.background, color: theme.text }} className="p-3 rounded-b-md text-xs overflow-x-auto">
+    <pre style={{ color: theme.text }} className="p-3 rounded-b-md text-xs overflow-x-auto bg-card">
       <code>{tokens}</code>
     </pre>
   );
@@ -69,25 +63,15 @@ export function CodeHighlighterSettings({ initialThemes, initialActiveThemeId }:
     const router = useRouter();
     const { toast } = useToast();
 
+    const [previewLanguage, setPreviewLanguage] = useState<string>('javascript');
+
     const selectedThemeData = useMemo(() => {
         return themes.find(t => t.id === activeThemeId) || themes.find(t => t.id === initialActiveThemeId) || null;
     }, [activeThemeId, themes, initialActiveThemeId]);
 
     const handleActivateTheme = async (themeId: string) => {
-        // This would call a server action
         console.log(`Activating theme: ${themeId}`);
         setActiveThemeId(themeId);
-        // In a real app:
-        // startSavingTransition(async () => {
-        //   const result = await activateThemeAction(themeId);
-        //   if (result.success) {
-        //     toast({ title: 'Theme Activated!' });
-        //     router.refresh();
-        //   } else {
-        //     toast({ title: 'Error', description: result.error, variant: 'destructive' });
-        //     setActiveThemeId(initialActiveThemeId); // Revert on failure
-        //   }
-        // });
         toast({ title: 'Previewing Theme', description: 'The site style will update upon saving or activation in a real implementation.' });
     };
 
@@ -97,22 +81,28 @@ export function CodeHighlighterSettings({ initialThemes, initialActiveThemeId }:
     };
 
     const handleSaveTheme = async (formData: CodeHighlightThemeFormData) => {
-        // This would call a server action
         console.log("Saving theme", formData);
         startSavingTransition(async () => {
-            // const result = await saveThemeAction(formData);
-            // MOCK SUCCESS
             const isNew = !themes.some(t => t.id === formData.id);
             let updatedThemes;
             if (isNew) {
-                updatedThemes = [...themes, { ...formData, isActive: false, isReadonly: false, createdAt: new Date().toISOString() }];
+                const newTheme: CodeHighlightTheme = {
+                    ...formData,
+                    styles: {
+                        background: 'transparent', // Ensure background is not set
+                        ...formData.styles
+                    },
+                    isActive: false,
+                    isReadonly: false,
+                    createdAt: new Date().toISOString()
+                };
+                updatedThemes = [...themes, newTheme];
             } else {
-                updatedThemes = themes.map(t => t.id === formData.id ? { ...t, ...formData } : t);
+                updatedThemes = themes.map(t => t.id === formData.id ? { ...t, ...formData, styles: { ...t.styles, ...formData.styles, background: 'transparent' } } : t);
             }
             setThemes(updatedThemes);
             setSelectedThemeForEdit(null);
             toast({ title: isNew ? 'Theme Created' : 'Theme Updated' });
-            // router.refresh();
         });
     };
     
@@ -122,11 +112,11 @@ export function CodeHighlighterSettings({ initialThemes, initialActiveThemeId }:
             name: 'New Custom Theme',
             isActive: false,
             isReadonly: false,
-            styles: { // Default to a light theme structure
-                background: '#ffffff', text: '#333333', comment: '#999999', keyword: '#d73a49',
-                string: '#032f62', number: '#005cc5', 'function': '#6f42c1', 'class': '#6f42c1',
-                tag: '#22863a', attr: '#6f42c1', variable: '#e36209', punctuation: '#24292e',
-                operator: '#d73a49'
+            styles: {
+                background: 'transparent', text: '#abb2bf', comment: '#5c6370', keyword: '#c678dd',
+                string: '#98c379', number: '#d19a66', 'function': '#61afef', 'class': '#e6c07b',
+                tag: '#e06c75', attr: '#d19a66', variable: '#e06c75', punctuation: '#abb2bf',
+                operator: '#56b6c2'
             },
         };
         setSelectedThemeForEdit(newTheme);
@@ -137,19 +127,28 @@ export function CodeHighlighterSettings({ initialThemes, initialActiveThemeId }:
             <div className="lg:col-span-8">
                 <Card className="bg-card/80 backdrop-blur-sm">
                     <CardHeader>
-                        <CardTitle>Theme Preview</CardTitle>
-                        <CardDescription>
-                            See how the selected theme looks with different languages. The active theme will be applied across the entire site.
-                        </CardDescription>
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <CardTitle>Theme Preview</CardTitle>
+                                <CardDescription>
+                                    See how the selected theme looks with different languages.
+                                </CardDescription>
+                            </div>
+                            <Select value={previewLanguage} onValueChange={setPreviewLanguage}>
+                                <SelectTrigger className="w-[180px]">
+                                    <SelectValue placeholder="Select language..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {Object.keys(codeSnippets).map(lang => (
+                                        <SelectItem key={lang} value={lang}>{lang.charAt(0).toUpperCase() + lang.slice(1)}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         {selectedThemeData ? (
-                            Object.entries(codeSnippets).map(([lang, code]) => (
-                                <div key={lang}>
-                                    <h4 className="text-sm font-medium text-muted-foreground mb-1 px-1">{lang.charAt(0).toUpperCase() + lang.slice(1)}</h4>
-                                    <SimpleSyntaxHighlight code={code} theme={selectedThemeData.styles} />
-                                </div>
-                            ))
+                            <SimpleSyntaxHighlight code={codeSnippets[previewLanguage]} theme={selectedThemeData.styles} />
                         ) : (
                             <p className="text-muted-foreground text-center py-8">No theme selected for preview.</p>
                         )}
@@ -245,6 +244,7 @@ function ThemeEditorDialog({ theme, isOpen, onOpenChange, onSave, isSaving }: Th
     }, [theme]);
     
     const handleStyleChange = (key: HighlightStyle, value: string) => {
+        if (key === 'background') return; // Do not allow background color editing
         setFormData(prev => ({ ...prev, styles: { ...prev.styles, [key]: value } }));
     };
 
@@ -254,48 +254,68 @@ function ThemeEditorDialog({ theme, isOpen, onOpenChange, onSave, isSaving }: Th
     };
 
     return (
-        <Card className="lg:col-span-12 bg-card/80 backdrop-blur-sm p-6 shadow-lg">
-             <form onSubmit={handleSubmit}>
-                <div className="flex justify-between items-center mb-4">
-                    <CardTitle>Edit Theme: {formData.name}</CardTitle>
-                    <div className="flex gap-2">
-                        <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
-                        <Button type="submit" disabled={isSaving}>
-                            {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4"/>}
-                            Save Theme
-                        </Button>
-                    </div>
-                </div>
-                <div className="space-y-4">
-                    <div>
-                        <Label htmlFor="themeName">Theme Name</Label>
-                        <Input id="themeName" value={formData.name} onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))} />
-                    </div>
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {HIGHLIGHT_STYLE_KEYS.map(styleKey => (
-                            <div key={styleKey}>
-                                <Label htmlFor={`style-${styleKey}`}>{HIGHLIGHT_STYLE_NAMES[styleKey]}</Label>
-                                <div className="flex items-center gap-2 mt-1">
-                                    <Input 
-                                        type="color" 
-                                        id={`style-color-${styleKey}`}
-                                        value={formData.styles[styleKey] || '#000000'}
-                                        onChange={(e) => handleStyleChange(styleKey, e.target.value)}
-                                        className="w-10 h-10 p-1"
-                                    />
-                                    <Input
-                                        id={`style-${styleKey}`}
-                                        value={formData.styles[styleKey] || ''}
-                                        onChange={(e) => handleStyleChange(styleKey, e.target.value)}
-                                        placeholder="#RRGGBB"
-                                        className="h-10"
-                                    />
+        <Dialog open={isOpen} onOpenChange={onOpenChange}>
+            <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0">
+                <DialogHeader className="p-6 pb-2 border-b">
+                    <DialogTitle>{theme.isReadonly ? `Viewing Theme: ${formData.name}` : `Editing Theme: ${formData.name}`}</DialogTitle>
+                    <DialogDescription>
+                        {theme.isReadonly ? 'This is a default theme and cannot be modified.' : 'Customize the colors for your code blocks.'}
+                    </DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="flex-grow contents">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 p-6 overflow-y-auto">
+                        <div className="md:col-span-2">
+                            <Label htmlFor="themeName">Theme Name</Label>
+                            <Input id="themeName" value={formData.name} onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))} disabled={theme.isReadonly} />
+                        </div>
+                        
+                        <div className="space-y-4">
+                            {HIGHLIGHT_STYLE_KEYS.filter(key => key !== 'background').map(styleKey => (
+                                <div key={styleKey}>
+                                    <Label htmlFor={`style-${styleKey}`}>{HIGHLIGHT_STYLE_NAMES[styleKey]}</Label>
+                                    <div className="flex items-center gap-2 mt-1">
+                                        <Input 
+                                            type="color" 
+                                            id={`style-color-${styleKey}`}
+                                            value={formData.styles[styleKey] || '#000000'}
+                                            onChange={(e) => handleStyleChange(styleKey, e.target.value)}
+                                            className="w-10 h-10 p-1"
+                                            disabled={theme.isReadonly}
+                                        />
+                                        <Input
+                                            id={`style-${styleKey}`}
+                                            value={formData.styles[styleKey] || ''}
+                                            onChange={(e) => handleStyleChange(styleKey, e.target.value)}
+                                            placeholder="#RRGGBB"
+                                            className="h-10"
+                                            disabled={theme.isReadonly}
+                                        />
+                                    </div>
                                 </div>
+                            ))}
+                        </div>
+
+                        <div className="space-y-4 sticky top-0">
+                            <Label>Live Preview</Label>
+                            <div className="border rounded-lg bg-card overflow-hidden">
+                                <div className="px-3 py-1.5 bg-card-foreground/5 text-xs text-muted-foreground border-b">
+                                    javascript
+                                </div>
+                                <SimpleSyntaxHighlight code={codeSnippets['javascript']} theme={formData.styles} />
                             </div>
-                        ))}
+                        </div>
                     </div>
-                </div>
-            </form>
-        </Card>
+                    <DialogFooter className="p-6 pt-4 border-t">
+                        <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
+                        {!theme.isReadonly && (
+                            <Button type="submit" disabled={isSaving}>
+                                {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4"/>}
+                                Save Theme
+                            </Button>
+                        )}
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
     );
 }

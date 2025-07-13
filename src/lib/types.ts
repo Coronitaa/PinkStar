@@ -1,5 +1,4 @@
 
-
 import type { Database } from './supabase/database.types';
 
 export type UserAppRole = Database['public']['Enums']['user_app_role_enum'];
@@ -435,10 +434,10 @@ export interface UserSentimentForReview {
 }
 
 // For Code Highlight Theme
-export type HighlightStyle = 'text' | 'background' | 'comment' | 'keyword' | 'string' | 'number' | 'function' | 'class' | 'tag' | 'attr' | 'variable' | 'punctuation' | 'operator';
+export type HighlightStyle = 'text' | 'comment' | 'keyword' | 'string' | 'number' | 'function' | 'class' | 'tag' | 'attr' | 'variable' | 'punctuation' | 'operator';
 
 export type HighlightTheme = {
-    [K in HighlightStyle]: string;
+    [K in HighlightStyle | 'background']: string;
 } & { name?: string; };
 
 export interface CodeHighlightTheme {
@@ -453,10 +452,9 @@ export interface CodeHighlightTheme {
 
 export type CodeHighlightThemeFormData = Pick<CodeHighlightTheme, 'id' | 'name' | 'styles'>;
 
-export const HIGHLIGHT_STYLE_KEYS: HighlightStyle[] = ['background', 'text', 'comment', 'keyword', 'string', 'number', 'function', 'class', 'tag', 'attr', 'variable', 'punctuation', 'operator'];
+export const HIGHLIGHT_STYLE_KEYS: HighlightStyle[] = ['text', 'comment', 'keyword', 'string', 'number', 'function', 'class', 'tag', 'attr', 'variable', 'punctuation', 'operator'];
 
 export const HIGHLIGHT_STYLE_NAMES: Record<HighlightStyle, string> = {
-    background: 'Background',
     text: 'Normal Text',
     comment: 'Comments',
     keyword: 'Keywords',
