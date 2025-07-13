@@ -14,41 +14,112 @@ import { Loader2, Save, Trash2, PlusCircle, Palette } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { SimpleSyntaxHighlight } from '../shared/SimpleSyntaxHighlight';
 
 
 const codeSnippets: Record<string, string> = {
-  javascript: `function greet(name) {\n  // A simple greeting function\n  const message = \`Hello, \${name}!\`;\n  console.log(message);\n  return 42;\n}`,
-  python: `class Greeter:\n    # A simple greeter class\n    def __init__(self, name):\n        self.name = name\n\n    def greet(self):\n        print(f"Hello, {self.name}!")\n        return True`,
-  html: `<div class="container">\n  <h1>Welcome!</h1>\n  <p>This is a sample.</p>\n</div>`,
-  css: `body {\n  background-color: #f0f0f0;\n  font-family: Arial, sans-serif;\n  line-height: 1.6;\n}`,
-  json: `{\n  "name": "PinkStar",\n  "version": "1.0.0",\n  "active": true,\n  "features": ["themes", "previews"]\n}`,
-  bash: `#!/bin/bash\n# A simple script to greet\nNAME="World"\necho "Hello, $NAME!"\n`,
-  java: `public class HelloWorld {\n    public static void main(String[] args) {\n        System.out.println("Hello, World!"); \n    }\n}`,
-  cpp: `#include <iostream>\n\nint main() {\n    std::cout << "Hello World!";\n    return 0;\n}`,
+  javascript: `// Modern JavaScript with classes and async/await
+class ApiClient {
+  constructor(baseUrl) {
+    this.baseUrl = baseUrl;
+  }
+
+  async fetchData(endpoint) {
+    const url = \`\${this.baseUrl}/\${endpoint}\`;
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      console.log(\`Data for \${endpoint}: \`, data);
+      return data;
+    } catch (error) {
+      console.error("API Error:", error);
+      return { error: true, code: 500 };
+    }
+  }
+}`,
+  python: `# A simple Greeter class in Python
+class Greeter:
+    def __init__(self, name: str):
+        self.name = name
+
+    def greet(self) -> bool:
+        """Prints a greeting message."""
+        print(f"Hello, {self.name}!")
+        return True
+
+greeter = Greeter("World")
+greeter.greet()`,
+  html: `<!-- A sample HTML structure -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>My Awesome Page</title>
+  </head>
+  <body>
+    <div class="container" id="main-content">
+      <h1>Welcome!</h1>
+      <p>This is a sample paragraph.</p>
+    </div>
+  </body>
+</html>`,
+  css: `/* Basic CSS styling for a page */
+body {
+  background-color: #f0f0f0; /* Page background */
+  font-family: 'Arial', sans-serif;
+  line-height: 1.6;
+}
+
+h1.main-title::before {
+  content: "🚀";
+  color: hsl(var(--primary));
+}`,
+  json: `{
+  "name": "PinkStar",
+  "version": "1.0.0",
+  "active": true,
+  "features": [
+    "themes",
+    "previews",
+    null
+  ]
+}`,
+  bash: `#!/bin/bash
+# A simple script to greet and loop
+NAME="World"
+echo "Hello, $NAME!"
+
+for i in {1..3}; do
+  echo "Loop #$i"
+  sleep 1
+done
+
+if [[ -z "$NAME" ]]; then
+  echo "Name is empty!" >&2
+fi`,
+  java: `// A classic HelloWorld in Java
+public class HelloWorld {
+    private static final String GREETING = "Hello, World!";
+
+    public static void main(String[] args) {
+        System.out.println(GREETING);
+    }
+}`,
+  cpp: `// C++ example with includes and classes
+#include <iostream>
+#include <string>
+
+class Greeter {
+public:
+    void sayHello(std::string name) {
+        std::cout << "Hello, " << name << "!" << std::endl;
+    }
 };
 
-const SimpleSyntaxHighlight = ({ code, theme }: { code: string; theme: Partial<HighlightTheme> }) => {
-  const highlightStyle = (tokenType: keyof HighlightTheme) => {
-    return { color: theme[tokenType] || theme.text };
-  };
-
-  const tokens = useMemo(() => {
-    // This is a very simplified tokenizer for preview purposes only
-    return code.split(/(\s+|\b)/).map((token, i) => {
-      if (token.startsWith('//') || token.startsWith('#')) return <span key={i} style={highlightStyle('comment')}>{token}</span>;
-      if (['function', 'class', 'const', 'def', 'div', 'h1', 'p', 'public', 'static', 'void', 'int', 'include'].includes(token)) return <span key={i} style={highlightStyle('keyword')}>{token}</span>;
-      if (token.match(/^[`"']/)) return <span key={i} style={highlightStyle('string')}>{token}</span>;
-      if (!isNaN(parseFloat(token))) return <span key={i} style={highlightStyle('number')}>{token}</span>;
-      if (token.match(/<[a-z/]+(>)?/)) return <span key={i} style={highlightStyle('tag')}>{token}</span>;
-      return <span key={i} style={{ color: theme.text }}>{token}</span>;
-    });
-  }, [code, theme]);
-
-  return (
-    <pre style={{ color: theme.text }} className="p-3 rounded-b-md text-xs overflow-x-auto bg-card">
-      <code>{tokens}</code>
-    </pre>
-  );
+int main() {
+    Greeter greeter;
+    greeter.sayHello("C++");
+    return 0;
+}`,
 };
 
 
