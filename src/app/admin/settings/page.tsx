@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Paintbrush } from 'lucide-react';
+import { Palette } from 'lucide-react';
 
 export default function AdminSettingsPage() {
   return (
@@ -14,10 +14,10 @@ export default function AdminSettingsPage() {
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <SettingsCard
-          title="Code Highlighter Theme"
-          description="Customize the color palette for all code blocks displayed on the site to match your branding."
-          icon={Paintbrush}
-          linkHref="/admin/settings/code-highlighter"
+          title="Theme"
+          description="Customize the look and feel of the site, including colors, fonts, and specific component styles."
+          icon={Palette}
+          linkHref="/admin/settings/theme"
           linkText="Customize Theme"
         />
         {/* Future settings cards can be added here */}
@@ -53,5 +53,3 @@ function SettingsCard({ title, description, icon: Icon, linkHref, linkText, disa
     </Card>
   );
 }
-
-

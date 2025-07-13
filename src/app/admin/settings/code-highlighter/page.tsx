@@ -17,7 +17,9 @@ export default async function AdminCodeHighlighterPage() {
                 <BreadcrumbSeparator />
                 <BreadcrumbItem><BreadcrumbLink href="/admin/settings">Settings</BreadcrumbLink></BreadcrumbItem>
                 <BreadcrumbSeparator />
-                <BreadcrumbItem><BreadcrumbPage>Code Highlighter Theme</BreadcrumbPage></BreadcrumbItem>
+                <BreadcrumbItem><BreadcrumbLink href="/admin/settings/theme">Theme</BreadcrumbLink></BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem><BreadcrumbPage>Code Highlighter</BreadcrumbPage></BreadcrumbItem>
                 </BreadcrumbList>
             </Breadcrumb>
             
@@ -35,5 +37,3 @@ export default async function AdminCodeHighlighterPage() {
         </div>
     );
 }
-
-
