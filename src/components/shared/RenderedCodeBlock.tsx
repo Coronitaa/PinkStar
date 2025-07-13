@@ -17,15 +17,11 @@ import xml from 'highlight.js/lib/languages/xml';
 import css from 'highlight.js/lib/languages/css';
 import json from 'highlight.js/lib/languages/json';
 import bash from 'highlight.js/lib/languages/bash';
+import java from 'highlight.js/lib/languages/java';
+import cpp from 'highlight.js/lib/languages/cpp';
+import plaintext from 'highlight.js/lib/languages/plaintext';
 
-const lowlight = createLowlight();
-lowlight.register('js', javascript);
-lowlight.register('ts', typescript);
-lowlight.register('py', python);
-lowlight.register('html', xml);
-lowlight.register('css', css);
-lowlight.register('json', json);
-lowlight.register('bash', bash);
+const lowlight = createLowlight({ javascript, typescript, css, xml, json, bash, python, java, cpp, plaintext });
 
 interface RenderedCodeBlockProps {
   rawCodeContent: string;
