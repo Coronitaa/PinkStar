@@ -1,10 +1,11 @@
 
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Check, ClipboardCopy, ChevronUp, ChevronDown } from 'lucide-react';
+import parse from 'html-react-parser';
 
 // Corrected import syntax for lowlight v3+
 import { createLowlight } from 'lowlight';
@@ -38,7 +39,7 @@ interface RenderedCodeBlockProps {
   maxHeight?: string;
   isCollapsible?: boolean;
   isCollapsed?: boolean;
-  children: React.ReactNode;
+  children: React.ReactNode; // Keep children for compatibility, but we won't use it for rendering code.
 }
 
 export const RenderedCodeBlock: React.FC<RenderedCodeBlockProps> = ({
@@ -52,6 +53,21 @@ export const RenderedCodeBlock: React.FC<RenderedCodeBlockProps> = ({
 }) => {
   const [isCopied, setIsCopied] = useState(false);
   const [collapsedState, setCollapsedState] = useState(isCollapsed);
+
+  const highlightedHtml = useMemo(() => {
+    try {
+      const registeredLanguages = lowlight.listLanguages();
+      if (language && registeredLanguages.includes(language)) {
+        const tree = lowlight.highlight(language, rawCodeContent);
+        return toHtml(tree);
+      }
+      const tree = lowlight.highlightAuto(rawCodeContent);
+      return toHtml(tree);
+    } catch (error) {
+      console.error("Syntax highlighting failed:", error);
+      return rawCodeContent; // Fallback to raw code
+    }
+  }, [rawCodeContent, language]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(rawCodeContent).then(() => {
@@ -85,7 +101,9 @@ export const RenderedCodeBlock: React.FC<RenderedCodeBlockProps> = ({
             className="tiptap-code-block hljs m-0"
             style={{ maxHeight: maxHeight, overflowY: 'auto' }}
           >
-            {children}
+            <code className={`language-${language}`}>
+              {parse(highlightedHtml)}
+            </code>
           </pre>
         )}
       </div>
