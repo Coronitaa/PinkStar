@@ -22,8 +22,11 @@ import {
     updateAuthorRoleInDb,
     transferResourceOwnershipInDb,
     updateAuthorColorInDb,
+    addCodeHighlightThemeToDb,
+    updateCodeHighlightThemeInDb,
+    deleteCodeHighlightThemeFromDb,
 } from '@/lib/data';
-import type { ProjectFormData, CategoryFormData, GenericListItem, Category, ItemType, UserAppRole, CategoryTagGroupConfig, ProjectCategoryTagConfigurations, ResourceFormData, Resource, SectionTagFormData, Tag, Author, ResourceAuthor } from '@/lib/types';
+import type { ProjectFormData, CategoryFormData, GenericListItem, Category, ItemType, UserAppRole, CategoryTagGroupConfig, ProjectCategoryTagConfigurations, ResourceFormData, Resource, SectionTagFormData, Tag, Author, ResourceAuthor, CodeHighlightThemeFormData, CodeHighlightTheme } from '@/lib/types';
 import { ITEM_TYPES_CONST, USER_APP_ROLES_CONST } from '@/lib/types';
 import { getDb } from '@/lib/db';
 import { generateSlugLocal } from '@/lib/data'; 
@@ -710,6 +713,59 @@ export async function setActiveCodeHighlightThemeAction(themeId: string, clientM
         await db.exec('ROLLBACK');
         console.error("[setActiveCodeHighlightThemeAction ACTION] Error:", e);
         return { success: false, error: e.message, errorCode: 'DB_ERROR' };
+    }
+}
+
+export async function saveCodeHighlightThemeAction(
+    formData: CodeHighlightThemeFormData,
+    isNew: boolean,
+    clientMockUserId?: string
+): Promise<ActionResult<{ theme: CodeHighlightTheme }>> {
+    const authCheck = await verifyPermission(['admin', 'mod'], clientMockUserId);
+    if ('error' in authCheck) {
+        return { success: false, error: authCheck.error, errorCode: authCheck.errorCode };
+    }
+    
+    try {
+        let theme: CodeHighlightTheme | undefined;
+        if (isNew) {
+            theme = await addCodeHighlightThemeToDb(formData);
+        } else {
+            theme = await updateCodeHighlightThemeInDb(formData);
+        }
+
+        if (theme) {
+            revalidatePath('/admin/settings/code-highlighter');
+            return { success: true, data: { theme } };
+        } else {
+            return { success: false, error: "Failed to save theme.", errorCode: 'DB_ERROR' };
+        }
+    } catch (e: any) {
+        console.error("[saveCodeHighlightThemeAction ACTION] Error:", e);
+        return { success: false, error: e.message, errorCode: 'UNKNOWN_ERROR' };
+    }
+}
+
+export async function deleteCodeHighlightThemeAction(
+    themeId: string,
+    clientMockUserId?: string
+): Promise<ActionResult> {
+    const authCheck = await verifyPermission(['admin', 'mod'], clientMockUserId);
+    if ('error' in authCheck) {
+        return { success: false, error: authCheck.error, errorCode: authCheck.errorCode };
+    }
+
+    try {
+        const success = await deleteCodeHighlightThemeFromDb(themeId);
+        if (success) {
+            revalidatePath('/admin/settings/code-highlighter');
+            return { success: true };
+        } else {
+            return { success: false, error: "Failed to delete theme or theme is protected.", errorCode: 'DB_ERROR' };
+        }
+    } catch (e: any) {
+        console.error("[deleteCodeHighlightThemeAction ACTION] Error:", e);
+        return { success: false, error: e.message, errorCode: 'UNKNOWN_ERROR' };
     }
 }
     

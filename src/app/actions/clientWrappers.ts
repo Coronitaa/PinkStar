@@ -1,5 +1,4 @@
 
-
 "use client"; 
 // This file houses client-side wrappers for server actions
 // to inject mock user authentication details if needed.
@@ -85,14 +84,16 @@ import {
     updateAuthorRoleAction as serverUpdateAuthorRoleAction,
     transferOwnershipAction as serverTransferOwnershipAction,
     updateAuthorColorAction as serverUpdateAuthorColorAction,
-    setActiveCodeHighlightThemeAction as serverSetActiveCodeHighlightThemeAction
+    setActiveCodeHighlightThemeAction as serverSetActiveCodeHighlightThemeAction,
+    saveCodeHighlightThemeAction as serverSaveCodeHighlightThemeAction,
+    deleteCodeHighlightThemeAction as serverDeleteCodeHighlightThemeAction
 } from '@/app/admin/actions'; // Path to admin actions
 import { deleteResourceAction as serverAdminDeleteResourceAction } from '@/app/admin/actions'; // Explicit import for admin version
 
 import type { 
     ProjectFormData, GenericListItem, ItemType, Tag, CategoryFormData, Category, 
     ProjectCategoryTagConfigurations, ResourceFormData, Resource,
-    ProfileUpdateFormData, Author as ProfileAuthor, ResourceAuthor
+    ProfileUpdateFormData, Author as ProfileAuthor, ResourceAuthor, CodeHighlightTheme, CodeHighlightThemeFormData
 } from '@/lib/types';
 
 export async function saveProject(
@@ -216,4 +217,17 @@ export async function updateAuthorColor(resourceId: string, authorId: string, co
 export async function setActiveCodeHighlightTheme(themeId: string): Promise<ActionResult> {
     const clientMockUserId = getMockUserIdFromStorage();
     return serverSetActiveCodeHighlightThemeAction(themeId, clientMockUserId);
+}
+
+export async function saveCodeHighlightTheme(
+    formData: CodeHighlightThemeFormData,
+    isNew: boolean
+): Promise<ActionResult<{ theme: CodeHighlightTheme }>> {
+    const clientMockUserId = getMockUserIdFromStorage();
+    return serverSaveCodeHighlightThemeAction(formData, isNew, clientMockUserId);
+}
+
+export async function deleteCodeHighlightTheme(themeId: string): Promise<ActionResult> {
+    const clientMockUserId = getMockUserIdFromStorage();
+    return serverDeleteCodeHighlightThemeAction(themeId, clientMockUserId);
 }

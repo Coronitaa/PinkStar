@@ -13,9 +13,10 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, Save, Trash2, PlusCircle, Palette } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose, DialogTrigger } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { SimpleSyntaxHighlight } from '../shared/SimpleSyntaxHighlight';
-import { setActiveCodeHighlightTheme } from '@/app/actions/clientWrappers';
+import { setActiveCodeHighlightThemeAction, saveCodeHighlightTheme as saveCodeHighlightThemeAction, deleteCodeHighlightTheme as deleteCodeHighlightThemeAction } from '@/app/actions/clientWrappers';
 
 
 const codeSnippets: Record<string, string> = {
@@ -135,6 +136,7 @@ export function CodeHighlighterSettings({ initialThemes, initialActiveThemeId }:
     const [selectedThemeForEdit, setSelectedThemeForEdit] = useState<CodeHighlightTheme | null>(null);
     const [isSaving, startSavingTransition] = useTransition();
     const [isActivating, startActivatingTransition] = useTransition();
+    const [isDeleting, startDeletingTransition] = useTransition();
     const router = useRouter();
     const { toast } = useToast();
 
@@ -144,17 +146,17 @@ export function CodeHighlighterSettings({ initialThemes, initialActiveThemeId }:
         return themes.find(t => t.id === activeThemeId) || themes.find(t => t.id === initialActiveThemeId) || null;
     }, [activeThemeId, themes, initialActiveThemeId]);
 
-    const handleActivateTheme = async (themeId: string) => {
+    const handleActivateTheme = (themeId: string) => {
         setActiveThemeId(themeId);
     };
 
     const handleSetAsActive = () => {
         if (!activeThemeId) return;
         startActivatingTransition(async () => {
-            const result = await setActiveCodeHighlightTheme(activeThemeId);
+            const result = await setActiveCodeHighlightThemeAction(activeThemeId);
             if (result.success) {
                 toast({ title: 'Theme Activated!', description: 'The new code highlighting theme is now live across the site.' });
-                router.refresh(); // Refresh the page to see changes in layout
+                router.refresh(); 
             } else {
                 toast({ title: 'Error', description: result.error || "Failed to activate theme.", variant: 'destructive' });
             }
@@ -166,35 +168,44 @@ export function CodeHighlighterSettings({ initialThemes, initialActiveThemeId }:
         setSelectedThemeForEdit(themeToEdit || null);
     };
 
-    const handleSaveTheme = async (formData: CodeHighlightThemeFormData) => {
-        console.log("Saving theme", formData);
+    const handleSaveTheme = async (formData: CodeHighlightThemeFormData, isNew: boolean) => {
         startSavingTransition(async () => {
-            const isNew = !themes.some(t => t.id === formData.id);
-            let updatedThemes;
-            if (isNew) {
-                const newTheme: CodeHighlightTheme = {
-                    ...formData,
-                    styles: {
-                        background: 'transparent', // Ensure background is not set
-                        ...formData.styles
-                    },
-                    isActive: false,
-                    isReadonly: false,
-                    createdAt: new Date().toISOString()
-                };
-                updatedThemes = [...themes, newTheme];
+            const result = await saveCodeHighlightThemeAction(formData, isNew);
+
+            if (result.success && result.data?.theme) {
+                const savedTheme = result.data.theme;
+                if (isNew) {
+                    setThemes(prev => [...prev, savedTheme]);
+                } else {
+                    setThemes(prev => prev.map(t => (t.id === savedTheme.id ? savedTheme : t)));
+                }
+                setSelectedThemeForEdit(null);
+                toast({ title: isNew ? 'Theme Created' : 'Theme Updated', description: `Theme "${savedTheme.name}" has been saved.` });
             } else {
-                updatedThemes = themes.map(t => t.id === formData.id ? { ...t, ...formData, styles: { ...t.styles, ...formData.styles, background: 'transparent' } } : t);
+                toast({ title: "Error Saving Theme", description: result.error || "An unexpected error occurred.", variant: "destructive" });
             }
-            setThemes(updatedThemes);
-            setSelectedThemeForEdit(null);
-            toast({ title: isNew ? 'Theme Created' : 'Theme Updated' });
+        });
+    };
+
+    const handleDeleteTheme = async (themeId: string) => {
+        startDeletingTransition(async () => {
+            const result = await deleteCodeHighlightThemeAction(themeId);
+            if (result.success) {
+                setThemes(prev => prev.filter(t => t.id !== themeId));
+                if (activeThemeId === themeId) {
+                    const defaultTheme = themes.find(t => t.isReadonly) || themes[0];
+                    if (defaultTheme) setActiveThemeId(defaultTheme.id);
+                }
+                toast({ title: "Theme Deleted" });
+            } else {
+                toast({ title: "Error", description: result.error || "Could not delete theme. Is it active or read-only?", variant: "destructive" });
+            }
         });
     };
     
     const handleAddNewTheme = () => {
         const newTheme: CodeHighlightTheme = {
-            id: `theme_${Date.now()}`,
+            id: `new_theme_${Date.now()}`,
             name: 'New Custom Theme',
             isActive: false,
             isReadonly: false,
@@ -282,9 +293,28 @@ export function CodeHighlighterSettings({ initialThemes, initialActiveThemeId }:
                                     <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleEditTheme(theme.id)} disabled={theme.isReadonly}>
                                         <Palette className="w-4 h-4 text-blue-500"/>
                                     </Button>
-                                    <Button variant="ghost" size="icon" className="h-7 w-7" disabled={theme.isReadonly}>
-                                        <Trash2 className="w-4 h-4 text-destructive/70"/>
-                                    </Button>
+                                    <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                             <Button variant="ghost" size="icon" className="h-7 w-7" disabled={theme.isReadonly || isDeleting || theme.isActive}>
+                                                <Trash2 className="w-4 h-4 text-destructive/70"/>
+                                            </Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>Delete Theme: "{theme.name}"?</AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    This action cannot be undone. You cannot delete a theme that is currently active or read-only.
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                <AlertDialogAction onClick={() => handleDeleteTheme(theme.id)} className="bg-destructive hover:bg-destructive/90" disabled={isDeleting}>
+                                                    {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
+                                                    Delete
+                                                </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
                                 </div>
                             </div>
                         ))}
@@ -315,11 +345,12 @@ interface ThemeEditorDialogProps {
     theme: CodeHighlightTheme;
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
-    onSave: (formData: CodeHighlightThemeFormData) => void;
+    onSave: (formData: CodeHighlightThemeFormData, isNew: boolean) => void;
     isSaving: boolean;
 }
 
 function ThemeEditorDialog({ theme, isOpen, onOpenChange, onSave, isSaving }: ThemeEditorDialogProps) {
+    const isNewTheme = useMemo(() => theme.id.startsWith('new_theme_'), [theme.id]);
     const [formData, setFormData] = useState<CodeHighlightThemeFormData>({
         id: theme.id,
         name: theme.name,
@@ -337,20 +368,27 @@ function ThemeEditorDialog({ theme, isOpen, onOpenChange, onSave, isSaving }: Th
     }, [theme]);
     
     const handleStyleChange = (key: HighlightStyle, value: string) => {
-        if (key === 'background') return; // Do not allow background color editing
+        if (key === 'background') return;
         setFormData(prev => ({ ...prev, styles: { ...prev.styles, [key]: value } }));
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onSave(formData);
+        
+        const finalFormData = { ...formData };
+        if (isNewTheme) {
+            // Server will generate a proper ID, but we send something unique
+            finalFormData.id = `theme_${Date.now().toString(36)}`;
+        }
+
+        onSave(finalFormData, isNewTheme);
     };
 
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0">
                 <DialogHeader className="p-6 pb-2 border-b">
-                    <DialogTitle>{theme.isReadonly ? `Viewing Theme: ${formData.name}` : `Editing Theme: ${formData.name}`}</DialogTitle>
+                    <DialogTitle>{isNewTheme ? 'Create New Theme' : (theme.isReadonly ? `Viewing Theme: ${formData.name}` : `Editing Theme: ${formData.name}`)}</DialogTitle>
                     <DialogDescription>
                         {theme.isReadonly ? 'This is a default theme and cannot be modified.' : 'Customize the colors for your code blocks.'}
                     </DialogDescription>
@@ -360,7 +398,7 @@ function ThemeEditorDialog({ theme, isOpen, onOpenChange, onSave, isSaving }: Th
                         <div className="space-y-4">
                              <div>
                                 <Label htmlFor="themeName">Theme Name</Label>
-                                <Input id="themeName" value={formData.name} onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))} disabled={theme.isReadonly} />
+                                <Input id="themeName" value={formData.name} onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))} disabled={theme.isReadonly || isSaving} />
                             </div>
                             
                             <div className="grid grid-cols-2 gap-x-4 gap-y-3">
@@ -374,7 +412,7 @@ function ThemeEditorDialog({ theme, isOpen, onOpenChange, onSave, isSaving }: Th
                                                 value={formData.styles[styleKey] || '#000000'}
                                                 onChange={(e) => handleStyleChange(styleKey, e.target.value)}
                                                 className="w-10 h-10 p-1"
-                                                disabled={theme.isReadonly}
+                                                disabled={theme.isReadonly || isSaving}
                                             />
                                             <Input
                                                 id={`style-${styleKey}`}
@@ -382,7 +420,7 @@ function ThemeEditorDialog({ theme, isOpen, onOpenChange, onSave, isSaving }: Th
                                                 onChange={(e) => handleStyleChange(styleKey, e.target.value)}
                                                 placeholder="#RRGGBB"
                                                 className="h-10"
-                                                disabled={theme.isReadonly}
+                                                disabled={theme.isReadonly || isSaving}
                                             />
                                         </div>
                                     </div>
@@ -426,5 +464,3 @@ function ThemeEditorDialog({ theme, isOpen, onOpenChange, onSave, isSaving }: Th
         </Dialog>
     );
 }
-
-    

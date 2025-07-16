@@ -1,5 +1,4 @@
 
-
 'use server';
 
 import { getDb } from './db';
@@ -390,7 +389,7 @@ export const getCategoriesForItemGeneric = async (itemIdOrSlug: string, itemType
   const isLikelySlug = !/^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(itemIdOrSlug) &&
                        !itemIdOrSlug.startsWith('item_') &&
                        !itemIdOrSlug.startsWith('cat_') &&
-                       itemIdOrSlug.includes('-');
+                       !itemIdOrSlug.includes('-');
 
   if (isLikelySlug) {
       const parentItem = await getItemBySlugGeneric(itemIdOrSlug, itemType, false, true);
@@ -693,7 +692,7 @@ export const getResources = async (params: GetResourcesParams): Promise<Paginate
 
       if (categoryForResource && categoryForResource.tagGroupConfigs) {
         categoryForResource.tagGroupConfigs.forEach(group => {
-          const selectedTagIdsInGroup = selectedTagGroups[group.id];
+          const selectedTagIdsInGroup = selectedTagIds[group.id];
           if (selectedTagIdsInGroup && Array.isArray(selectedTagIdsInGroup)) {
             selectedTagIdsInGroup.forEach(tagId => {
               const tagConfig = (group.tags || []).find(t => t.id === tagId);
@@ -1465,4 +1464,32 @@ export const getAllCodeHighlightThemes = async (): Promise<CodeHighlightTheme[]>
         createdAt: row.created_at,
         updatedAt: row.updated_at,
     }));
+};
+
+export const addCodeHighlightThemeToDb = async (formData: CodeHighlightThemeFormData): Promise<CodeHighlightTheme> => {
+    const db = await getDb();
+    await db.run(
+        "INSERT INTO code_highlight_themes (id, name, styles, is_readonly, is_active) VALUES (?, ?, ?, ?, ?)",
+        formData.id, formData.name, JSON.stringify(formData.styles), false, false
+    );
+    const newTheme = await db.get("SELECT * FROM code_highlight_themes WHERE id = ?", formData.id);
+    if (!newTheme) throw new Error("Failed to retrieve created theme.");
+    return { ...newTheme, styles: JSON.parse(newTheme.styles), is_active: Boolean(newTheme.is_active), is_readonly: Boolean(newTheme.is_readonly) };
+};
+
+export const updateCodeHighlightThemeInDb = async (formData: CodeHighlightThemeFormData): Promise<CodeHighlightTheme> => {
+    const db = await getDb();
+    await db.run(
+        "UPDATE code_highlight_themes SET name = ?, styles = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND is_readonly = FALSE",
+        formData.name, JSON.stringify(formData.styles), formData.id
+    );
+    const updatedTheme = await db.get("SELECT * FROM code_highlight_themes WHERE id = ?", formData.id);
+    if (!updatedTheme) throw new Error("Failed to retrieve updated theme.");
+    return { ...updatedTheme, styles: JSON.parse(updatedTheme.styles), is_active: Boolean(updatedTheme.is_active), is_readonly: Boolean(updatedTheme.is_readonly) };
+};
+
+export const deleteCodeHighlightThemeFromDb = async (themeId: string): Promise<boolean> => {
+    const db = await getDb();
+    const result = await db.run("DELETE FROM code_highlight_themes WHERE id = ? AND is_readonly = FALSE AND is_active = FALSE", themeId);
+    return (result.changes ?? 0) > 0;
 };
