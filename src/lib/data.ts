@@ -1,4 +1,5 @@
 
+
 'use server';
 
 import { getDb } from './db';
@@ -692,7 +693,7 @@ export const getResources = async (params: GetResourcesParams): Promise<Paginate
 
       if (categoryForResource && categoryForResource.tagGroupConfigs) {
         categoryForResource.tagGroupConfigs.forEach(group => {
-          const selectedTagIdsInGroup = selectedTagIds[group.id];
+          const selectedTagIdsInGroup = selectedTagGroups[group.id];
           if (selectedTagIdsInGroup && Array.isArray(selectedTagIdsInGroup)) {
             selectedTagIdsInGroup.forEach(tagId => {
               const tagConfig = (group.tags || []).find(t => t.id === tagId);
@@ -759,6 +760,7 @@ export const getResources = async (params: GetResourcesParams): Promise<Paginate
         status: row.status as ProjectStatus,
         tags: resourceDisplayTags,
         files,
+        reviews: [],
         selectedDynamicTagsJson: row.selected_dynamic_tags_json,
         mainFileDetailsJson: row.main_file_details_json,
       } as Resource;
