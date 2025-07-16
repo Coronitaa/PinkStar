@@ -15,7 +15,7 @@ function generateHighlightCss(themeStyles: HighlightTheme, selectorPrefix: strin
         [`${selectorPrefix} .hljs-comment, ${selectorPrefix} .hljs-quote`]: `color: ${themeStyles.comment}; font-style: italic;`,
         
         // Keywords & Control Flow
-        [`${selectorPrefix} .hljs-keyword, ${selectorPrefix} .hljs-selector-tag, ${selectorPrefix} .hljs-doctag, ${selectorPrefix} .hljs-meta-keyword, ${selectorPrefix} .hljs-subst, ${selectorPrefix} .hljs-section, ${selectorPrefix} .hljs-built_in[class*="self"], ${selectorPrefix} .hljs-keyword[class*="self"]`]: `color: ${themeStyles.keyword};`,
+        [`${selectorPrefix} .hljs-keyword, ${selectorPrefix} .hljs-selector-tag, ${selectorPrefix} .hljs-doctag, ${selectorPrefix} .hljs-meta-keyword, ${selectorPrefix} .hljs-subst, ${selectorPrefix} .hljs-section, ${selectorPrefix} .hljs-built_in[class*="self"], ${selectorPrefix} .hljs-keyword[class*="self"], ${selectorPrefix} .hljs-name, ${selectorPrefix} .hljs-strong`]: `color: ${themeStyles.keyword};`,
 
         // Strings, Regex, etc.
         [`${selectorPrefix} .hljs-string, ${selectorPrefix} .hljs-regexp, ${selectorPrefix} .hljs-meta-string, ${selectorPrefix} .hljs-selector-attr, ${selectorPrefix} .hljs-template-variable, ${selectorPrefix} .hljs-addition`]: `color: ${themeStyles.string};`,
@@ -24,13 +24,13 @@ function generateHighlightCss(themeStyles: HighlightTheme, selectorPrefix: strin
         [`${selectorPrefix} .hljs-number, ${selectorPrefix} .hljs-literal`]: `color: ${themeStyles.number};`,
         
         // Functions & Methods
-        [`${selectorPrefix} .hljs-title.function_, ${selectorPrefix} .hljs-title.function_.invoke__`]: `color: ${themeStyles.function};`,
+        [`${selectorPrefix} .hljs-title.function_, ${selectorPrefix} .hljs-title.function_.invoke__, ${selectorPrefix} .hljs-title[class*="function"]`]: `color: ${themeStyles.function};`,
         
         // Parameters of functions
-        [`${selectorPrefix} .hljs-params`]: `color: ${themeStyles.text}; font-style: italic;`,
+        [`${selectorPrefix} .hljs-params`]: `color: ${themeStyles.variable}; font-style: normal;`,
 
         // Classes, Types, & Built-ins
-        [`${selectorPrefix} .hljs-title.class_, ${selectorPrefix} .hljs-type, ${selectorPrefix} .hljs-built_in, ${selectorPrefix} .hljs-name, ${selectorPrefix} .hljs-class .hljs-title`]: `color: ${themeStyles.class};`,
+        [`${selectorPrefix} .hljs-title.class_, ${selectorPrefix} .hljs-type, ${selectorPrefix} .hljs-built_in, ${selectorPrefix} .hljs-class .hljs-title`]: `color: ${themeStyles.class};`,
         
         // Decorators & Annotations (e.g., @decorator in Python/JS)
         [`${selectorPrefix} .hljs-meta, ${selectorPrefix} .hljs-meta .hljs-keyword`]: `color: ${themeStyles.tag};`,
@@ -52,7 +52,6 @@ function generateHighlightCss(themeStyles: HighlightTheme, selectorPrefix: strin
 
         // Style
         [`${selectorPrefix} .hljs-emphasis`]: `font-style: italic;`,
-        [`${selectorPrefix} .hljs-strong`]: `font-weight: bold;`,
     };
 
     return Object.entries(styles)
