@@ -6,6 +6,7 @@ import { unstable_noStore as noStore } from 'next/cache';
 
 function generateHighlightCss(themeStyles: HighlightTheme, selectorPrefix: string): string {
     if (!themeStyles) return '';
+    // Comprehensive mapping of highlight.js classes to theme properties
     const styles: { [key: string]: string } = {
         // Base
         [`${selectorPrefix}`]: `background-color: ${themeStyles.background || 'transparent'}; color: ${themeStyles.text};`,
@@ -14,37 +15,40 @@ function generateHighlightCss(themeStyles: HighlightTheme, selectorPrefix: strin
         [`${selectorPrefix} .hljs-comment, ${selectorPrefix} .hljs-quote`]: `color: ${themeStyles.comment}; font-style: italic;`,
         
         // Keywords & Control Flow
-        [`${selectorPrefix} .hljs-keyword, ${selectorPrefix} .hljs-selector-tag, ${selectorPrefix} .hljs-doctag, ${selectorPrefix} .hljs-meta-keyword, ${selectorPrefix} .hljs-subst`]: `color: ${themeStyles.keyword};`,
+        [`${selectorPrefix} .hljs-keyword, ${selectorPrefix} .hljs-selector-tag, ${selectorPrefix} .hljs-doctag, ${selectorPrefix} .hljs-meta-keyword, ${selectorPrefix} .hljs-subst, ${selectorPrefix} .hljs-section`]: `color: ${themeStyles.keyword};`,
         
-        // Strings & Regex
-        [`${selectorPrefix} .hljs-string, ${selectorPrefix} .hljs-regexp, ${selectorPrefix} .hljs-meta-string, ${selectorPrefix} .hljs-selector-attr, ${selectorPrefix} .hljs-template-variable`]: `color: ${themeStyles.string};`,
+        // Strings, Regex, etc.
+        [`${selectorPrefix} .hljs-string, ${selectorPrefix} .hljs-regexp, ${selectorPrefix} .hljs-meta-string, ${selectorPrefix} .hljs-selector-attr, ${selectorPrefix} .hljs-template-variable, ${selectorPrefix} .hljs-addition`]: `color: ${themeStyles.string};`,
         
-        // Numbers & Literals
+        // Numbers & Literals (booleans, null, etc.)
         [`${selectorPrefix} .hljs-number, ${selectorPrefix} .hljs-literal`]: `color: ${themeStyles.number};`,
         
         // Functions & Methods
         [`${selectorPrefix} .hljs-title.function_, ${selectorPrefix} .hljs-title.function_.invoke__`]: `color: ${themeStyles.function};`,
         
+        // Parameters of functions
+        [`${selectorPrefix} .hljs-params`]: `color: ${themeStyles.variable};`,
+
         // Classes, Types, & Built-ins
-        [`${selectorPrefix} .hljs-title.class_, ${selectorPrefix} .hljs-type, ${selectorPrefix} .hljs-built_in`]: `color: ${themeStyles.class};`,
+        [`${selectorPrefix} .hljs-title.class_, ${selectorPrefix} .hljs-type, ${selectorPrefix} .hljs-built_in, ${selectorPrefix} .hljs-name`]: `color: ${themeStyles.class};`,
         
-        // Tags & Sections
-        [`${selectorPrefix} .hljs-tag, ${selectorPrefix} .hljs-name, ${selectorPrefix} .hljs-section, ${selectorPrefix} .hljs-selector-id, ${selectorPrefix} .hljs-selector-class`]: `color: ${themeStyles.tag};`,
+        // Decorators (e.g., @decorator in Python/JS)
+        [`${selectorPrefix} .hljs-meta`]: `color: ${themeStyles.tag};`,
+
+        // HTML/XML Tags and Component names
+        [`${selectorPrefix} .hljs-tag, ${selectorPrefix} .hljs-selector-id, ${selectorPrefix} .hljs-selector-class`]: `color: ${themeStyles.tag};`,
         
         // Attributes
         [`${selectorPrefix} .hljs-attribute, ${selectorPrefix} .hljs-attr`]: `color: ${themeStyles.attr};`,
         
-        // Variables & Parameters
-        [`${selectorPrefix} .hljs-variable, ${selectorPrefix} .hljs-params, ${selectorPrefix} .hljs-property`]: `color: ${themeStyles.variable};`,
+        // Variables & Properties
+        [`${selectorPrefix} .hljs-variable, ${selectorPrefix} .hljs-property`]: `color: ${themeStyles.variable};`,
         
         // Punctuation & Operators
         [`${selectorPrefix} .hljs-operator, ${selectorPrefix} .hljs-punctuation`]: `color: ${themeStyles.punctuation};`,
 
-        // Links & Symbols
-        [`${selectorPrefix} .hljs-symbol, ${selectorPrefix} .hljs-bullet, ${selectorPrefix} .hljs-link`]: `color: ${themeStyles.operator};`, // Reusing operator color for symbols
-
-        // Meta (preprocessor)
-        [`${selectorPrefix} .hljs-meta`]: `color: ${themeStyles.comment};`, // Reusing comment color for meta
+        // Symbols and bullets
+        [`${selectorPrefix} .hljs-symbol, ${selectorPrefix} .hljs-bullet, ${selectorPrefix} .hljs-link`]: `color: ${themeStyles.operator};`,
 
         // Style
         [`${selectorPrefix} .hljs-emphasis`]: `font-style: italic;`,

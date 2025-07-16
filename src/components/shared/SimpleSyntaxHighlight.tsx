@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useMemo } from 'react';
@@ -18,7 +19,7 @@ import cpp from 'highlight.js/lib/languages/cpp';
 import plaintext from 'highlight.js/lib/languages/plaintext';
 import type { HighlightTheme } from '@/lib/types';
 
-const lowlight = createLowlight({ javascript, typescript, css, xml, json, bash, java: javaLang, cpp, plaintext });
+const lowlight = createLowlight({ javascript, typescript, css, xml, json, bash, java: lang, cpp, plaintext });
 
 interface SimpleSyntaxHighlightProps {
   code: string;
@@ -26,25 +27,29 @@ interface SimpleSyntaxHighlightProps {
 }
 
 function generateCssFromTheme(theme: HighlightTheme): string {
-  const styles: { [key: string]: string } = {
-    '': `background-color: ${theme.background}; color: ${theme.text};`,
-    '.hljs-comment, .hljs-quote': `color: ${theme.comment}; font-style: italic;`,
-    '.hljs-doctag, .hljs-keyword, .hljs-formula': `color: ${theme.keyword};`,
-    '.hljs-section, .hljs-name, .hljs-selector-tag, .hljs-deletion, .hljs-subst': `color: ${theme.tag};`,
-    '.hljs-literal': `color: ${theme.number};`,
-    '.hljs-string, .hljs-regexp, .hljs-addition, .hljs-attribute, .hljs-meta-string': `color: ${theme.string};`,
-    '.hljs-built_in, .hljs-class .hljs-title': `color: ${theme.class};`,
-    '.hljs-attr, .hljs-variable, .hljs-template-variable, .hljs-type, .hljs-selector-class, .hljs-selector-attr, .hljs-selector-pseudo, .hljs-number': `color: ${theme.attr};`,
-    '.hljs-symbol, .hljs-bullet, .hljs-link, .hljs-meta, .hljs-selector-id, .hljs-title': `color: ${theme.function};`,
-    '.hljs-emphasis': 'font-style: italic;',
-    '.hljs-strong': 'font-weight: bold;',
-    '.hljs-punctuation': `color: ${theme.punctuation};`,
-    '.hljs-operator': `color: ${theme.operator};`,
-  };
+    if (!theme) return '';
+    const styles: { [key: string]: string } = {
+        '': `background-color: ${theme.background}; color: ${theme.text};`,
+        '.hljs-comment, .hljs-quote': `color: ${theme.comment}; font-style: italic;`,
+        '.hljs-keyword, .hljs-selector-tag, .hljs-doctag, .hljs-meta-keyword, .hljs-subst, .hljs-section': `color: ${theme.keyword};`,
+        '.hljs-string, .hljs-regexp, .hljs-addition, .hljs-attribute, .hljs-meta-string, .hljs-selector-attr, .hljs-template-variable': `color: ${theme.string};`,
+        '.hljs-number, .hljs-literal': `color: ${theme.number};`,
+        '.hljs-title.function_, .hljs-title.function_.invoke__': `color: ${theme.function};`,
+        '.hljs-params': `color: ${theme.variable};`,
+        '.hljs-title.class_, .hljs-type, .hljs-built_in, .hljs-name': `color: ${theme.class};`,
+        '.hljs-meta': `color: ${theme.tag};`,
+        '.hljs-tag, .hljs-selector-id, .hljs-selector-class': `color: ${theme.tag};`,
+        '.hljs-attr': `color: ${theme.attr};`, // Kept for specificity if needed
+        '.hljs-variable, .hljs-property': `color: ${theme.variable};`,
+        '.hljs-operator, .hljs-punctuation': `color: ${theme.punctuation};`,
+        '.hljs-symbol, .hljs-bullet, .hljs-link': `color: ${theme.operator};`,
+        '.hljs-emphasis': 'font-style: italic;',
+        '.hljs-strong': 'font-weight: bold;',
+    };
 
-  return Object.entries(styles)
-    .map(([selector, rule]) => `.code-preview-wrapper .hljs${selector} { ${rule} }`)
-    .join('\n');
+    return Object.entries(styles)
+        .map(([selector, rule]) => `.code-preview-wrapper ${selector.startsWith('.') ? selector : `.hljs${selector}`} { ${rule} }`)
+        .join('\n');
 }
 
 export const SimpleSyntaxHighlight: React.FC<SimpleSyntaxHighlightProps> = ({ code, theme }) => {
