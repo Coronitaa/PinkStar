@@ -14,7 +14,7 @@ import { Loader2, Save, Trash2, PlusCircle, Palette } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose, DialogTrigger } from '@/components/ui/dialog';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { SimpleSyntaxHighlight } from '../shared/SimpleSyntaxHighlight';
 import { setActiveCodeHighlightTheme, saveCodeHighlightTheme, deleteCodeHighlightTheme } from '@/app/actions/clientWrappers';
 
