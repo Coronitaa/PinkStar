@@ -19,7 +19,7 @@ import cpp from 'highlight.js/lib/languages/cpp';
 import plaintext from 'highlight.js/lib/languages/plaintext';
 import type { HighlightTheme } from '@/lib/types';
 
-const lowlight = createLowlight({ javascript, typescript, css, xml, json, bash, java: lang, cpp, plaintext });
+const lowlight = createLowlight({ javascript, typescript, css, xml, json, bash, java: javaLang, cpp, plaintext });
 
 interface SimpleSyntaxHighlightProps {
   code: string;
@@ -29,7 +29,7 @@ interface SimpleSyntaxHighlightProps {
 function generateCssFromTheme(theme: HighlightTheme): string {
     if (!theme) return '';
     const styles: { [key: string]: string } = {
-        '': `background-color: ${theme.background}; color: ${theme.text};`,
+        '': `background-color: ${theme.background || 'transparent'}; color: ${theme.text};`,
         '.hljs-comment, .hljs-quote': `color: ${theme.comment}; font-style: italic;`,
         '.hljs-keyword, .hljs-selector-tag, .hljs-doctag, .hljs-meta-keyword, .hljs-subst, .hljs-section': `color: ${theme.keyword};`,
         '.hljs-string, .hljs-regexp, .hljs-addition, .hljs-attribute, .hljs-meta-string, .hljs-selector-attr, .hljs-template-variable': `color: ${theme.string};`,
