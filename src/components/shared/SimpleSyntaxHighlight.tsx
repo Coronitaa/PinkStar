@@ -19,7 +19,7 @@ import cpp from 'highlight.js/lib/languages/cpp';
 import plaintext from 'highlight.js/lib/languages/plaintext';
 import type { HighlightTheme } from '@/lib/types';
 
-const lowlight = createLowlight({ javascript, typescript, css, xml, json, bash, java: javaLang, cpp, plaintext });
+const lowlight = createLowlight({ javascript, typescript, python, css, xml, json, bash, java: javaLang, cpp, plaintext });
 
 interface SimpleSyntaxHighlightProps {
   code: string;
@@ -31,15 +31,15 @@ function generateCssFromTheme(theme: HighlightTheme): string {
     const styles: { [key: string]: string } = {
         '': `background-color: ${theme.background || 'transparent'}; color: ${theme.text};`,
         '.hljs-comment, .hljs-quote': `color: ${theme.comment}; font-style: italic;`,
-        '.hljs-keyword, .hljs-selector-tag, .hljs-doctag, .hljs-meta-keyword, .hljs-subst, .hljs-section': `color: ${theme.keyword};`,
+        '.hljs-keyword, .hljs-selector-tag, .hljs-doctag, .hljs-meta-keyword, .hljs-subst, .hljs-section, .hljs-built_in[class*="self"], .hljs-keyword[class*="self"]': `color: ${theme.keyword};`,
         '.hljs-string, .hljs-regexp, .hljs-addition, .hljs-attribute, .hljs-meta-string, .hljs-selector-attr, .hljs-template-variable': `color: ${theme.string};`,
         '.hljs-number, .hljs-literal': `color: ${theme.number};`,
         '.hljs-title.function_, .hljs-title.function_.invoke__': `color: ${theme.function};`,
-        '.hljs-params': `color: ${theme.variable};`,
-        '.hljs-title.class_, .hljs-type, .hljs-built_in, .hljs-name': `color: ${theme.class};`,
-        '.hljs-meta': `color: ${theme.tag};`,
+        '.hljs-params': `color: ${theme.text}; font-style: italic;`,
+        '.hljs-title.class_, .hljs-type, .hljs-built_in, .hljs-name, .hljs-class .hljs-title': `color: ${theme.class};`,
+        '.hljs-meta, .hljs-meta .hljs-keyword': `color: ${theme.tag};`,
         '.hljs-tag, .hljs-selector-id, .hljs-selector-class': `color: ${theme.tag};`,
-        '.hljs-attr': `color: ${theme.attr};`, // Kept for specificity if needed
+        '.hljs-attr': `color: ${theme.attr};`,
         '.hljs-variable, .hljs-property': `color: ${theme.variable};`,
         '.hljs-operator, .hljs-punctuation': `color: ${theme.punctuation};`,
         '.hljs-symbol, .hljs-bullet, .hljs-link': `color: ${theme.operator};`,

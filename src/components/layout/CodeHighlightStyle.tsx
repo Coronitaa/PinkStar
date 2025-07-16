@@ -11,12 +11,12 @@ function generateHighlightCss(themeStyles: HighlightTheme, selectorPrefix: strin
         // Base
         [`${selectorPrefix}`]: `background-color: ${themeStyles.background || 'transparent'}; color: ${themeStyles.text};`,
         
-        // Comments
+        // Comments & Docstrings
         [`${selectorPrefix} .hljs-comment, ${selectorPrefix} .hljs-quote`]: `color: ${themeStyles.comment}; font-style: italic;`,
         
         // Keywords & Control Flow
-        [`${selectorPrefix} .hljs-keyword, ${selectorPrefix} .hljs-selector-tag, ${selectorPrefix} .hljs-doctag, ${selectorPrefix} .hljs-meta-keyword, ${selectorPrefix} .hljs-subst, ${selectorPrefix} .hljs-section`]: `color: ${themeStyles.keyword};`,
-        
+        [`${selectorPrefix} .hljs-keyword, ${selectorPrefix} .hljs-selector-tag, ${selectorPrefix} .hljs-doctag, ${selectorPrefix} .hljs-meta-keyword, ${selectorPrefix} .hljs-subst, ${selectorPrefix} .hljs-section, ${selectorPrefix} .hljs-built_in[class*="self"], ${selectorPrefix} .hljs-keyword[class*="self"]`]: `color: ${themeStyles.keyword};`,
+
         // Strings, Regex, etc.
         [`${selectorPrefix} .hljs-string, ${selectorPrefix} .hljs-regexp, ${selectorPrefix} .hljs-meta-string, ${selectorPrefix} .hljs-selector-attr, ${selectorPrefix} .hljs-template-variable, ${selectorPrefix} .hljs-addition`]: `color: ${themeStyles.string};`,
         
@@ -27,13 +27,13 @@ function generateHighlightCss(themeStyles: HighlightTheme, selectorPrefix: strin
         [`${selectorPrefix} .hljs-title.function_, ${selectorPrefix} .hljs-title.function_.invoke__`]: `color: ${themeStyles.function};`,
         
         // Parameters of functions
-        [`${selectorPrefix} .hljs-params`]: `color: ${themeStyles.variable};`,
+        [`${selectorPrefix} .hljs-params`]: `color: ${themeStyles.text}; font-style: italic;`,
 
         // Classes, Types, & Built-ins
-        [`${selectorPrefix} .hljs-title.class_, ${selectorPrefix} .hljs-type, ${selectorPrefix} .hljs-built_in, ${selectorPrefix} .hljs-name`]: `color: ${themeStyles.class};`,
+        [`${selectorPrefix} .hljs-title.class_, ${selectorPrefix} .hljs-type, ${selectorPrefix} .hljs-built_in, ${selectorPrefix} .hljs-name, ${selectorPrefix} .hljs-class .hljs-title`]: `color: ${themeStyles.class};`,
         
-        // Decorators (e.g., @decorator in Python/JS)
-        [`${selectorPrefix} .hljs-meta`]: `color: ${themeStyles.tag};`,
+        // Decorators & Annotations (e.g., @decorator in Python/JS)
+        [`${selectorPrefix} .hljs-meta, ${selectorPrefix} .hljs-meta .hljs-keyword`]: `color: ${themeStyles.tag};`,
 
         // HTML/XML Tags and Component names
         [`${selectorPrefix} .hljs-tag, ${selectorPrefix} .hljs-selector-id, ${selectorPrefix} .hljs-selector-class`]: `color: ${themeStyles.tag};`,
