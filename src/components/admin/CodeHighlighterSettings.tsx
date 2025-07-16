@@ -16,7 +16,7 @@ import { cn } from '@/lib/utils';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { SimpleSyntaxHighlight } from '../shared/SimpleSyntaxHighlight';
-import { setActiveCodeHighlightThemeAction, saveCodeHighlightTheme as saveCodeHighlightThemeAction, deleteCodeHighlightTheme as deleteCodeHighlightThemeAction } from '@/app/actions/clientWrappers';
+import { setActiveCodeHighlightTheme, saveCodeHighlightTheme, deleteCodeHighlightTheme } from '@/app/actions/clientWrappers';
 
 
 const codeSnippets: Record<string, string> = {
@@ -153,7 +153,7 @@ export function CodeHighlighterSettings({ initialThemes, initialActiveThemeId }:
     const handleSetAsActive = () => {
         if (!activeThemeId) return;
         startActivatingTransition(async () => {
-            const result = await setActiveCodeHighlightThemeAction(activeThemeId);
+            const result = await setActiveCodeHighlightTheme(activeThemeId);
             if (result.success) {
                 toast({ title: 'Theme Activated!', description: 'The new code highlighting theme is now live across the site.' });
                 router.refresh(); 
@@ -170,7 +170,7 @@ export function CodeHighlighterSettings({ initialThemes, initialActiveThemeId }:
 
     const handleSaveTheme = async (formData: CodeHighlightThemeFormData, isNew: boolean) => {
         startSavingTransition(async () => {
-            const result = await saveCodeHighlightThemeAction(formData, isNew);
+            const result = await saveCodeHighlightTheme(formData, isNew);
 
             if (result.success && result.data?.theme) {
                 const savedTheme = result.data.theme;
@@ -189,7 +189,7 @@ export function CodeHighlighterSettings({ initialThemes, initialActiveThemeId }:
 
     const handleDeleteTheme = async (themeId: string) => {
         startDeletingTransition(async () => {
-            const result = await deleteCodeHighlightThemeAction(themeId);
+            const result = await deleteCodeHighlightTheme(themeId);
             if (result.success) {
                 setThemes(prev => prev.filter(t => t.id !== themeId));
                 if (activeThemeId === themeId) {
