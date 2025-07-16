@@ -682,4 +682,34 @@ export async function updateAuthorColorAction(resourceId: string, authorId: stri
   }
 }
 
+// --- Settings Actions ---
+
+export async function setActiveCodeHighlightThemeAction(themeId: string, clientMockUserId?: string): Promise<ActionResult> {
+    const authCheck = await verifyPermission(['admin', 'mod'], clientMockUserId);
+    if ('error' in authCheck) {
+        return { success: false, error: authCheck.error, errorCode: authCheck.errorCode };
+    }
+
+    const db = await getDb();
+    try {
+        await db.exec('BEGIN TRANSACTION');
+        // Deactivate all themes
+        await db.run("UPDATE code_highlight_themes SET is_active = FALSE WHERE is_active = TRUE");
+        // Activate the new theme
+        const result = await db.run("UPDATE code_highlight_themes SET is_active = TRUE WHERE id = ?", themeId);
+        await db.exec('COMMIT');
+
+        if (result.changes === 0) {
+            return { success: false, error: "Theme not found.", errorCode: 'NOT_FOUND' };
+        }
+
+        revalidatePath('/', 'layout');
+
+        return { success: true };
+    } catch (e: any) {
+        await db.exec('ROLLBACK');
+        console.error("[setActiveCodeHighlightThemeAction ACTION] Error:", e);
+        return { success: false, error: e.message, errorCode: 'DB_ERROR' };
+    }
+}
     

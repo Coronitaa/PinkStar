@@ -15,6 +15,7 @@ import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { SimpleSyntaxHighlight } from '../shared/SimpleSyntaxHighlight';
+import { setActiveCodeHighlightTheme } from '@/app/actions/clientWrappers';
 
 
 const codeSnippets: Record<string, string> = {
@@ -133,6 +134,7 @@ export function CodeHighlighterSettings({ initialThemes, initialActiveThemeId }:
     const [activeThemeId, setActiveThemeId] = useState(initialActiveThemeId);
     const [selectedThemeForEdit, setSelectedThemeForEdit] = useState<CodeHighlightTheme | null>(null);
     const [isSaving, startSavingTransition] = useTransition();
+    const [isActivating, startActivatingTransition] = useTransition();
     const router = useRouter();
     const { toast } = useToast();
 
@@ -143,9 +145,20 @@ export function CodeHighlighterSettings({ initialThemes, initialActiveThemeId }:
     }, [activeThemeId, themes, initialActiveThemeId]);
 
     const handleActivateTheme = async (themeId: string) => {
-        console.log(`Activating theme: ${themeId}`);
         setActiveThemeId(themeId);
-        toast({ title: 'Previewing Theme', description: 'The site style will update upon saving or activation in a real implementation.' });
+    };
+
+    const handleSetAsActive = () => {
+        if (!activeThemeId) return;
+        startActivatingTransition(async () => {
+            const result = await setActiveCodeHighlightTheme(activeThemeId);
+            if (result.success) {
+                toast({ title: 'Theme Activated!', description: 'The new code highlighting theme is now live across the site.' });
+                router.refresh(); // Refresh the page to see changes in layout
+            } else {
+                toast({ title: 'Error', description: result.error || "Failed to activate theme.", variant: 'destructive' });
+            }
+        });
     };
 
     const handleEditTheme = (themeId: string) => {
@@ -249,9 +262,9 @@ export function CodeHighlighterSettings({ initialThemes, initialActiveThemeId }:
                                 ))}
                             </SelectContent>
                         </Select>
-                         <Button className="w-full" disabled>
-                            <Save className="w-4 h-4 mr-2" /> Set as Active Theme
-                            <span className="text-xs ml-2 opacity-70">(Not Implemented)</span>
+                         <Button className="w-full button-primary-glow" onClick={handleSetAsActive} disabled={isActivating || !activeThemeId || activeThemeId === initialActiveThemeId}>
+                            {isActivating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                            Set as Active Theme
                         </Button>
                     </CardContent>
                 </Card>

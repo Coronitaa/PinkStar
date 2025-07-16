@@ -84,7 +84,8 @@ import {
     removeAuthorAction as serverRemoveAuthorAction,
     updateAuthorRoleAction as serverUpdateAuthorRoleAction,
     transferOwnershipAction as serverTransferOwnershipAction,
-    updateAuthorColorAction as serverUpdateAuthorColorAction
+    updateAuthorColorAction as serverUpdateAuthorColorAction,
+    setActiveCodeHighlightThemeAction as serverSetActiveCodeHighlightThemeAction
 } from '@/app/admin/actions'; // Path to admin actions
 import { deleteResourceAction as serverAdminDeleteResourceAction } from '@/app/admin/actions'; // Explicit import for admin version
 
@@ -209,4 +210,10 @@ export async function transferOwnership(resourceId: string, newCreatorId: string
 export async function updateAuthorColor(resourceId: string, authorId: string, color: string | null): Promise<ActionResult<{ authors: ResourceAuthor[] }>> {
     const clientMockUserId = getMockUserIdFromStorage();
     return serverUpdateAuthorColorAction(resourceId, authorId, color, clientMockUserId);
+}
+
+// --- Settings Action Wrappers ---
+export async function setActiveCodeHighlightTheme(themeId: string): Promise<ActionResult> {
+    const clientMockUserId = getMockUserIdFromStorage();
+    return serverSetActiveCodeHighlightThemeAction(themeId, clientMockUserId);
 }
