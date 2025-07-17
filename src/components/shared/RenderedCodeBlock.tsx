@@ -36,6 +36,7 @@ interface RenderedCodeBlockProps {
 
 function generateCssFromTheme(theme: HighlightTheme, wrapperId: string): string {
     if (!theme) return '';
+    // This consolidated mapping includes all selectors from SimpleSyntaxHighlight, CodeHighlightStyle, and RichTextEditor's implementation.
     const styles: { [key: string]: string } = {
         '': `background-color: ${theme.background || 'transparent'}; color: ${theme.text};`,
         '.hljs-comment, .hljs-quote': `color: ${theme.comment}; font-style: italic;`,
@@ -124,7 +125,7 @@ export const RenderedCodeBlock: React.FC<RenderedCodeBlockProps> = ({
               className="rendered-code-block m-0"
               style={{ maxHeight: maxHeight, overflowY: 'auto' }}
             >
-              <code className={`language-${language}`}>
+              <code className={`hljs language-${language}`}>
                 {parse(highlightedHtml)}
               </code>
             </pre>
