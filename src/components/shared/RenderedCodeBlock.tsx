@@ -2,7 +2,7 @@
 
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useId } from 'react';
 import parse from 'html-react-parser';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -71,7 +71,7 @@ export const RenderedCodeBlock: React.FC<RenderedCodeBlockProps> = ({
 }) => {
   const [isCopied, setIsCopied] = React.useState(false);
   const [collapsedState, setCollapsedState] = React.useState(isCollapsed);
-  const uniqueId = useMemo(() => `code-block-${Math.random().toString(36).substring(2, 9)}`, []);
+  const uniqueId = useId();
 
   const highlightedHtml = useMemo(() => {
     try {
