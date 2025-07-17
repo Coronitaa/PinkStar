@@ -17,16 +17,16 @@ import bash from 'highlight.js/lib/languages/bash';
 import javaLang from 'highlight.js/lib/languages/java';
 import cpp from 'highlight.js/lib/languages/cpp';
 import plaintext from 'highlight.js/lib/languages/plaintext';
-import type { HighlightTheme } from '@/lib/types';
+import type { CodeHighlightTheme } from '@/lib/types';
 
 const lowlight = createLowlight({ javascript, typescript, python, css, xml, json, bash, java: javaLang, cpp, plaintext });
 
 interface SimpleSyntaxHighlightProps {
   code: string;
-  theme: HighlightTheme;
+  theme?: CodeHighlightTheme['styles'] | null;
 }
 
-function generateCssFromTheme(theme: HighlightTheme): string {
+function generateCssFromTheme(theme: CodeHighlightTheme['styles']): string {
     if (!theme) return '';
     const styles: { [key: string]: string } = {
         '': `background-color: ${theme.background || 'transparent'}; color: ${theme.text};`,
@@ -62,11 +62,11 @@ export const SimpleSyntaxHighlight: React.FC<SimpleSyntaxHighlightProps> = ({ co
     }
   }, [code]);
 
-  const themeStyles = useMemo(() => generateCssFromTheme(theme), [theme]);
+  const themeStyles = useMemo(() => theme ? generateCssFromTheme(theme) : '', [theme]);
 
   return (
     <>
-      <style>{themeStyles}</style>
+      {themeStyles && <style>{themeStyles}</style>}
       <div className="code-preview-wrapper">
         <pre className="m-0 p-4 rounded-b-md" style={{ maxHeight: '400px', overflowY: 'auto' }}>
           <code>

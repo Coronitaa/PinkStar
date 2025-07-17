@@ -5,7 +5,7 @@
 import { useState, useEffect } from 'react'; 
 import { notFound, useRouter, useSearchParams as useNextSearchParams, usePathname } from 'next/navigation'; 
 import Link from 'next/link';
-import type { Resource, ItemType, DynamicAvailableFilterTags } from '@/lib/types';
+import type { Resource, ItemType, DynamicAvailableFilterTags, CodeHighlightTheme } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ResourceInfoSidebar } from '@/components/resource/ResourceInfoSidebar';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
@@ -18,7 +18,7 @@ import { ImageGalleryCarousel } from '@/components/shared/ImageGalleryCarousel';
 import { ResourceCard } from '@/components/resource/ResourceCard';
 import { Carousel, CarouselItem } from '@/components/shared/Carousel';
 import { EditResourceButtonAndModal } from '@/components/resource/EditResourceButtonAndModal'; 
-import { getAvailableFilterTags } from '@/lib/data';
+import { getAvailableFilterTags, getActiveCodeHighlightTheme } from '@/lib/data';
 import { getItemTypePlural } from '@/lib/utils';
 import parse, { domToReact, Element } from 'html-react-parser';
 import { cn } from '@/lib/utils';
@@ -45,6 +45,7 @@ export function ResourcePageContent({ resource, relatedResources }: ResourcePage
 
     const [carouselAllowOverflow, setCarouselAllowOverflow] = useState(false);
     const [dynamicAvailableFileTagGroups, setDynamicAvailableFileTagGroups] = useState<DynamicAvailableFilterTags>([]);
+    const [activeTheme, setActiveTheme] = useState<CodeHighlightTheme | null>(null);
     
     const initialTabFromUrl = resolvedSearchParamsHook.get('tab') || 'overview';
     const [activeTab, setActiveTab] = useState<string>(initialTabFromUrl);
@@ -57,15 +58,19 @@ export function ResourcePageContent({ resource, relatedResources }: ResourcePage
     }, [resolvedSearchParamsHook, activeTab]);
 
     useEffect(() => {
-        async function fetchTags() {
+        async function fetchData() {
             try {
-                const allCategoryTags = await getAvailableFilterTags(resource.parentItemSlug, resource.parentItemType, resource.categorySlug);
-                setDynamicAvailableFileTagGroups(allCategoryTags.filter(group => group.appliesToFiles));
+                const [tags, theme] = await Promise.all([
+                  getAvailableFilterTags(resource.parentItemSlug, resource.parentItemType, resource.categorySlug),
+                  getActiveCodeHighlightTheme()
+                ]);
+                setDynamicAvailableFileTagGroups(tags.filter(group => group.appliesToFiles));
+                setActiveTheme(theme);
             } catch (error) {
-                console.error("Error fetching available file tags:", error);
+                console.error("Error fetching initial data for resource page:", error);
             }
         }
-        fetchTags();
+        fetchData();
     }, [resource.parentItemSlug, resource.parentItemType, resource.categorySlug]);
 
     const itemTypePlural = getItemTypePlural(resource.parentItemType);
@@ -118,7 +123,7 @@ export function ResourcePageContent({ resource, relatedResources }: ResourcePage
                             ...restAttribs 
                         } = domNode.attribs;
 
-                        const images = JSON.parse(imagesJson || '[]');
+                        const images = JSON.parse(imagesJson || '[]') as string[];
                         const autoplayInterval = autoplayIntervalStr ? parseInt(autoplayIntervalStr, 10) : 5000;
                         const finalAspectRatio = aspectRatio || '16/9';
 
@@ -163,13 +168,12 @@ export function ResourcePageContent({ resource, relatedResources }: ResourcePage
                         return <RenderedCodeBlock
                             title={title}
                             language={language}
+                            theme={activeTheme?.styles}
                             maxHeight={maxHeight}
                             rawCodeContent={rawCodeContent}
                             isCollapsible={isCollapsible}
                             isCollapsed={isCollapsed}
-                        >
-                            {domToReact(codeElement.children, parseOptions)}
-                        </RenderedCodeBlock>;
+                        />;
                     }
                 }
             }
