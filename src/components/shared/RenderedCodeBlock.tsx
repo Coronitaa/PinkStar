@@ -20,7 +20,7 @@ import bash from 'highlight.js/lib/languages/bash';
 import javaLang from 'highlight.js/lib/languages/java';
 import cpp from 'highlight.js/lib/languages/cpp';
 import plaintext from 'highlight.js/lib/languages/plaintext';
-import type { CodeHighlightTheme, HighlightTheme } from '@/lib/types';
+import type { HighlightTheme } from '@/lib/types';
 
 const lowlight = createLowlight({ javascript, typescript, python, css, xml, json, bash, java: javaLang, cpp, plaintext });
 
