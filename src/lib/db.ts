@@ -1,5 +1,4 @@
 
-
 'use server';
 
 import sqlite3 from 'sqlite3';
@@ -364,3 +363,5 @@ async function initDbSchema(db: Database): Promise<void> {
 
   console.log("SQLite database schema initialized/verified. Mock profiles ensured (with social links).");
 }
+
+    
