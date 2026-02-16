@@ -98,7 +98,7 @@ export function EditResourceButtonAndModal({ resource }: EditResourceButtonAndMo
   };
 
   if (isLoadingUser) {
-    return <div className="h-9 w-20" />; 
+    return <div className="h-9 w-20" />;
   }
 
   if (!isAllowedToEdit) {
