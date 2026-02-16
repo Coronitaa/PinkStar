@@ -588,8 +588,8 @@ const CodeBlockComponent = (props: NodeViewProps) => {
                 className="relative border border-border rounded-lg overflow-hidden" 
             >
                 <div className="flex items-center justify-between bg-card-foreground/5 px-2 py-1.5 border-b border-border text-xs">
-                    <div className="flex items-center gap-2 flex-grow" data-drag-handle>
-                        <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab shrink-0" />
+                    <div className="flex items-center gap-2 flex-grow">
+                        <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab shrink-0" data-drag-handle />
                         <input 
                             className="bg-transparent text-muted-foreground outline-none placeholder:text-muted-foreground/70 text-xs w-full" 
                             placeholder="Filename (optional)"
