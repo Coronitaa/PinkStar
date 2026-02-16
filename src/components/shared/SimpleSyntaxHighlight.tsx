@@ -29,7 +29,7 @@ interface SimpleSyntaxHighlightProps {
 function generateCssFromTheme(theme: CodeHighlightTheme['styles']): string {
     if (!theme) return '';
     const styles: { [key: string]: string } = {
-        '': `background-color: ${theme.background || 'transparent'}; color: ${theme.text};`,
+        'pre': `background-color: ${theme.background || 'transparent'}; color: ${theme.text};`,
         '.hljs-comment, .hljs-quote': `color: ${theme.comment}; font-style: italic;`,
         '.hljs-keyword, .hljs-selector-tag, .hljs-doctag, .hljs-meta-keyword, .hljs-subst, .hljs-section, .hljs-built_in[class*="self"], .hljs-keyword[class*="self"], .hljs-name, .hljs-strong': `color: ${theme.keyword};`,
         '.hljs-string, .hljs-regexp, .hljs-addition, .hljs-attribute, .hljs-meta-string, .hljs-selector-attr, .hljs-template-variable': `color: ${theme.string};`,
@@ -47,7 +47,13 @@ function generateCssFromTheme(theme: CodeHighlightTheme['styles']): string {
     };
 
     return Object.entries(styles)
-        .map(([selector, rule]) => `.code-preview-wrapper ${selector.startsWith('.') ? selector : `.hljs${selector}`} { ${rule} }`)
+        .map(([selectors, rule]) => {
+            const scopedSelectors = selectors
+                .split(',')
+                .map(s => `.code-preview-wrapper ${s.trim()}`)
+                .join(', ');
+            return `${scopedSelectors} { ${rule} }`;
+        })
         .join('\n');
 }
 
