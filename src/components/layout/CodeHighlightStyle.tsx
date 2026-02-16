@@ -6,52 +6,54 @@ import { unstable_noStore as noStore } from 'next/cache';
 
 function generateHighlightCss(themeStyles: HighlightTheme, selectorPrefix: string): string {
     if (!themeStyles) return '';
-    // Comprehensive mapping of highlight.js classes to theme properties
+
+    const prefixWithBody = `body ${selectorPrefix}`;
+
     const styles: { [key: string]: string } = {
         // Base
-        [`${selectorPrefix}`]: `background-color: ${themeStyles.background || 'transparent'}; color: ${themeStyles.text};`,
+        [`${prefixWithBody}`]: `background-color: ${themeStyles.background || 'transparent'}; color: ${themeStyles.text};`,
         
         // Comments & Docstrings
-        [`${selectorPrefix} .hljs-comment, ${selectorPrefix} .hljs-quote`]: `color: ${themeStyles.comment}; font-style: italic;`,
+        [`${prefixWithBody} .hljs-comment, ${prefixWithBody} .hljs-quote`]: `color: ${themeStyles.comment}; font-style: italic;`,
         
         // Keywords & Control Flow
-        [`${selectorPrefix} .hljs-keyword, ${selectorPrefix} .hljs-selector-tag, ${selectorPrefix} .hljs-doctag, ${selectorPrefix} .hljs-meta-keyword, ${selectorPrefix} .hljs-subst, ${selectorPrefix} .hljs-section, ${selectorPrefix} .hljs-built_in[class*="self"], ${selectorPrefix} .hljs-keyword[class*="self"], ${selectorPrefix} .hljs-name, ${selectorPrefix} .hljs-strong`]: `color: ${themeStyles.keyword};`,
+        [`${prefixWithBody} .hljs-keyword, ${prefixWithBody} .hljs-selector-tag, ${prefixWithBody} .hljs-doctag, ${prefixWithBody} .hljs-meta-keyword, ${prefixWithBody} .hljs-subst, ${prefixWithBody} .hljs-section, ${prefixWithBody} .hljs-built_in[class*="self"], ${prefixWithBody} .hljs-keyword[class*="self"], ${prefixWithBody} .hljs-name, ${prefixWithBody} .hljs-strong`]: `color: ${themeStyles.keyword};`,
 
         // Strings, Regex, etc.
-        [`${selectorPrefix} .hljs-string, ${selectorPrefix} .hljs-regexp, ${selectorPrefix} .hljs-meta-string, ${selectorPrefix} .hljs-selector-attr, ${selectorPrefix} .hljs-template-variable, ${selectorPrefix} .hljs-addition`]: `color: ${themeStyles.string};`,
+        [`${prefixWithBody} .hljs-string, ${prefixWithBody} .hljs-regexp, ${prefixWithBody} .hljs-meta-string, ${prefixWithBody} .hljs-selector-attr, ${prefixWithBody} .hljs-template-variable, ${prefixWithBody} .hljs-addition`]: `color: ${themeStyles.string};`,
         
         // Numbers & Literals (booleans, null, etc.)
-        [`${selectorPrefix} .hljs-number, ${selectorPrefix} .hljs-literal`]: `color: ${themeStyles.number};`,
+        [`${prefixWithBody} .hljs-number, ${prefixWithBody} .hljs-literal`]: `color: ${themeStyles.number};`,
         
         // Functions & Methods
-        [`${selectorPrefix} .hljs-title.function_, ${selectorPrefix} .hljs-title.function_.invoke__, ${selectorPrefix} .hljs-title[class*="function"]`]: `color: ${themeStyles.function};`,
+        [`${prefixWithBody} .hljs-title.function_, ${prefixWithBody} .hljs-title.function_.invoke__, ${prefixWithBody} .hljs-title[class*="function"]`]: `color: ${themeStyles.function};`,
         
         // Parameters of functions
-        [`${selectorPrefix} .hljs-params`]: `color: ${themeStyles.variable}; font-style: normal;`,
+        [`${prefixWithBody} .hljs-params`]: `color: ${themeStyles.variable}; font-style: normal;`,
 
         // Classes, Types, & Built-ins
-        [`${selectorPrefix} .hljs-title.class_, ${selectorPrefix} .hljs-type, ${selectorPrefix} .hljs-built_in, ${selectorPrefix} .hljs-class .hljs-title`]: `color: ${themeStyles.class};`,
+        [`${prefixWithBody} .hljs-title.class_, ${prefixWithBody} .hljs-type, ${prefixWithBody} .hljs-built_in, ${prefixWithBody} .hljs-class .hljs-title`]: `color: ${themeStyles.class};`,
         
         // Decorators & Annotations (e.g., @decorator in Python/JS)
-        [`${selectorPrefix} .hljs-meta, ${selectorPrefix} .hljs-meta .hljs-keyword`]: `color: ${themeStyles.tag};`,
+        [`${prefixWithBody} .hljs-meta, ${prefixWithBody} .hljs-meta .hljs-keyword`]: `color: ${themeStyles.tag};`,
 
         // HTML/XML Tags and Component names
-        [`${selectorPrefix} .hljs-tag, ${selectorPrefix} .hljs-selector-id, ${selectorPrefix} .hljs-selector-class`]: `color: ${themeStyles.tag};`,
+        [`${prefixWithBody} .hljs-tag, ${prefixWithBody} .hljs-selector-id, ${prefixWithBody} .hljs-selector-class`]: `color: ${themeStyles.tag};`,
         
         // Attributes
-        [`${selectorPrefix} .hljs-attribute, ${selectorPrefix} .hljs-attr`]: `color: ${themeStyles.attr};`,
+        [`${prefixWithBody} .hljs-attribute, ${prefixWithBody} .hljs-attr`]: `color: ${themeStyles.attr};`,
         
         // Variables & Properties
-        [`${selectorPrefix} .hljs-variable, ${selectorPrefix} .hljs-property`]: `color: ${themeStyles.variable};`,
+        [`${prefixWithBody} .hljs-variable, ${prefixWithBody} .hljs-property`]: `color: ${themeStyles.variable};`,
         
         // Punctuation & Operators
-        [`${selectorPrefix} .hljs-operator, ${selectorPrefix} .hljs-punctuation`]: `color: ${themeStyles.punctuation};`,
+        [`${prefixWithBody} .hljs-operator, ${prefixWithBody} .hljs-punctuation`]: `color: ${themeStyles.punctuation};`,
 
         // Symbols and bullets
-        [`${selectorPrefix} .hljs-symbol, ${selectorPrefix} .hljs-bullet, ${selectorPrefix} .hljs-link`]: `color: ${themeStyles.operator};`,
+        [`${prefixWithBody} .hljs-symbol, ${prefixWithBody} .hljs-bullet, ${prefixWithBody} .hljs-link`]: `color: ${themeStyles.operator};`,
 
         // Style
-        [`${selectorPrefix} .hljs-emphasis`]: `font-style: italic;`,
+        [`${prefixWithBody} .hljs-emphasis`]: `font-style: italic;`,
     };
 
     return Object.entries(styles)

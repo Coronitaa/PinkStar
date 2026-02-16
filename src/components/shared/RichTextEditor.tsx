@@ -585,7 +585,7 @@ const CodeBlockComponent = (props: NodeViewProps) => {
     return (
         <NodeViewWrapper className="not-prose my-4 relative group/code-block">
             <div 
-                className="relative bg-muted/30 border border-border rounded-lg overflow-hidden" 
+                className="relative border border-border rounded-lg overflow-hidden" 
             >
                 <div className="flex items-center justify-between bg-card-foreground/5 px-2 py-1.5 border-b border-border text-xs">
                     <div className="flex items-center gap-2 flex-grow" data-drag-handle>
