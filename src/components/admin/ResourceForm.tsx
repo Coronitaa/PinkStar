@@ -108,54 +108,54 @@ interface MockUserForRole {
 }
 
 const ImagePreview = ({ watchUrl, alt, fallbackText, className }: { watchUrl?: string; alt: string; fallbackText: string; className?: string }) => {
-    const [isValidImage, setIsValidImage] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
+  const [isValidImage, setIsValidImage] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-    useEffect(() => {
-        setIsLoading(true);
-        if (watchUrl && watchUrl.startsWith('http')) {
-            const proxiedUrl = `/api/image-proxy?imageUrl=${encodeURIComponent(watchUrl)}`;
-            const img = new window.Image();
-            img.src = proxiedUrl;
-            img.onload = () => {
-                setIsValidImage(true);
-                setIsLoading(false);
-            };
-            img.onerror = () => {
-                setIsValidImage(false);
-                setIsLoading(false);
-            };
-        } else if (watchUrl && watchUrl.startsWith('data:image')) {
-            setIsValidImage(true);
-            setIsLoading(false);
-        } else {
-            setIsValidImage(false);
-            setIsLoading(false);
-        }
-    }, [watchUrl]);
+  useEffect(() => {
+    setIsLoading(true);
+    if (watchUrl && watchUrl.startsWith('http')) {
+      const proxiedUrl = `/api/image-proxy?imageUrl=${encodeURIComponent(watchUrl)}`;
+      const img = new window.Image();
+      img.src = proxiedUrl;
+      img.onload = () => {
+        setIsValidImage(true);
+        setIsLoading(false);
+      };
+      img.onerror = () => {
+        setIsValidImage(false);
+        setIsLoading(false);
+      };
+    } else if (watchUrl && watchUrl.startsWith('data:image')) {
+      setIsValidImage(true);
+      setIsLoading(false);
+    } else {
+      setIsValidImage(false);
+      setIsLoading(false);
+    }
+  }, [watchUrl]);
 
-    return (
-        <div className={cn("relative flex items-center justify-center rounded-md border border-dashed bg-muted/50 text-muted-foreground", className)}>
-            {isLoading && <Loader2 className="h-6 w-6 animate-spin text-primary" />}
-            {!isLoading && isValidImage && watchUrl ? (
-                <Image src={watchUrl.startsWith('http') ? `/api/image-proxy?imageUrl=${encodeURIComponent(watchUrl)}` : watchUrl} alt={alt} fill style={{ objectFit: 'cover' }} className="rounded-md" onDragStart={(e) => e.preventDefault()} />
-            ) : null}
-            {!isLoading && !isValidImage ? (
-                <span className="p-4 text-xs text-center">{fallbackText}</span>
-            ) : null}
-        </div>
-    );
+  return (
+    <div className={cn("relative flex items-center justify-center rounded-md border border-dashed bg-muted/50 text-muted-foreground", className)}>
+      {isLoading && <Loader2 className="h-6 w-6 animate-spin text-primary" />}
+      {!isLoading && isValidImage && watchUrl ? (
+        <Image src={watchUrl.startsWith('http') ? `/api/image-proxy?imageUrl=${encodeURIComponent(watchUrl)}` : watchUrl} alt={alt} fill style={{ objectFit: 'cover' }} className="rounded-md" onDragStart={(e) => e.preventDefault()} />
+      ) : null}
+      {!isLoading && !isValidImage ? (
+        <span className="p-4 text-xs text-center">{fallbackText}</span>
+      ) : null}
+    </div>
+  );
 };
 
 const AspectRatioIcon = ({ ratio, className }: { ratio: '16:9' | '4:3' | '1:1', className?: string }) => {
-      const viewBox = { '16:9': '0 0 16 9', '4:3': '0 0 16 12', '1:1': '0 0 16 16' }[ratio];
-      const rectProps = { '16:9': { width: 16, height: 9 }, '4:3': { width: 16, height: 12 }, '1:1': { width: 16, height: 16 } }[ratio];
-      return (
-          <svg viewBox={viewBox} className={cn("fill-current", className)} xmlns="http://www.w3.org/2000/svg">
-              <rect {...rectProps} rx="1" />
-          </svg>
-      );
-  };
+  const viewBox = { '16:9': '0 0 16 9', '4:3': '0 0 16 12', '1:1': '0 0 16 16' }[ratio];
+  const rectProps = { '16:9': { width: 16, height: 9 }, '4:3': { width: 16, height: 12 }, '1:1': { width: 16, height: 16 } }[ratio];
+  return (
+    <svg viewBox={viewBox} className={cn("fill-current", className)} xmlns="http://www.w3.org/2000/svg">
+      <rect {...rectProps} rx="1" />
+    </svg>
+  );
+};
 
 const itemTypeIcons: Record<ItemType, React.ElementType> = {
   game: Gamepad2,
@@ -191,7 +191,7 @@ export function ResourceForm({
 
   const [isMainImageEditorOpen, setIsMainImageEditorOpen] = useState(false);
   const [imageToCrop, setImageToCrop] = useState<string | null>(null);
-  
+
   const [editingGalleryIndex, setEditingGalleryIndex] = useState<number | null>(null);
   const [galleryImageToCrop, setGalleryImageToCrop] = useState<string | null>(null);
 
@@ -246,16 +246,16 @@ export function ResourceForm({
       initialData?.files
         ?.filter((file): file is ResourceFile => !!file && typeof file === 'object')
         .map((f): ResourceFileFormData => ({
-            id: typeof f.id === 'string' ? f.id : undefined,
-            name: typeof f.name === 'string' ? f.name : 'Default Name',
-            url: typeof f.url === 'string' ? f.url : 'https://example.com/default.zip',
-            versionName: typeof f.versionName === 'string' && f.versionName.length > 0 ? f.versionName : '1.0.0',
-            size: (typeof f.size === 'string' && f.size.trim() !== '') ? f.size.trim() : undefined,
-            channelId: typeof f.channelId === 'string' ? f.channelId : null,
-            changelogNotes: typeof f.changelogNotes === 'string' ? f.changelogNotes : '',
-            selectedFileTags: (f.selectedFileTags && typeof f.selectedFileTags === 'object' && !Array.isArray(f.selectedFileTags)) ? f.selectedFileTags : {},
-            createdAt: typeof f.createdAt === 'string' ? f.createdAt : undefined,
-          })) || [];
+          id: typeof f.id === 'string' ? f.id : undefined,
+          name: typeof f.name === 'string' ? f.name : 'Default Name',
+          url: typeof f.url === 'string' ? f.url : 'https://example.com/default.zip',
+          versionName: typeof f.versionName === 'string' && f.versionName.length > 0 ? f.versionName : '1.0.0',
+          size: (typeof f.size === 'string' && f.size.trim() !== '') ? f.size.trim() : undefined,
+          channelId: typeof f.channelId === 'string' ? f.channelId : null,
+          changelogNotes: typeof f.changelogNotes === 'string' ? f.changelogNotes : '',
+          selectedFileTags: (f.selectedFileTags && typeof f.selectedFileTags === 'object' && !Array.isArray(f.selectedFileTags)) ? f.selectedFileTags : {},
+          createdAt: typeof f.createdAt === 'string' ? f.createdAt : undefined,
+        })) || [];
 
 
     let initialResourceSelectedDynamicTags: DynamicTagSelection = {};
@@ -319,29 +319,29 @@ export function ResourceForm({
   useEffect(() => {
     // When the component loads with new initial data, reset the form.
     form.reset(defaultValues);
-    if(initialData?.authors) {
+    if (initialData?.authors) {
       setCurrentAuthors(initialData.authors);
     }
   }, [initialData, defaultValues, form]);
 
 
   const isMainImageGif = useMemo(() => (watchedImageUrl ? parseMediaUrl(watchedImageUrl)?.isGif : false) || false, [watchedImageUrl]);
-  
+
   const [autoplaySeconds, setAutoplaySeconds] = useState(
     (watchedGalleryAutoplayInterval ?? 5000) === 999999999 ? 0 : (watchedGalleryAutoplayInterval ?? 5000) / 1000
   );
 
   useEffect(() => {
-      const interval = watchedGalleryAutoplayInterval ?? 5000;
-      setAutoplaySeconds(interval === 999999999 ? 0 : interval / 1000);
+    const interval = watchedGalleryAutoplayInterval ?? 5000;
+    setAutoplaySeconds(interval === 999999999 ? 0 : interval / 1000);
   }, [watchedGalleryAutoplayInterval]);
 
   const handleSliderChange = (value: number[]) => {
-      const seconds = value[0];
-      setAutoplaySeconds(seconds);
-      form.setValue('galleryAutoplayInterval', seconds === 0 ? 999999999 : seconds * 1000, { shouldDirty: true });
+    const seconds = value[0];
+    setAutoplaySeconds(seconds);
+    form.setValue('galleryAutoplayInterval', seconds === 0 ? 999999999 : seconds * 1000, { shouldDirty: true });
   };
-  
+
   const numericAspectRatio = useMemo(() => {
     if (watchedGalleryAspectRatio === '4/3') return 4 / 3;
     if (watchedGalleryAspectRatio === '1/1') return 1;
@@ -375,7 +375,7 @@ export function ResourceForm({
     startSavingTransition(async () => {
       try {
         const resourceFormData: ResourceFormData = {
-          ...data, 
+          ...data,
           imageGallery: data.imageGallery?.map(item => item.value) || [],
           galleryAspectRatio: data.galleryAspectRatio,
           galleryAutoplayInterval: data.galleryAutoplayInterval,
@@ -424,9 +424,9 @@ export function ResourceForm({
 
   const openNewFileDialog = () => {
     setCurrentFileModalData({
-        ...defaultNewFileModalValues,
-        id: undefined,
-        createdAt: undefined,
+      ...defaultNewFileModalValues,
+      id: undefined,
+      createdAt: undefined,
     });
     setEditingFileIndex(null);
     setIsFileModalOpen(true);
@@ -448,29 +448,29 @@ export function ResourceForm({
 
   const handleSaveFileFromDialog = () => {
     try {
-        const fileDataToValidate = {
-            ...currentFileModalData,
-            name: currentFileModalData.name,
-            url: currentFileModalData.url,
-            versionName: currentFileModalData.versionName,
-            size: currentFileModalData.size,
-            channelId: currentFileModalData.channelId === CLEAR_SELECTION_VALUE ? null : (currentFileModalData.channelId),
-            changelogNotes: currentFileModalData.changelogNotes,
-            selectedFileTags: currentFileModalData.selectedFileTags || {},
-        };
-        resourceFileSchema.parse(fileDataToValidate);
+      const fileDataToValidate = {
+        ...currentFileModalData,
+        name: currentFileModalData.name,
+        url: currentFileModalData.url,
+        versionName: currentFileModalData.versionName,
+        size: currentFileModalData.size,
+        channelId: currentFileModalData.channelId === CLEAR_SELECTION_VALUE ? null : (currentFileModalData.channelId),
+        changelogNotes: currentFileModalData.changelogNotes,
+        selectedFileTags: currentFileModalData.selectedFileTags || {},
+      };
+      resourceFileSchema.parse(fileDataToValidate);
     } catch (error: any) {
-        if (error instanceof z.ZodError) {
-            let errorMessages = "Please correct the following issues in the file details:\\n";
-            error.errors.forEach(err => {
-                const fieldPath = err.path.join('.') || 'File Data';
-                errorMessages += `- ${fieldPath}: ${err.message}\\n`;
-            });
-            toast({ title: "File Validation Error", description: errorMessages, variant: "destructive", duration: 7000 });
-        } else {
-            toast({ title: "File Error", description: "An unknown validation error occurred with file data.", variant: "destructive" });
-        }
-        return;
+      if (error instanceof z.ZodError) {
+        let errorMessages = "Please correct the following issues in the file details:\\n";
+        error.errors.forEach(err => {
+          const fieldPath = err.path.join('.') || 'File Data';
+          errorMessages += `- ${fieldPath}: ${err.message}\\n`;
+        });
+        toast({ title: "File Validation Error", description: errorMessages, variant: "destructive", duration: 7000 });
+      } else {
+        toast({ title: "File Error", description: "An unknown validation error occurred with file data.", variant: "destructive" });
+      }
+      return;
     }
 
     const fileDataToSave: ResourceFileFormData = {
@@ -494,8 +494,8 @@ export function ResourceForm({
   const handleFileModalInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setCurrentFileModalData(prev => ({
-        ...prev,
-        [name]: (name === 'size' && value.trim() === '') ? undefined : value
+      ...prev,
+      [name]: (name === 'size' && value.trim() === '') ? undefined : value
     }));
   };
 
@@ -505,17 +505,17 @@ export function ResourceForm({
 
   const handleFileModalTagToggle = (groupId: string, tagId: string) => {
     setCurrentFileModalData(prev => {
-        const currentGroupTags = prev.selectedFileTags?.[groupId] || [];
-        const newGroupTags = currentGroupTags.includes(tagId)
-                            ? currentGroupTags.filter(id => id !== tagId)
-                            : [...currentGroupTags, tagId];
-        return {
-            ...prev,
-            selectedFileTags: {
-                ...(prev.selectedFileTags || {}),
-                [groupId]: newGroupTags.length > 0 ? newGroupTags : undefined,
-            }
-        };
+      const currentGroupTags = prev.selectedFileTags?.[groupId] || [];
+      const newGroupTags = currentGroupTags.includes(tagId)
+        ? currentGroupTags.filter(id => id !== tagId)
+        : [...currentGroupTags, tagId];
+      return {
+        ...prev,
+        selectedFileTags: {
+          ...(prev.selectedFileTags || {}),
+          [groupId]: newGroupTags.length > 0 ? newGroupTags : undefined,
+        }
+      };
     });
   };
 
@@ -523,7 +523,7 @@ export function ResourceForm({
     setDraggingImageIndex(index);
   };
   const handleImageDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault(); 
+    e.preventDefault();
   };
   const handleImageDrop = (e: React.DragEvent<HTMLDivElement>, targetIndex: number) => {
     e.preventDefault();
@@ -539,12 +539,12 @@ export function ResourceForm({
   const handleOpenMainImageEditor = () => {
     const urlToEdit = watchedImageUrl;
     if (!urlToEdit || !(urlToEdit.startsWith('http') || urlToEdit.startsWith('data:image'))) {
-        toast({ title: "Invalid URL", description: "Please provide a valid image URL to edit.", variant: "destructive" });
-        return;
+      toast({ title: "Invalid URL", description: "Please provide a valid image URL to edit.", variant: "destructive" });
+      return;
     }
     if (isMainImageGif) {
-        toast({ title: "Info", description: "Animated GIFs cannot be cropped." });
-        return;
+      toast({ title: "Info", description: "Animated GIFs cannot be cropped." });
+      return;
     }
     setImageToCrop(urlToEdit);
     setIsMainImageEditorOpen(true);
@@ -554,7 +554,7 @@ export function ResourceForm({
     form.setValue('imageUrl', croppedImage, { shouldDirty: true });
     setIsMainImageEditorOpen(false);
   };
-  
+
   const handleOpenGalleryImageEditor = (index: number) => {
     const url = form.getValues(`imageGallery.${index}.value`);
     const media = parseMediaUrl(url);
@@ -562,17 +562,17 @@ export function ResourceForm({
     const isVideo = media?.type === 'video';
 
     if (!url || !media || isVideo || isGif) {
-        toast({ title: "Editing Not Supported", description: "Only non-animated images can be edited.", variant: "destructive" });
-        return;
+      toast({ title: "Editing Not Supported", description: "Only non-animated images can be edited.", variant: "destructive" });
+      return;
     }
-    
+
     setEditingGalleryIndex(index);
     setGalleryImageToCrop(url);
   };
 
   const handleGalleryImageSave = (croppedImage: string) => {
     if (editingGalleryIndex !== null) {
-        form.setValue(`imageGallery.${editingGalleryIndex}.value`, croppedImage, { shouldDirty: true });
+      form.setValue(`imageGallery.${editingGalleryIndex}.value`, croppedImage, { shouldDirty: true });
     }
     setEditingGalleryIndex(null);
     setGalleryImageToCrop(null);
@@ -584,22 +584,22 @@ export function ResourceForm({
 
   return (
     <>
-    <form onSubmit={form.handleSubmit(onSubmit, (errors) => console.error("Form validation errors:", JSON.stringify(errors, null, 2)))} className="space-y-6">
-      <Card className="bg-card/80 backdrop-blur-sm shadow-lg border-none">
-        <Tabs defaultValue="general" className="w-full">
-          <div className="overflow-x-auto whitespace-nowrap px-6 pt-4">
-            <TabsList className="grid w-full grid-cols-4 sm:grid-cols-7 mb-4 bg-card-foreground/5 rounded-lg shrink-0">
-              <TabsTrigger value="general"><IconForType className="w-4 h-4 mr-1 sm:mr-2" />General</TabsTrigger>
-              <TabsTrigger value="authors"><Users className="w-4 h-4 mr-1 sm:mr-2" />Authors</TabsTrigger>
-              <TabsTrigger value="details"><ListChecks className="w-4 h-4 mr-1 sm:mr-2" />Details</TabsTrigger>
-              <TabsTrigger value="visuals"><ImageIcon className="w-4 h-4 mr-1 sm:mr-2" />Visuals</TabsTrigger>
-              <TabsTrigger value="files"><Archive className="w-4 h-4 mr-1 sm:mr-2" />Files</TabsTrigger>
-              <TabsTrigger value="tags"><Tags className="w-4 h-4 mr-1 sm:mr-2" />Tags</TabsTrigger>
-              <TabsTrigger value="links"><LinkIconLucide className="w-4 h-4 mr-1 sm:mr-2" />Links</TabsTrigger>
-            </TabsList>
-          </div>
-  
-          <div className="space-y-6 p-6 pt-2">
+      <form onSubmit={form.handleSubmit(onSubmit, (errors) => console.error("Form validation errors:", JSON.stringify(errors, null, 2)))} className="space-y-6">
+        <Card className="bg-card/80 backdrop-blur-sm shadow-lg border-none">
+          <Tabs defaultValue="general" className="w-full">
+            <div className="overflow-x-auto whitespace-nowrap px-6 pt-4">
+              <TabsList className="grid w-full grid-cols-4 sm:grid-cols-7 mb-4 bg-card-foreground/5 rounded-lg shrink-0">
+                <TabsTrigger value="general"><IconForType className="w-4 h-4 mr-1 sm:mr-2" />General</TabsTrigger>
+                <TabsTrigger value="authors"><Users className="w-4 h-4 mr-1 sm:mr-2" />Authors</TabsTrigger>
+                <TabsTrigger value="details"><ListChecks className="w-4 h-4 mr-1 sm:mr-2" />Details</TabsTrigger>
+                <TabsTrigger value="visuals"><ImageIcon className="w-4 h-4 mr-1 sm:mr-2" />Visuals</TabsTrigger>
+                <TabsTrigger value="files"><Archive className="w-4 h-4 mr-1 sm:mr-2" />Files</TabsTrigger>
+                <TabsTrigger value="tags"><Tags className="w-4 h-4 mr-1 sm:mr-2" />Tags</TabsTrigger>
+                <TabsTrigger value="links"><LinkIconLucide className="w-4 h-4 mr-1 sm:mr-2" />Links</TabsTrigger>
+              </TabsList>
+            </div>
+
+            <div className="space-y-6 p-6 pt-2 overflow-y-auto max-h-[calc(90vh-180px)] custom-scrollbar">
               <TabsContent value="general" className="space-y-6 m-0">
                 <CardTitle className="text-xl mb-4 flex items-center"><IconForType className="w-5 h-5 mr-2 text-primary" />Basic Information</CardTitle>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -631,37 +631,37 @@ export function ResourceForm({
                       name="status"
                       control={form.control}
                       render={({ field }) => (
-                      <Select
+                        <Select
                           onValueChange={(value) => field.onChange(value as ProjectStatus)}
                           value={field.value || 'draft'}
-                      >
-                          <SelectTrigger id="status"><SelectValue placeholder="Select status..."/></SelectTrigger>
+                        >
+                          <SelectTrigger id="status"><SelectValue placeholder="Select status..." /></SelectTrigger>
                           <SelectContent>{PROJECT_STATUSES_CONST.map(sVal => <SelectItem key={sVal} value={sVal}>{PROJECT_STATUS_NAMES[sVal]}</SelectItem>)}</SelectContent>
-                      </Select>
+                        </Select>
                       )}
                     />
                     {form.formState.errors.status && <p className="text-xs text-destructive mt-1">{form.formState.errors.status.message}</p>}
                   </div>
                 )}
-                {form.formState.errors.selectedDynamicTags?.root && <p className="text-sm text-destructive mt-2 bg-destructive/10 p-2 rounded-md flex items-center"><Info className="w-4 h-4 mr-2"/>{form.formState.errors.selectedDynamicTags.root.message}</p>}
-                {form.formState.errors.files?.root && <p className="text-sm text-destructive mt-2 bg-destructive/10 p-2 rounded-md flex items-center"><Info className="w-4 h-4 mr-2"/>{form.formState.errors.files.root.message}</p>}
+                {form.formState.errors.selectedDynamicTags?.root && <p className="text-sm text-destructive mt-2 bg-destructive/10 p-2 rounded-md flex items-center"><Info className="w-4 h-4 mr-2" />{form.formState.errors.selectedDynamicTags.root.message}</p>}
+                {form.formState.errors.files?.root && <p className="text-sm text-destructive mt-2 bg-destructive/10 p-2 rounded-md flex items-center"><Info className="w-4 h-4 mr-2" />{form.formState.errors.files.root.message}</p>}
               </TabsContent>
-              
+
               <TabsContent value="authors" className="space-y-6 m-0">
-                  <CardTitle className="text-xl mb-4 flex items-center"><Users className="w-5 h-5 mr-2 text-primary" />Authors & Collaborators</CardTitle>
-                  {!isNew && initialData?.id ? (
-                      <ResourceAuthorsManager 
-                          resourceId={initialData.id}
-                          initialAuthors={currentAuthors}
-                          onAuthorsUpdate={setCurrentAuthors}
-                      />
-                  ) : (
-                      <div className="text-center text-muted-foreground py-8 border border-dashed rounded-md">
-                          <p>Save the resource first to manage authors.</p>
-                      </div>
-                  )}
+                <CardTitle className="text-xl mb-4 flex items-center"><Users className="w-5 h-5 mr-2 text-primary" />Authors & Collaborators</CardTitle>
+                {!isNew && initialData?.id ? (
+                  <ResourceAuthorsManager
+                    resourceId={initialData.id}
+                    initialAuthors={currentAuthors}
+                    onAuthorsUpdate={setCurrentAuthors}
+                  />
+                ) : (
+                  <div className="text-center text-muted-foreground py-8 border border-dashed rounded-md">
+                    <p>Save the resource first to manage authors.</p>
+                  </div>
+                )}
               </TabsContent>
-  
+
               <TabsContent value="details" className="space-y-6 m-0">
                 <CardTitle className="text-xl mb-4 flex items-center"><ListChecks className="w-5 h-5 mr-2 text-primary" />Detailed Information</CardTitle>
                 <div>
@@ -679,272 +679,274 @@ export function ResourceForm({
                   {form.formState.errors.detailedDescription && <p className="text-xs text-destructive mt-1">{form.formState.errors.detailedDescription.message}</p>}
                 </div>
                 <div>
-                    <Label htmlFor="requirements">Requirements (Markdown)</Label>
-                    <Textarea id="requirements" {...form.register('requirements')} rows={5} />
-                    {form.formState.errors.requirements && <p className="text-xs text-destructive mt-1">{form.formState.errors.requirements.message}</p>}
+                  <Label htmlFor="requirements">Requirements (Markdown)</Label>
+                  <Textarea id="requirements" {...form.register('requirements')} rows={5} />
+                  {form.formState.errors.requirements && <p className="text-xs text-destructive mt-1">{form.formState.errors.requirements.message}</p>}
                 </div>
               </TabsContent>
-  
+
               <TabsContent value="visuals" className="space-y-6 m-0">
                 <CardTitle className="text-xl mb-4 flex items-center"><ImageIcon className="w-5 h-5 mr-2 text-primary" />Visuals</CardTitle>
-                
+
                 <div className="space-y-4">
                   <Label>Main Image</Label>
                   <div className="grid grid-cols-12 gap-4">
-                      <div className="col-span-5 aspect-[16/9] shrink-0">
-                          <ImagePreview watchUrl={watchedImageUrl} alt="Main Image Preview" fallbackText="Main Image Preview" className="h-full w-full"/>
+                    <div className="col-span-5 aspect-[16/9] shrink-0">
+                      <ImagePreview watchUrl={watchedImageUrl} alt="Main Image Preview" fallbackText="Main Image Preview" className="h-full w-full" />
+                    </div>
+                    <div className="col-span-7 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Input id="imageUrl" {...form.register('imageUrl')} placeholder="https://..." disabled={isSaving} />
+                        <Button type="button" variant="outline" size="sm" onClick={handleOpenMainImageEditor} disabled={isSaving || !watchedImageUrl || isMainImageGif} title="Edit Image" className="shrink-0">
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit
+                        </Button>
                       </div>
-                      <div className="col-span-7 space-y-2">
-                           <div className="flex items-center gap-2">
-                              <Input id="imageUrl" {...form.register('imageUrl')} placeholder="https://..." disabled={isSaving} />
-                              <Button type="button" variant="outline" size="sm" onClick={handleOpenMainImageEditor} disabled={isSaving || !watchedImageUrl || isMainImageGif} title="Edit Image" className="shrink-0">
-                                  <Edit className="h-4 w-4 mr-2" />
-                                  Edit
-                              </Button>
-                          </div>
-                          {isMainImageGif && <p className="text-xs text-muted-foreground">Animated GIFs cannot be cropped.</p>}
-                          {form.formState.errors.imageUrl && <p className="text-xs text-destructive mt-1">{form.formState.errors.imageUrl.message}</p>}
-                      </div>
+                      {isMainImageGif && <p className="text-xs text-muted-foreground">Animated GIFs cannot be cropped.</p>}
+                      {form.formState.errors.imageUrl && <p className="text-xs text-destructive mt-1">{form.formState.errors.imageUrl.message}</p>}
+                    </div>
                   </div>
                 </div>
 
                 <Separator />
-              
+
                 <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <Label>Image Gallery</Label>
-                      <Controller
-                          name="showMainImageInGallery"
-                          control={form.control}
-                          render={({ field }) => (
-                              <div className="flex items-center space-x-2">
-                                  <Checkbox
-                                      id="showMainImageInGallery"
-                                      checked={field.value}
-                                      onCheckedChange={field.onChange}
-                                  />
-                                  <label
-                                      htmlFor="showMainImageInGallery"
-                                      className="text-sm font-medium leading-none text-muted-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                  >
-                                      Include main image in gallery
-                                  </label>
-                              </div>
-                          )}
-                      />
-                    </div>
-                    
-                    {/* Gallery Controls */}
-                    <div className="space-y-3 p-3 border rounded-md bg-muted/20">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 items-center">
-                        <div>
-                          <Label className="text-xs font-medium">Aspect Ratio</Label>
-                          <div className="flex justify-start gap-2 mt-1">
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button type="button" variant={watchedGalleryAspectRatio === '16/9' ? 'default' : 'outline'} size="icon" onClick={() => form.setValue('galleryAspectRatio', '16/9', { shouldDirty: true })}>
-                                    <AspectRatioIcon ratio="16:9" className="w-5 h-5" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent><p>Widescreen (16:9)</p></TooltipContent>
-                              </Tooltip>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button type="button" variant={watchedGalleryAspectRatio === '4/3' ? 'default' : 'outline'} size="icon" onClick={() => form.setValue('galleryAspectRatio', '4/3', { shouldDirty: true })}>
-                                    <AspectRatioIcon ratio="4:3" className="w-5 h-5" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent><p>Standard (4:3)</p></TooltipContent>
-                              </Tooltip>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button type="button" variant={watchedGalleryAspectRatio === '1/1' ? 'default' : 'outline'} size="icon" onClick={() => form.setValue('galleryAspectRatio', '1/1', { shouldDirty: true })}>
-                                    <AspectRatioIcon ratio="1:1" className="w-5 h-5" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent><p>Square (1:1)</p></TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          </div>
-                        </div>
-                        <div>
-                          <div className="flex justify-between items-center">
-                            <Label htmlFor="autoplay-slider" className="text-xs font-medium">Autoplay Speed</Label>
-                            <span className="text-xs text-muted-foreground w-16 text-right">
-                                {autoplaySeconds === 0 ? 'Off' : `${autoplaySeconds.toFixed(1)}s`}
-                            </span>
-                          </div>
-                          <Slider
-                              id="autoplay-slider"
-                              min={0} max={30} step={0.5}
-                              value={[autoplaySeconds]}
-                              onValueChange={handleSliderChange}
-                              className="mt-2"
+                  <div className="flex items-center justify-between">
+                    <Label>Image Gallery</Label>
+                    <Controller
+                      name="showMainImageInGallery"
+                      control={form.control}
+                      render={({ field }) => (
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            id="showMainImageInGallery"
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
                           />
+                          <label
+                            htmlFor="showMainImageInGallery"
+                            className="text-sm font-medium leading-none text-muted-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          >
+                            Include main image in gallery
+                          </label>
+                        </div>
+                      )}
+                    />
+                  </div>
+
+                  {/* Gallery Controls */}
+                  <div className="space-y-3 p-3 border rounded-md bg-muted/20">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 items-center">
+                      <div>
+                        <Label className="text-xs font-medium">Aspect Ratio</Label>
+                        <div className="flex justify-start gap-2 mt-1">
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button type="button" variant={watchedGalleryAspectRatio === '16/9' ? 'default' : 'outline'} size="icon" onClick={() => form.setValue('galleryAspectRatio', '16/9', { shouldDirty: true })}>
+                                  <AspectRatioIcon ratio="16:9" className="w-5 h-5" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent><p>Widescreen (16:9)</p></TooltipContent>
+                            </Tooltip>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button type="button" variant={watchedGalleryAspectRatio === '4/3' ? 'default' : 'outline'} size="icon" onClick={() => form.setValue('galleryAspectRatio', '4/3', { shouldDirty: true })}>
+                                  <AspectRatioIcon ratio="4:3" className="w-5 h-5" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent><p>Standard (4:3)</p></TooltipContent>
+                            </Tooltip>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button type="button" variant={watchedGalleryAspectRatio === '1/1' ? 'default' : 'outline'} size="icon" onClick={() => form.setValue('galleryAspectRatio', '1/1', { shouldDirty: true })}>
+                                  <AspectRatioIcon ratio="1:1" className="w-5 h-5" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent><p>Square (1:1)</p></TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         </div>
                       </div>
-                    </div>
-
-
-                    {/* Gallery List & Preview */}
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                        <div className="lg:col-span-7">
-                            <div className="border rounded-md bg-muted/30 p-2 space-y-2 h-[250px] overflow-y-auto custom-scrollbar">
-                              {galleryFields.map((field, index) => {
-                                const url = form.getValues(`imageGallery.${index}.value`);
-                                const media = parseMediaUrl(url);
-                                const isVideo = media?.type === 'video';
-                                const isGif = media?.isGif || false;
-                                const isEditable = url && (url.startsWith('http') || url.startsWith('data:image')) && !isVideo && !isGif;
-                                return (
-                                <div 
-                                  key={field.id}
-                                  draggable="true"
-                                  onDragStart={(e) => handleImageDragStart(e, index)}
-                                  onDragOver={handleImageDragOver}
-                                  onDrop={(e) => handleImageDrop(e, index)}
-                                  onDragEnd={handleImageDragEnd}
-                                  className={cn(
-                                    "flex items-center gap-2 p-1.5 rounded-md hover:bg-muted/50 group cursor-grab",
-                                    draggingImageIndex === index && "opacity-50 bg-primary/20"
-                                  )}
-                                >
-                                  <GripVertical className="h-5 w-5 text-muted-foreground mr-1 opacity-50 group-hover:opacity-100 shrink-0" />
-                                  <Input {...form.register(`imageGallery.${index}.value`)} placeholder="https://..." className="h-8"/>
-                                  <div className="flex gap-0.5 shrink-0">
-                                    <Button type="button" size="icon" variant="ghost" onClick={() => handleOpenGalleryImageEditor(index)} className="text-blue-500 hover:text-blue-400 h-7 w-7" title="Edit Image" disabled={!isEditable}>
-                                        <Edit className="h-4 w-4"/>
-                                    </Button>
-                                    <Button type="button" size="icon" variant="ghost" onClick={() => removeGalleryField(index)} className="text-destructive/70 hover:text-destructive h-7 w-7"><X className="h-4 w-4" /></Button>
-                                  </div>
-                                </div>
-                              )})}
-                               {galleryFields.length === 0 && <p className="text-center text-xs text-muted-foreground py-4">No media added to the gallery.</p>}
-                            </div>
-                            <Button type="button" variant="outline" size="sm" className="mt-2" onClick={() => appendGalleryField({ value: '' })}>
-                                <PlusCircle className="mr-2 h-4 w-4" /> Add Image/Video
-                            </Button>
+                      <div>
+                        <div className="flex justify-between items-center">
+                          <Label htmlFor="autoplay-slider" className="text-xs font-medium">Autoplay Speed</Label>
+                          <span className="text-xs text-muted-foreground w-16 text-right">
+                            {autoplaySeconds === 0 ? 'Off' : `${autoplaySeconds.toFixed(1)}s`}
+                          </span>
                         </div>
-                        <div className={cn(
-                          "lg:col-span-5 border rounded-md bg-background/30 p-2",
-                          watchedGalleryAspectRatio === '16/9' && 'aspect-video',
-                          watchedGalleryAspectRatio === '4/3' && 'aspect-[4/3]',
-                          watchedGalleryAspectRatio === '1/1' && 'aspect-square',
-                          !watchedGalleryAspectRatio && 'aspect-video'
-                        )}>
-                            {galleryImagesForPreview.length > 0 ? (
-                              <Carousel 
-                                itemsToShow={1}
-                                showArrows={galleryImagesForPreview.length > 1}
-                                autoplay
-                                autoplayInterval={watchedGalleryAutoplayInterval}
-                              >
-                                {galleryImagesForPreview.map((url, i) => {
-                                  const media = parseMediaUrl(url);
-                                  return (
-                                    <CarouselItem key={i}>
-                                      <div className="relative w-full h-full bg-black rounded-md overflow-hidden">
-                                        {media?.type === 'video' ? (
-                                          <iframe
-                                            src={`${media.src}?autoplay=${i === 0 ? 1 : 0}&mute=1&controls=0&loop=1&playlist=${media.videoId}&rel=0&iv_load_policy=3`}
-                                            title={`Preview ${i + 1}`}
-                                            className="w-full h-full"
-                                            frameBorder="0"
-                                            allow="autoplay; encrypted-media; picture-in-picture"
-                                            allowFullScreen
-                                          />
-                                        ) : (
-                                          <Image src={media?.src || 'https://placehold.co/800x450.png'} alt={`Preview ${i+1}`} fill style={{objectFit:'cover'}} className="rounded-md" />
-                                        )}
-                                      </div>
-                                    </CarouselItem>
-                                  );
-                                })}
-                              </Carousel>
-                            ) : (
-                              <div className="flex items-center justify-center h-full text-muted-foreground text-xs">
-                                <p>No media to preview.</p>
+                        <Slider
+                          id="autoplay-slider"
+                          min={0} max={30} step={0.5}
+                          value={[autoplaySeconds]}
+                          onValueChange={handleSliderChange}
+                          className="mt-2"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+
+                  {/* Gallery List & Preview */}
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                    <div className="lg:col-span-7">
+                      <div className="border rounded-md bg-muted/30 p-2 space-y-2 h-[250px] overflow-y-auto custom-scrollbar">
+                        {galleryFields.map((field, index) => {
+                          const url = form.getValues(`imageGallery.${index}.value`);
+                          const media = parseMediaUrl(url);
+                          const isVideo = media?.type === 'video';
+                          const isGif = media?.isGif || false;
+                          const isEditable = url && (url.startsWith('http') || url.startsWith('data:image')) && !isVideo && !isGif;
+                          return (
+                            <div
+                              key={field.id}
+                              draggable="true"
+                              onDragStart={(e) => handleImageDragStart(e, index)}
+                              onDragOver={handleImageDragOver}
+                              onDrop={(e) => handleImageDrop(e, index)}
+                              onDragEnd={handleImageDragEnd}
+                              className={cn(
+                                "flex items-center gap-2 p-1.5 rounded-md hover:bg-muted/50 group cursor-grab",
+                                draggingImageIndex === index && "opacity-50 bg-primary/20"
+                              )}
+                            >
+                              <GripVertical className="h-5 w-5 text-muted-foreground mr-1 opacity-50 group-hover:opacity-100 shrink-0" />
+                              <Input {...form.register(`imageGallery.${index}.value`)} placeholder="https://..." className="h-8" />
+                              <div className="flex gap-0.5 shrink-0">
+                                <Button type="button" size="icon" variant="ghost" onClick={() => handleOpenGalleryImageEditor(index)} className="text-blue-500 hover:text-blue-400 h-7 w-7" title="Edit Image" disabled={!isEditable}>
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button type="button" size="icon" variant="ghost" onClick={() => removeGalleryField(index)} className="text-destructive/70 hover:text-destructive h-7 w-7"><X className="h-4 w-4" /></Button>
                               </div>
-                            )}
-                        </div>
+                            </div>
+                          )
+                        })}
+                        {galleryFields.length === 0 && <p className="text-center text-xs text-muted-foreground py-4">No media added to the gallery.</p>}
+                      </div>
+                      <Button type="button" variant="outline" size="sm" className="mt-2" onClick={() => appendGalleryField({ value: '' })}>
+                        <PlusCircle className="mr-2 h-4 w-4" /> Add Image/Video
+                      </Button>
                     </div>
+                    <div className={cn(
+                      "lg:col-span-5 border rounded-md bg-background/30 p-2",
+                      watchedGalleryAspectRatio === '16/9' && 'aspect-video',
+                      watchedGalleryAspectRatio === '4/3' && 'aspect-[4/3]',
+                      watchedGalleryAspectRatio === '1/1' && 'aspect-square',
+                      !watchedGalleryAspectRatio && 'aspect-video'
+                    )}>
+                      {galleryImagesForPreview.length > 0 ? (
+                        <Carousel
+                          itemsToShow={1}
+                          showArrows={galleryImagesForPreview.length > 1}
+                          autoplay
+                          autoplayInterval={watchedGalleryAutoplayInterval}
+                        >
+                          {galleryImagesForPreview.map((url, i) => {
+                            const media = parseMediaUrl(url);
+                            return (
+                              <CarouselItem key={i}>
+                                <div className="relative w-full h-full bg-black rounded-md overflow-hidden">
+                                  {media?.type === 'video' ? (
+                                    <iframe
+                                      src={`${media.src}?autoplay=${i === 0 ? 1 : 0}&mute=1&controls=0&loop=1&playlist=${media.videoId}&rel=0&iv_load_policy=3`}
+                                      title={`Preview ${i + 1}`}
+                                      className="w-full h-full"
+                                      frameBorder="0"
+                                      allow="autoplay; encrypted-media; picture-in-picture"
+                                      allowFullScreen
+                                    />
+                                  ) : (
+                                    <Image src={media?.src || 'https://placehold.co/800x450.png'} alt={`Preview ${i + 1}`} fill style={{ objectFit: 'cover' }} className="rounded-md" />
+                                  )}
+                                </div>
+                              </CarouselItem>
+                            );
+                          })}
+                        </Carousel>
+                      ) : (
+                        <div className="flex items-center justify-center h-full text-muted-foreground text-xs">
+                          <p>No media to preview.</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
                 {form.formState.errors.imageGallery && <p className="text-xs text-destructive mt-1">{form.formState.errors.imageGallery.message}</p>}
               </TabsContent>
-  
+
               <TabsContent value="files" className="space-y-4 m-0">
-                  <div className="flex justify-between items-center">
-                      <CardTitle className="text-xl flex items-center"><Archive className="w-5 h-5 mr-2 text-primary" />File Versions</CardTitle>
-                      <Button type="button" variant="outline" size="sm" onClick={openNewFileDialog} className="button-outline-glow"><FileUp className="mr-2 h-4 w-4" />Add File Version</Button>
-                  </div>
-                  {form.formState.errors.files?.root && <p className="text-sm text-destructive mb-2 bg-destructive/10 p-2 rounded-md flex items-center shrink-0"><Info className="w-4 h-4 mr-2"/>{form.formState.errors.files.root.message}</p>}
-                  {form.formState.errors.files?.message && <p className="text-xs text-destructive mt-1 shrink-0">{form.formState.errors.files.message}</p>}
-                  
-                  <div className="space-y-3">
-                      {fileFields.length === 0 ? (
-                          <div className="text-sm text-muted-foreground text-center py-4 flex-grow flex items-center justify-center">
-                              No file versions added. Click "Add File Version" to start.
-                          </div>
-                      ) : (
-                          
-                              fileFields.map((field, index) => {
-                              const fileData = form.watch(`files.${index}`);
-                              const channelInfo = FILE_CHANNELS.find(c => c.id === fileData.channelId);
-                              const channelColorStyle = channelInfo ? { borderColor: channelInfo.borderColor || channelInfo.color } : { borderColor: 'hsl(var(--border))' };
+                <div className="flex justify-between items-center">
+                  <CardTitle className="text-xl flex items-center"><Archive className="w-5 h-5 mr-2 text-primary" />File Versions</CardTitle>
+                  <Button type="button" variant="outline" size="sm" onClick={openNewFileDialog} className="button-outline-glow"><FileUp className="mr-2 h-4 w-4" />Add File Version</Button>
+                </div>
+                {form.formState.errors.files?.root && <p className="text-sm text-destructive mb-2 bg-destructive/10 p-2 rounded-md flex items-center shrink-0"><Info className="w-4 h-4 mr-2" />{form.formState.errors.files.root.message}</p>}
+                {form.formState.errors.files?.message && <p className="text-xs text-destructive mt-1 shrink-0">{form.formState.errors.files.message}</p>}
 
-                              let displayTags: Tag[] = [];
-                              if (fileData.selectedFileTags) {
-                                      for (const groupId in fileData.selectedFileTags) {
-                                          const tagIdsInGroup = fileData.selectedFileTags[groupId];
-                                          const groupConfig = fileApplicableTagGroups.find(g => g.id === groupId);
-                                          if (groupConfig && tagIdsInGroup) {
-                                              tagIdsInGroup.forEach(tagId => {
-                                                  const tagConfig = (groupConfig.tags || []).find(t => t.id === tagId);
-                                                  if (tagConfig) {
-                                                      displayTags.push(mapConfigToTagInterface(tagConfig, groupConfig));
-                                                  }
-                                              });
-                                          }
-                                      }
+                <div className="space-y-3">
+                  {fileFields.length === 0 ? (
+                    <div className="text-sm text-muted-foreground text-center py-4 flex-grow flex items-center justify-center">
+                      No file versions added. Click "Add File Version" to start.
+                    </div>
+                  ) : (
+
+                    fileFields.map((field, index) => {
+                      const fileData = form.watch(`files.${index}`);
+                      const channelInfo = FILE_CHANNELS.find(c => c.id === fileData.channelId);
+                      const channelColorStyle = channelInfo ? { borderColor: channelInfo.borderColor || channelInfo.color } : { borderColor: 'hsl(var(--border))' };
+
+                      let displayTags: Tag[] = [];
+                      if (fileData.selectedFileTags) {
+                        for (const groupId in fileData.selectedFileTags) {
+                          const tagIdsInGroup = fileData.selectedFileTags[groupId];
+                          const groupConfig = fileApplicableTagGroups.find(g => g.id === groupId);
+                          if (groupConfig && tagIdsInGroup) {
+                            tagIdsInGroup.forEach(tagId => {
+                              const tagConfig = (groupConfig.tags || []).find(t => t.id === tagId);
+                              if (tagConfig) {
+                                displayTags.push(mapConfigToTagInterface(tagConfig, groupConfig));
                               }
+                            });
+                          }
+                        }
+                      }
 
-                              return (
-                              <Card key={field.id} className="p-3 bg-muted/40 shadow-sm hover:shadow-md transition-shadow border-l-4" style={channelColorStyle}>
-                                  <div className="flex items-start justify-between">
-                                  <div className="flex-grow space-y-0.5">
-                                      <p className="font-semibold text-foreground text-sm">{fileData.name}</p>
-                                      <p className="text-xs text-muted-foreground">Version: {fileData.versionName} {channelInfo ? `(${channelInfo.name})` : ''}</p>
-                                      <p className="text-xs text-muted-foreground truncate max-w-xs sm:max-w-sm md:max-w-md">URL: {fileData.url}</p>
-                                      {fileData.createdAt && (
-                                          <p className="text-xs text-muted-foreground flex items-center">
-                                              <CalendarDays className="w-3 h-3 mr-1 text-accent/80"/> Added: {formatTimeAgo(fileData.createdAt)}
-                                          </p>
-                                      )}
-                                      {displayTags.length > 0 && (
-                                          <div className="mt-1.5 flex flex-wrap gap-1 items-center">
-                                              <Tags className="w-3 h-3 text-muted-foreground/80 mr-0.5"/>
-                                              {displayTags.slice(0, 6).map(tag => <TagBadge key={tag.id} tag={tag} className="text-[9px] px-1 py-0" />)}
-                                              {displayTags.length > 6 && <span className="text-[9px] text-muted-foreground ml-1">+{displayTags.length - 6} more</span>}
-                                          </div>
-                                      )}
-                                  </div>
-                                  <div className="flex gap-1.5 shrink-0 ml-2">
-                                      <Button type="button" variant="ghost" size="icon" onClick={() => openEditFileDialog(index)} className="h-7 w-7 text-blue-500 hover:text-blue-400" title="Edit File"><Edit className="h-4 w-4" /></Button>
-                                      <Button type="button" variant="ghost" size="icon" onClick={() => removeFile(index)} className="h-7 w-7 text-destructive/70 hover:text-destructive" title="Remove File"><Trash2 className="h-4 w-4" /></Button>
-                                  </div>
-                                  </div>
-                              </Card>
-                              );})
-                          
-                      )}
-                  </div>
+                      return (
+                        <Card key={field.id} className="p-3 bg-muted/40 shadow-sm hover:shadow-md transition-shadow border-l-4" style={channelColorStyle}>
+                          <div className="flex items-start justify-between">
+                            <div className="flex-grow space-y-0.5">
+                              <p className="font-semibold text-foreground text-sm">{fileData.name}</p>
+                              <p className="text-xs text-muted-foreground">Version: {fileData.versionName} {channelInfo ? `(${channelInfo.name})` : ''}</p>
+                              <p className="text-xs text-muted-foreground truncate max-w-xs sm:max-w-sm md:max-w-md">URL: {fileData.url}</p>
+                              {fileData.createdAt && (
+                                <p className="text-xs text-muted-foreground flex items-center">
+                                  <CalendarDays className="w-3 h-3 mr-1 text-accent/80" /> Added: {formatTimeAgo(fileData.createdAt)}
+                                </p>
+                              )}
+                              {displayTags.length > 0 && (
+                                <div className="mt-1.5 flex flex-wrap gap-1 items-center">
+                                  <Tags className="w-3 h-3 text-muted-foreground/80 mr-0.5" />
+                                  {displayTags.slice(0, 6).map(tag => <TagBadge key={tag.id} tag={tag} className="text-[9px] px-1 py-0" />)}
+                                  {displayTags.length > 6 && <span className="text-[9px] text-muted-foreground ml-1">+{displayTags.length - 6} more</span>}
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex gap-1.5 shrink-0 ml-2">
+                              <Button type="button" variant="ghost" size="icon" onClick={() => openEditFileDialog(index)} className="h-7 w-7 text-blue-500 hover:text-blue-400" title="Edit File"><Edit className="h-4 w-4" /></Button>
+                              <Button type="button" variant="ghost" size="icon" onClick={() => removeFile(index)} className="h-7 w-7 text-destructive/70 hover:text-destructive" title="Remove File"><Trash2 className="h-4 w-4" /></Button>
+                            </div>
+                          </div>
+                        </Card>
+                      );
+                    })
+
+                  )}
+                </div>
               </TabsContent>
-  
+
               <TabsContent value="tags" className="space-y-6 m-0">
                 <CardTitle className="text-xl mb-4 flex items-center"><Tags className="w-5 h-5 mr-2 text-primary" />Resource Tags</CardTitle>
-                {form.formState.errors.selectedDynamicTags?.root && <p className="text-sm text-destructive mb-2 bg-destructive/10 p-2 rounded-md flex items-center"><Info className="w-4 h-4 mr-2"/>{form.formState.errors.selectedDynamicTags.root.message}</p>}
+                {form.formState.errors.selectedDynamicTags?.root && <p className="text-sm text-destructive mb-2 bg-destructive/10 p-2 rounded-md flex items-center"><Info className="w-4 h-4 mr-2" />{form.formState.errors.selectedDynamicTags.root.message}</p>}
                 {dynamicTagGroups.length > 0 ? (
                   <div className="p-4 border rounded-md bg-muted/30 space-y-4">
                     {dynamicTagGroups.map(group => (
@@ -975,7 +977,7 @@ export function ResourceForm({
                   </div>
                 ) : (<p className="text-sm text-muted-foreground">No tag groups configured for this resource's category.</p>)}
               </TabsContent>
-  
+
               <TabsContent value="links" className="space-y-6 m-0">
                 <CardTitle className="text-xl mb-4 flex items-center"><LinkIconLucide className="w-5 h-5 mr-2 text-primary" />External Links</CardTitle>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -986,124 +988,124 @@ export function ResourceForm({
                   <div><Label htmlFor="links.projectUrl">Main Project/Resource Site</Label><Input id="links.projectUrl" {...form.register('links.projectUrl')} />{form.formState.errors.links?.projectUrl && <p className="text-xs text-destructive mt-1">{form.formState.errors.links.projectUrl.message}</p>}</div>
                 </div>
               </TabsContent>
-          </div>
-  
-          <CardFooter className="flex justify-between items-center border-t border-border/20 pt-6 p-6">
-            <div>
-              {(!isLoadingRole && !isNew && initialData?.id && (currentUserRole === 'admin' || currentUserRole === 'mod')) && (
-                <AlertDialog>
-                  <AlertDialogTrigger asChild><Button variant="destructive" type="button" disabled={isDeleting}>{isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}<Trash2 className="mr-2 h-4 w-4" />Delete</Button></AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader><AlertDialogTitle>Delete Resource: {initialData.name}?</AlertDialogTitle><AlertDialogDescription>This action cannot be undone. All associated files and data will be lost.</AlertDialogDescription></AlertDialogHeader>
-                    <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={handleDeleteResource} className="bg-destructive hover:bg-destructive/90">{isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Delete</AlertDialogAction></AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              )}
             </div>
-            <Button type="submit" className="button-primary-glow" disabled={isSaving || isLoadingRole}>{(isSaving || isLoadingRole) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}<Save className="mr-2 h-4 w-4" />{isNew ? 'Create Resource' : 'Save Changes'}</Button>
-          </CardFooter>
-        </Tabs>
-      </Card>
 
-      <Dialog open={isFileModalOpen} onOpenChange={(open) => { if (!open) setEditingFileIndex(null); setIsFileModalOpen(open); }}>
-        <DialogContent className="sm:max-w-lg md:max-w-xl lg:max-w-2xl max-h-[85vh] flex flex-col p-0">
-          <DialogHeader className="p-6 pb-0">
-            <DialogTitle>{editingFileIndex !== null ? `Edit File: ${currentFileModalData.name || 'File'}` : 'Add New File Version'}</DialogTitle>
-            <DialogDescription>Fill in the details for this file version.</DialogDescription>
-          </DialogHeader>
-          
-          <Tabs defaultValue="general" className="flex flex-col flex-grow overflow-hidden pt-4 px-6">
-            <TabsList className="grid w-full grid-cols-2 mb-4 shrink-0">
-              <TabsTrigger value="general">General Details</TabsTrigger>
-              <TabsTrigger value="tags">File Tags</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="general" className="flex-grow overflow-y-auto -mx-1 px-1">
-              <div className="space-y-4 py-1">
-                <div><Label htmlFor="modalFileName">File Display Name</Label><Input id="modalFileName" name="name" value={currentFileModalData.name} onChange={handleFileModalInputChange} /></div>
-                <div><Label htmlFor="modalFileUrl">File URL</Label><Input id="modalFileUrl" name="url" value={currentFileModalData.url} onChange={handleFileModalInputChange} /></div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div><Label htmlFor="modalFileVersionName">Version String</Label><Input id="modalFileVersionName" name="versionName" value={currentFileModalData.versionName} onChange={handleFileModalInputChange} /></div>
-                  <div><Label htmlFor="modalFileSize">File Size (optional)</Label><Input id="modalFileSize" name="size" value={currentFileModalData.size || ''} onChange={handleFileModalInputChange} /></div>
-                </div>
-                <div>
-                  <Label htmlFor="modalFileChannelId">Channel</Label>
-                  <Select value={currentFileModalData.channelId || CLEAR_SELECTION_VALUE} onValueChange={handleFileModalChannelChange}>
-                    <SelectTrigger id="modalFileChannelId"><SelectValue placeholder="Select channel..." /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={CLEAR_SELECTION_VALUE}>None (Default)</SelectItem>
-                      {FILE_CHANNELS.map(channel => <SelectItem key={channel.id} value={channel.id}>{channel.name}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div><Label htmlFor="modalFileChangelogNotes">Changelog Notes (Markdown)</Label><Textarea id="modalFileChangelogNotes" name="changelogNotes" value={currentFileModalData.changelogNotes || ''} onChange={handleFileModalInputChange} rows={4}/></div>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="tags" className="flex-grow overflow-y-auto -mx-1 px-1">
-               <div className="space-y-3 py-1">
-                {fileApplicableTagGroups.length > 0 ? (
-                  <>
-                    <Label className="text-sm font-medium text-primary flex items-center mb-1">
-                      <Tags className="w-4 h-4 mr-1.5"/>File Specific Tags
-                    </Label>
-                    <div className="space-y-3">
-                      {fileApplicableTagGroups.map(group => (
-                        <div key={group.id} className="p-3 border rounded-md bg-muted/20">
-                          <Label className="text-xs font-medium text-muted-foreground">{group.displayName}</Label>
-                          <div className="mt-1.5 flex flex-wrap gap-1.5 items-center">
-                            {group.tags.map(tag => {
-                              const isSelected = currentFileModalData.selectedFileTags?.[group.id]?.includes(tag.id);
-                              return (
-                                <button type="button" key={tag.id} onClick={() => handleFileModalTagToggle(group.id, tag.id)} className="focus:outline-none focus-visible:ring-1 focus-visible:ring-ring rounded-full" aria-pressed={!!isSelected}>
-                                  <TagBadge tag={tag} className={cn("cursor-pointer transition-all text-[10px] px-2 py-0.5", isSelected ? 'ring-1 ring-primary ring-offset-background opacity-100 shadow-sm scale-105 bg-primary/20 border-primary/70 text-primary hover:bg-primary/30' : 'opacity-70 hover:opacity-100 active:scale-95 hover:ring-1 hover:ring-primary/30')}>
-                                    {isSelected && <Check className="w-3 h-3 mr-1 shrink-0" />}
-                                  </TagBadge>
-                                </button>
-                              );
-                            })}
-                            {group.tags.length === 0 && <p className="text-xs text-muted-foreground">No tags available in this group.</p>}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </>
-                ) : (
-                  <p className="text-sm text-muted-foreground text-center py-4">No file-specific tag groups configured for this resource's category.</p>
+            <CardFooter className="flex justify-between items-center border-t border-border/20 pt-6 p-6">
+              <div>
+                {(!isLoadingRole && !isNew && initialData?.id && (currentUserRole === 'admin' || currentUserRole === 'mod')) && (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild><Button variant="destructive" type="button" disabled={isDeleting}>{isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}<Trash2 className="mr-2 h-4 w-4" />Delete</Button></AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader><AlertDialogTitle>Delete Resource: {initialData.name}?</AlertDialogTitle><AlertDialogDescription>This action cannot be undone. All associated files and data will be lost.</AlertDialogDescription></AlertDialogHeader>
+                      <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={handleDeleteResource} className="bg-destructive hover:bg-destructive/90">{isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Delete</AlertDialogAction></AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 )}
               </div>
-            </TabsContent>
+              <Button type="submit" className="button-primary-glow" disabled={isSaving || isLoadingRole}>{(isSaving || isLoadingRole) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}<Save className="mr-2 h-4 w-4" />{isNew ? 'Create Resource' : 'Save Changes'}</Button>
+            </CardFooter>
           </Tabs>
-          
-          <DialogFooter className="p-6 pt-4 border-t mt-auto shrink-0">
-            <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
-            <Button type="button" onClick={handleSaveFileFromDialog} className="button-primary-glow">Save File Details</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </form>
-    {imageToCrop && (
+        </Card>
+
+        <Dialog open={isFileModalOpen} onOpenChange={(open) => { if (!open) setEditingFileIndex(null); setIsFileModalOpen(open); }}>
+          <DialogContent className="sm:max-w-lg md:max-w-xl lg:max-w-2xl max-h-[85vh] flex flex-col p-0">
+            <DialogHeader className="p-6 pb-0">
+              <DialogTitle>{editingFileIndex !== null ? `Edit File: ${currentFileModalData.name || 'File'}` : 'Add New File Version'}</DialogTitle>
+              <DialogDescription>Fill in the details for this file version.</DialogDescription>
+            </DialogHeader>
+
+            <Tabs defaultValue="general" className="flex flex-col flex-grow overflow-hidden pt-4 px-6">
+              <TabsList className="grid w-full grid-cols-2 mb-4 shrink-0">
+                <TabsTrigger value="general">General Details</TabsTrigger>
+                <TabsTrigger value="tags">File Tags</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="general" className="flex-grow overflow-y-auto -mx-1 px-1">
+                <div className="space-y-4 py-1">
+                  <div><Label htmlFor="modalFileName">File Display Name</Label><Input id="modalFileName" name="name" value={currentFileModalData.name} onChange={handleFileModalInputChange} /></div>
+                  <div><Label htmlFor="modalFileUrl">File URL</Label><Input id="modalFileUrl" name="url" value={currentFileModalData.url} onChange={handleFileModalInputChange} /></div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div><Label htmlFor="modalFileVersionName">Version String</Label><Input id="modalFileVersionName" name="versionName" value={currentFileModalData.versionName} onChange={handleFileModalInputChange} /></div>
+                    <div><Label htmlFor="modalFileSize">File Size (optional)</Label><Input id="modalFileSize" name="size" value={currentFileModalData.size || ''} onChange={handleFileModalInputChange} /></div>
+                  </div>
+                  <div>
+                    <Label htmlFor="modalFileChannelId">Channel</Label>
+                    <Select value={currentFileModalData.channelId || CLEAR_SELECTION_VALUE} onValueChange={handleFileModalChannelChange}>
+                      <SelectTrigger id="modalFileChannelId"><SelectValue placeholder="Select channel..." /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={CLEAR_SELECTION_VALUE}>None (Default)</SelectItem>
+                        {FILE_CHANNELS.map(channel => <SelectItem key={channel.id} value={channel.id}>{channel.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div><Label htmlFor="modalFileChangelogNotes">Changelog Notes (Markdown)</Label><Textarea id="modalFileChangelogNotes" name="changelogNotes" value={currentFileModalData.changelogNotes || ''} onChange={handleFileModalInputChange} rows={4} /></div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="tags" className="flex-grow overflow-y-auto -mx-1 px-1">
+                <div className="space-y-3 py-1">
+                  {fileApplicableTagGroups.length > 0 ? (
+                    <>
+                      <Label className="text-sm font-medium text-primary flex items-center mb-1">
+                        <Tags className="w-4 h-4 mr-1.5" />File Specific Tags
+                      </Label>
+                      <div className="space-y-3">
+                        {fileApplicableTagGroups.map(group => (
+                          <div key={group.id} className="p-3 border rounded-md bg-muted/20">
+                            <Label className="text-xs font-medium text-muted-foreground">{group.displayName}</Label>
+                            <div className="mt-1.5 flex flex-wrap gap-1.5 items-center">
+                              {group.tags.map(tag => {
+                                const isSelected = currentFileModalData.selectedFileTags?.[group.id]?.includes(tag.id);
+                                return (
+                                  <button type="button" key={tag.id} onClick={() => handleFileModalTagToggle(group.id, tag.id)} className="focus:outline-none focus-visible:ring-1 focus-visible:ring-ring rounded-full" aria-pressed={!!isSelected}>
+                                    <TagBadge tag={tag} className={cn("cursor-pointer transition-all text-[10px] px-2 py-0.5", isSelected ? 'ring-1 ring-primary ring-offset-background opacity-100 shadow-sm scale-105 bg-primary/20 border-primary/70 text-primary hover:bg-primary/30' : 'opacity-70 hover:opacity-100 active:scale-95 hover:ring-1 hover:ring-primary/30')}>
+                                      {isSelected && <Check className="w-3 h-3 mr-1 shrink-0" />}
+                                    </TagBadge>
+                                  </button>
+                                );
+                              })}
+                              {group.tags.length === 0 && <p className="text-xs text-muted-foreground">No tags available in this group.</p>}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center py-4">No file-specific tag groups configured for this resource's category.</p>
+                  )}
+                </div>
+              </TabsContent>
+            </Tabs>
+
+            <DialogFooter className="p-6 pt-4 border-t mt-auto shrink-0">
+              <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
+              <Button type="button" onClick={handleSaveFileFromDialog} className="button-primary-glow">Save File Details</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </form>
+      {imageToCrop && (
         <ResourceImageEditor
-            isOpen={isMainImageEditorOpen}
-            onOpenChange={setIsMainImageEditorOpen}
-            imageSrc={imageToCrop}
-            onSave={handleMainImageSave}
+          isOpen={isMainImageEditorOpen}
+          onOpenChange={setIsMainImageEditorOpen}
+          imageSrc={imageToCrop}
+          onSave={handleMainImageSave}
         />
-    )}
-    {galleryImageToCrop && (
+      )}
+      {galleryImageToCrop && (
         <ResourceImageEditor
-            isOpen={editingGalleryIndex !== null}
-            onOpenChange={(open) => {
-                if (!open) {
-                    setEditingGalleryIndex(null);
-                    setGalleryImageToCrop(null);
-                }
-            }}
-            imageSrc={galleryImageToCrop}
-            onSave={handleGalleryImageSave}
-            aspectRatio={numericAspectRatio}
+          isOpen={editingGalleryIndex !== null}
+          onOpenChange={(open) => {
+            if (!open) {
+              setEditingGalleryIndex(null);
+              setGalleryImageToCrop(null);
+            }
+          }}
+          imageSrc={galleryImageToCrop}
+          onSave={handleGalleryImageSave}
+          aspectRatio={numericAspectRatio}
         />
-    )}
+      )}
     </>
   );
 }

@@ -2277,7 +2277,7 @@ export const RichTextEditor = ({ initialContent, onChange, readonly }: RichTextE
         <Toolbar editor={editor} />
       </div>
 
-      <div className="min-h-[250px] overflow-y-auto overflow-x-hidden px-3 py-2">
+      <div className="min-h-[250px] max-h-[400px] overflow-y-auto overflow-x-hidden px-3 py-2 custom-scrollbar">
         <EditorContent editor={editor} />
       </div>
     </div>
