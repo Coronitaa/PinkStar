@@ -28,7 +28,7 @@ export const RenderedCodeBlock: React.FC<RenderedCodeBlockProps> = ({
   language,
   theme: propTheme,
   title,
-  maxHeight = '400px',
+  maxHeight = '800px',
   isCollapsible = false,
   isCollapsed = false,
 }) => {

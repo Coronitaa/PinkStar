@@ -9,6 +9,16 @@ import bash from 'highlight.js/lib/languages/bash';
 import javaLang from 'highlight.js/lib/languages/java';
 import cpp from 'highlight.js/lib/languages/cpp';
 import plaintext from 'highlight.js/lib/languages/plaintext';
+import yaml from 'highlight.js/lib/languages/yaml';
+import csharp from 'highlight.js/lib/languages/csharp';
+import go from 'highlight.js/lib/languages/go';
+import php from 'highlight.js/lib/languages/php';
+import ruby from 'highlight.js/lib/languages/ruby';
+import rust from 'highlight.js/lib/languages/rust';
+import kotlin from 'highlight.js/lib/languages/kotlin';
+import sql from 'highlight.js/lib/languages/sql';
+import markdown from 'highlight.js/lib/languages/markdown';
+import swift from 'highlight.js/lib/languages/swift';
 
 export const lowlight = createLowlight({
     javascript,
@@ -20,5 +30,15 @@ export const lowlight = createLowlight({
     bash,
     java: javaLang,
     cpp,
-    plaintext
+    plaintext,
+    yaml,
+    csharp,
+    go,
+    php,
+    ruby,
+    rust,
+    kotlin,
+    sql,
+    markdown,
+    swift
 });
