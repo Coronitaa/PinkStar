@@ -10,6 +10,9 @@ import { createSupabaseClient } from '@/lib/supabase/client'; // For potential s
 import Script from 'next/script';
 import { CodeHighlightStyle } from '@/components/layout/CodeHighlightStyle';
 
+import { getActiveCodeHighlightTheme } from '@/lib/data';
+import { CodeHighlightThemeProvider } from '@/components/providers/CodeHighlightThemeProvider';
+
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
@@ -45,9 +48,11 @@ export default async function RootLayout({
   // by AuthLayout not including them.
   // const isAuthPage = currentUrl.startsWith('/auth'); 
 
+  const activeTheme = await getActiveCodeHighlightTheme();
+
   return (
     <html lang="en" className="dark">
-       <head>
+      <head>
         <CodeHighlightStyle />
       </head>
       <body className={cn(
@@ -56,25 +61,27 @@ export default async function RootLayout({
         "antialiased flex flex-col min-h-screen"
         // Conditional background for auth pages will be handled by AuthLayout itself
       )}>
-        <Header />
-        <main className={cn(
-          "flex-grow",
-          // Apply container styles only if NOT an auth page,
-          // AuthLayout will handle its own full-page centering.
-          // This check relies on AuthLayout being a distinct layout.
-          // A more robust way might involve a context or URL check if nesting complex layouts.
-          // For now, assuming AuthLayout is top-level for auth routes.
-          "container mx-auto max-w-screen-2xl px-4 py-8" // Default container for non-auth
-        )}>
-          {children}
-        </main>
-        <Footer />
-        <Toaster />
-        <Script
-          type="module"
-          src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"
-          strategy="lazyOnload"
-        />
+        <CodeHighlightThemeProvider theme={activeTheme}>
+          <Header />
+          <main className={cn(
+            "flex-grow",
+            // Apply container styles only if NOT an auth page,
+            // AuthLayout will handle its own full-page centering.
+            // This check relies on AuthLayout being a distinct layout.
+            // A more robust way might involve a context or URL check if nesting complex layouts.
+            // For now, assuming AuthLayout is top-level for auth routes.
+            "container mx-auto max-w-screen-2xl px-4 py-8" // Default container for non-auth
+          )}>
+            {children}
+          </main>
+          <Footer />
+          <Toaster />
+          <Script
+            type="module"
+            src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"
+            strategy="lazyOnload"
+          />
+        </CodeHighlightThemeProvider>
       </body>
     </html>
   );

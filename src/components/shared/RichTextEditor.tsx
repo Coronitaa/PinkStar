@@ -3,6 +3,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useCodeHighlightTheme } from '@/components/providers/CodeHighlightThemeProvider';
 import { useEditor, EditorContent, BubbleMenu, type Editor, NodeViewWrapper, NodeViewContent, ReactNodeViewRenderer, type NodeViewProps, Node, mergeAttributes, type ChainedCommands, type RawCommands, CommandProps } from '@tiptap/react';
 import { Extension } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
@@ -15,18 +16,10 @@ import { Color } from '@tiptap/extension-color';
 import TextStyle from '@tiptap/extension-text-style';
 import Underline from '@tiptap/extension-underline';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
-import { createLowlight } from 'lowlight';
-import javascript from 'highlight.js/lib/languages/javascript';
-import typescript from 'highlight.js/lib/languages/typescript';
-import css from 'highlight.js/lib/languages/css';
-import xml from 'highlight.js/lib/languages/xml';
-import json from 'highlight.js/lib/languages/json';
-import bash from 'highlight.js/lib/languages/bash';
-import python from 'highlight.js/lib/languages/python';
-import javaLang from 'highlight.js/lib/languages/java';
-import cpp from 'highlight.js/lib/languages/cpp';
-import plaintext from 'highlight.js/lib/languages/plaintext';
-import { 
+import { lowlight } from '@/lib/lowlight';
+import { generateHighlightCss } from '@/lib/code-theme-utils';
+// Removed individual language imports as they are now in @/lib/lowlight
+import {
   Bold, Italic, Link as LinkIcon, List, ListOrdered, Strikethrough, Underline as UnderlineIcon,
   AlignLeft, AlignCenter, AlignRight, AlignJustify, Image as ImageIcon, Video, Palette, RotateCw, ImagePlus, Box, GalleryHorizontal, GripVertical, Trash2, Edit, Code as CodeIcon, ClipboardCopy, Settings, Check, ChevronUp, ChevronDown
 } from 'lucide-react';
@@ -52,7 +45,8 @@ import { ResourceImageEditor } from '@/components/admin/ResourceImageEditor';
 import { useToast } from '@/hooks/use-toast';
 import { Checkbox } from '../ui/checkbox';
 
-const lowlight = createLowlight({ javascript, typescript, css, xml, json, bash, python, java: javaLang, cpp, plaintext });
+
+
 
 
 declare global {
@@ -208,70 +202,70 @@ export const FontSize = Extension.create<FontSizeOptions>({
 });
 
 export const TextGradient = Extension.create<any>({
-    name: 'textGradient',
-    addOptions() { return { types: ['textStyle'] } },
-    addGlobalAttributes() {
-        return [{
-            types: this.options.types,
-            attributes: {
-                textGradient: {
-                    default: null,
-                    parseHTML: element => element.style.backgroundImage,
-                    renderHTML: attributes => {
-                        if (!attributes.textGradient) return {};
-                        
-                        const regex = /(?:#[\da-f]{3,8}|(?:rgb|hsl)a?\([^)]+\))/i;
-                        const matches = attributes.textGradient.match(regex);
-                        const firstColor = matches ? matches[0] : 'hsl(var(--accent))'; 
+  name: 'textGradient',
+  addOptions() { return { types: ['textStyle'] } },
+  addGlobalAttributes() {
+    return [{
+      types: this.options.types,
+      attributes: {
+        textGradient: {
+          default: null,
+          parseHTML: element => element.style.backgroundImage,
+          renderHTML: attributes => {
+            if (!attributes.textGradient) return {};
 
-                        return {
-                            class: 'has-text-gradient',
-                            style: `background-image: ${attributes.textGradient}; --first-gradient-color: ${firstColor}; color: transparent; -webkit-background-clip: text; background-clip: text;`,
-                        };
-                    },
-                },
-            },
-        }];
-    },
-    addCommands() {
-      return {
-        setTextGradient: (gradient: string) => ({ chain, editor }: CommandProps) => {
-          const { fontFamily, fontSize } = editor.getAttributes('textStyle');
-          return chain().setMark('textStyle', { textGradient: gradient, fontFamily, fontSize }).run();
+            const regex = /(?:#[\da-f]{3,8}|(?:rgb|hsl)a?\([^)]+\))/i;
+            const matches = attributes.textGradient.match(regex);
+            const firstColor = matches ? matches[0] : 'hsl(var(--accent))';
+
+            return {
+              class: 'has-text-gradient',
+              style: `background-image: ${attributes.textGradient}; --first-gradient-color: ${firstColor}; color: transparent; -webkit-background-clip: text; background-clip: text;`,
+            };
+          },
         },
-        unsetTextGradient: () => ({ chain, editor }: CommandProps) => {
-          const { fontFamily, fontSize } = editor.getAttributes('textStyle');
-          // @ts-ignore
-          return chain().setMark('textStyle', { textGradient: null, fontFamily, fontSize }).removeEmptyTextStyle().run()
-        },
-      }
-    },
+      },
+    }];
+  },
+  addCommands() {
+    return {
+      setTextGradient: (gradient: string) => ({ chain, editor }: CommandProps) => {
+        const { fontFamily, fontSize } = editor.getAttributes('textStyle');
+        return chain().setMark('textStyle', { textGradient: gradient, fontFamily, fontSize }).run();
+      },
+      unsetTextGradient: () => ({ chain, editor }: CommandProps) => {
+        const { fontFamily, fontSize } = editor.getAttributes('textStyle');
+        // @ts-ignore
+        return chain().setMark('textStyle', { textGradient: null, fontFamily, fontSize }).removeEmptyTextStyle().run()
+      },
+    }
+  },
 });
 
 // --- Media Resize Component ---
 
 const handles = [
-    { pos: 'top-0 left-0 -translate-x-1/2 -translate-y-1/2', direction: 'top-left' },
-    { pos: 'top-0 left-1/2 -translate-x-1/2 -translate-y-1/2', direction: 'top' },
-    { pos: 'top-0 right-0 translate-x-1/2 -translate-y-1/2', direction: 'top-right' },
-    { pos: 'top-1/2 left-0 -translate-x-1/2 -translate-y-1/2', direction: 'left' },
-    { pos: 'top-1/2 right-0 translate-x-1/2 -translate-y-1/2', direction: 'right' },
-    { pos: 'bottom-0 left-0 -translate-x-1/2 translate-y-1/2', direction: 'bottom-left' },
-    { pos: 'bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2', direction: 'bottom' },
-    { pos: 'bottom-0 right-0 translate-x-1/2 translate-y-1/2', direction: 'bottom-right' },
+  { pos: 'top-0 left-0 -translate-x-1/2 -translate-y-1/2', direction: 'top-left' },
+  { pos: 'top-0 left-1/2 -translate-x-1/2 -translate-y-1/2', direction: 'top' },
+  { pos: 'top-0 right-0 translate-x-1/2 -translate-y-1/2', direction: 'top-right' },
+  { pos: 'top-1/2 left-0 -translate-x-1/2 -translate-y-1/2', direction: 'left' },
+  { pos: 'top-1/2 right-0 translate-x-1/2 -translate-y-1/2', direction: 'right' },
+  { pos: 'bottom-0 left-0 -translate-x-1/2 translate-y-1/2', direction: 'bottom-left' },
+  { pos: 'bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2', direction: 'bottom' },
+  { pos: 'bottom-0 right-0 translate-x-1/2 translate-y-1/2', direction: 'bottom-right' },
 ];
 
 const getDynamicCursor = (handleDirection: string, objectRotation: number): string => {
-    const baseCursorAngles: { [key: string]: number } = {
-        'top': 90, 'bottom': 90,
-        'left': 0, 'right': 0,
-        'top-left': 135, 'top-right': 45,
-        'bottom-left': 45, 'bottom-right': 135,
-    };
+  const baseCursorAngles: { [key: string]: number } = {
+    'top': 90, 'bottom': 90,
+    'left': 0, 'right': 0,
+    'top-left': 135, 'top-right': 45,
+    'bottom-left': 45, 'bottom-right': 135,
+  };
 
-    const rotation = baseCursorAngles[handleDirection] + objectRotation;
+  const rotation = baseCursorAngles[handleDirection] + objectRotation;
 
-    const svg = `
+  const svg = `
         <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
             <g transform="rotate(${rotation} 16 16)">
                 <path d="M4 16 H28 M4 16 L10 10 M4 16 L10 22 M28 16 L22 10 M28 16 L22 22" stroke="black" stroke-width="3.5" fill="none" stroke-linejoin="round" stroke-linecap="round" />
@@ -280,8 +274,8 @@ const getDynamicCursor = (handleDirection: string, objectRotation: number): stri
         </svg>
     `.replace(/>\s+</g, '><').replace(/\s\s+/g, ' ').trim();
 
-    const encodedSvg = encodeURIComponent(svg);
-    return `url('data:image/svg+xml;charset=UTF-8,${encodedSvg}') 16 16, auto`;
+  const encodedSvg = encodeURIComponent(svg);
+  return `url('data:image/svg+xml;charset=UTF-8,${encodedSvg}') 16 16, auto`;
 };
 
 
@@ -298,28 +292,28 @@ const MediaResizeComponent = (props: NodeViewProps) => {
 
   useEffect(() => {
     if (selected && containerRef.current) {
-        const editorViewDom = editor.view.dom;
-        const editorRect = editorViewDom.getBoundingClientRect();
-        const nodeRect = containerRef.current.getBoundingClientRect();
-        
-        const toolbar = editorViewDom.parentElement?.querySelector('[data-testid="rte-toolbar"]');
-        const toolbarHeight = toolbar?.clientHeight || 45;
-        
-        const spaceAbove = nodeRect.top - editorRect.top;
-        const menuHeightEstimate = 40;
+      const editorViewDom = editor.view.dom;
+      const editorRect = editorViewDom.getBoundingClientRect();
+      const nodeRect = containerRef.current.getBoundingClientRect();
 
-        if (spaceAbove < toolbarHeight + menuHeightEstimate) {
-            setMenuPosition('bottom');
-        } else {
-            setMenuPosition('top');
-        }
+      const toolbar = editorViewDom.parentElement?.querySelector('[data-testid="rte-toolbar"]');
+      const toolbarHeight = toolbar?.clientHeight || 45;
+
+      const spaceAbove = nodeRect.top - editorRect.top;
+      const menuHeightEstimate = 40;
+
+      if (spaceAbove < toolbarHeight + menuHeightEstimate) {
+        setMenuPosition('bottom');
+      } else {
+        setMenuPosition('top');
+      }
     }
   }, [selected, editor.view.dom]);
-  
+
   const setAlignment = (align: 'left' | 'center' | 'right' | null) => {
     updateAttributes({ 'data-float': align });
   };
-  
+
   const float = node.attrs['data-float'];
   const width = node.attrs.width;
   const height = node.attrs.height;
@@ -329,10 +323,10 @@ const MediaResizeComponent = (props: NodeViewProps) => {
     const currentRotation = node.attrs.rotate || 0;
     updateAttributes({ rotate: currentRotation + degrees });
   };
-  
+
   const handleStyles = useMemo(() => {
     return handles.map(handle => ({
-        cursor: getDynamicCursor(handle.direction, rotation)
+      cursor: getDynamicCursor(handle.direction, rotation)
     }));
   }, [rotation]);
 
@@ -343,7 +337,7 @@ const MediaResizeComponent = (props: NodeViewProps) => {
 
     const container = containerRef.current;
     if (!container) return;
-    
+
     const startX = e.clientX;
     const startY = e.clientY;
     const startWidth = container.offsetWidth;
@@ -362,14 +356,14 @@ const MediaResizeComponent = (props: NodeViewProps) => {
 
       let newWidth = startWidth;
       let newHeight = startHeight;
-      
+
       const shouldDeform = moveEvent.shiftKey;
 
       if (direction.includes('right')) newWidth = startWidth + dxRot;
       if (direction.includes('left')) newWidth = startWidth - dxRot;
       if (direction.includes('bottom')) newHeight = startHeight + dyRot;
       if (direction.includes('top')) newHeight = startHeight - dyRot;
-      
+
       if (!shouldDeform) {
         const isCorner = direction.includes('-');
         if (isCorner) {
@@ -386,7 +380,7 @@ const MediaResizeComponent = (props: NodeViewProps) => {
           }
         }
       }
-      
+
       newWidth = Math.max(50, newWidth);
       newHeight = Math.max(20, newHeight);
 
@@ -401,7 +395,7 @@ const MediaResizeComponent = (props: NodeViewProps) => {
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
   };
-  
+
   const createRotationHandler = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -416,9 +410,9 @@ const MediaResizeComponent = (props: NodeViewProps) => {
     const initialRotation = rotation;
 
     const handleMouseMove = (moveEvent: MouseEvent) => {
-        const currentAngle = Math.atan2(moveEvent.clientY - centerY, e.clientX - centerX) * (180 / Math.PI);
-        const newRotation = initialRotation + (currentAngle - startAngle);
-        updateAttributes({ rotate: newRotation });
+      const currentAngle = Math.atan2(moveEvent.clientY - centerY, e.clientX - centerX) * (180 / Math.PI);
+      const newRotation = initialRotation + (currentAngle - startAngle);
+      updateAttributes({ rotate: newRotation });
     };
 
     const handleMouseUp = () => {
@@ -446,100 +440,100 @@ const MediaResizeComponent = (props: NodeViewProps) => {
       data-float={float}
       draggable="true" data-drag-handle
     >
-      <div 
+      <div
         ref={containerRef}
         className={cn(
           "relative w-full",
           selected && 'border-2 border-primary border-solid'
         )}
         style={{
-            height: height || 'auto',
-            transform: `rotate(${rotation}deg)`
+          height: height || 'auto',
+          transform: `rotate(${rotation}deg)`
         }}
       >
         {isImage && (
-            href ? (
-              <a href={href} target="_blank" rel="noopener noreferrer nofollow" className="w-full h-full block cursor-pointer" onClick={handleLinkClick}>
-                {imageContent}
-              </a>
-            ) : imageContent
+          href ? (
+            <a href={href} target="_blank" rel="noopener noreferrer nofollow" className="w-full h-full block cursor-pointer" onClick={handleLinkClick}>
+              {imageContent}
+            </a>
+          ) : imageContent
         )}
         {(isVideo || isIframe) && (
           <div className="w-full h-full relative">
-              <iframe
-                className="absolute inset-0 w-full h-full"
-                src={node.attrs.src}
-                frameBorder="0"
-                allowFullScreen
+            <iframe
+              className="absolute inset-0 w-full h-full"
+              src={node.attrs.src}
+              frameBorder="0"
+              allowFullScreen
+            />
+            {editor.isEditable && (
+              <div
+                className={cn(
+                  "absolute inset-0 z-10",
+                  selected && "cursor-move"
+                )}
+                aria-hidden="true"
               />
-              {editor.isEditable && (
-                  <div 
-                      className={cn(
-                          "absolute inset-0 z-10",
-                          selected && "cursor-move"
-                      )} 
-                      aria-hidden="true" 
-                  />
-              )}
+            )}
           </div>
         )}
         {isModel && (
           <div className="w-full h-full relative">
-              <model-viewer
-                src={node.attrs.src}
-                alt="A 3D model"
-                camera-controls
-                auto-rotate
-                className="w-full h-full rounded-md"
-              ></model-viewer>
-              {editor.isEditable && (
-                  <div 
-                      className={cn(
-                          "absolute inset-0 z-10",
-                          selected && "cursor-move"
-                      )} 
-                      aria-hidden="true" 
-                  />
-              )}
+            <model-viewer
+              src={node.attrs.src}
+              alt="A 3D model"
+              camera-controls
+              auto-rotate
+              className="w-full h-full rounded-md"
+            ></model-viewer>
+            {editor.isEditable && (
+              <div
+                className={cn(
+                  "absolute inset-0 z-10",
+                  selected && "cursor-move"
+                )}
+                aria-hidden="true"
+              />
+            )}
           </div>
         )}
-      
+
         {selected && (
           <>
             {handles.map((handle, index) => (
-                    <div
-                      key={index}
-                      className={cn(
-                        "absolute w-2.5 h-2.5 bg-primary rounded-full border border-card pointer-events-auto z-20",
-                        handle.pos
-                      )}
-                      style={handleStyles[index]}
-                      onMouseDown={createResizeHandler(handle.direction)}
-                    />
-            ))}
               <div
-                className="absolute bottom-0 right-0 translate-x-[110%] translate-y-[110%] p-1.5 bg-card rounded-full border border-primary pointer-events-auto z-20 cursor-alias transition-transform group-hover:scale-110"
-                onMouseDown={createRotationHandler}
-                title="Rotate Freely"
-              >
-                  <RotateCw className="w-4 h-4 text-primary"/>
-              </div>
+                key={index}
+                className={cn(
+                  "absolute w-2.5 h-2.5 bg-primary rounded-full border border-card pointer-events-auto z-20",
+                  handle.pos
+                )}
+                style={handleStyles[index]}
+                onMouseDown={createResizeHandler(handle.direction)}
+              />
+            ))}
+            <div
+              className="absolute bottom-0 right-0 translate-x-[110%] translate-y-[110%] p-1.5 bg-card rounded-full border border-primary pointer-events-auto z-20 cursor-alias transition-transform group-hover:scale-110"
+              onMouseDown={createRotationHandler}
+              title="Rotate Freely"
+            >
+              <RotateCw className="w-4 h-4 text-primary" />
+            </div>
           </>
         )}
       </div>
-       {selected && (
-          <div className={cn(
-            "absolute left-1/2 -translate-x-1/2 z-20 flex gap-1 bg-card p-1 rounded-md shadow-lg border border-border pointer-events-auto",
-            menuPosition === 'top' ? "top-0 -translate-y-[calc(100%+12px)]" : "bottom-0 translate-y-[calc(100%+12px)]"
-          )}>
-              <Button type="button" size="icon" variant={float === 'left' ? 'default' : 'ghost'} className="h-7 w-7" onClick={() => setAlignment('left')} title="Align left"><AlignLeft className="w-4 h-4" /></Button>
-              <Button type="button" size="icon" variant={!float || float === 'center' ? 'default' : 'ghost'} className="h-7 w-7" onClick={() => setAlignment('center')} title="Align center"><AlignCenter className="w-4 h-4" /></Button>
-              <Button type="button" size="icon" variant={float === 'right' ? 'default' : 'ghost'} className="h-7 w-7" onClick={() => setAlignment('right')} title="Align right"><AlignRight className="w-4 h-4" /></Button>
-              <div className="w-px h-5 bg-border mx-1 self-center" />
-              <Button type="button" size="icon" variant="ghost" className="h-7 w-7" onClick={() => rotateByAxis(90)} title="Rotate 90°">
-                  <RotateCw className="w-4 h-4" />
-              </Button>
-            </div>
+      {selected && (
+        <div className={cn(
+          "absolute left-1/2 -translate-x-1/2 z-20 flex gap-1 bg-card p-1 rounded-md shadow-lg border border-border pointer-events-auto",
+          menuPosition === 'top' ? "top-0 -translate-y-[calc(100%+12px)]" : "bottom-0 translate-y-[calc(100%+12px)]"
+        )}>
+          <Button type="button" size="icon" variant={float === 'left' ? 'default' : 'ghost'} className="h-7 w-7" onClick={() => setAlignment('left')} title="Align left"><AlignLeft className="w-4 h-4" /></Button>
+          <Button type="button" size="icon" variant={!float || float === 'center' ? 'default' : 'ghost'} className="h-7 w-7" onClick={() => setAlignment('center')} title="Align center"><AlignCenter className="w-4 h-4" /></Button>
+          <Button type="button" size="icon" variant={float === 'right' ? 'default' : 'ghost'} className="h-7 w-7" onClick={() => setAlignment('right')} title="Align right"><AlignRight className="w-4 h-4" /></Button>
+          <div className="w-px h-5 bg-border mx-1 self-center" />
+          <Button type="button" size="icon" variant="ghost" className="h-7 w-7" onClick={() => rotateByAxis(90)} title="Rotate 90°">
+            <RotateCw className="w-4 h-4" />
+          </Button>
+        </div>
       )}
     </NodeViewWrapper>
   );
@@ -547,249 +541,254 @@ const MediaResizeComponent = (props: NodeViewProps) => {
 
 // --- Custom Code Block Components ---
 const CodeBlockComponent = (props: NodeViewProps) => {
-    const { node, updateAttributes, editor } = props;
-    const [isCopied, setIsCopied] = useState(false);
-    const preRef = useRef<HTMLPreElement>(null);
-    
-    const handleCopy = () => {
-        navigator.clipboard.writeText(node.textContent).then(() => {
-            setIsCopied(true);
-            setTimeout(() => setIsCopied(false), 2000);
-        });
+  const { node, updateAttributes, editor, extension } = props;
+  const [isCopied, setIsCopied] = useState(false);
+  const preRef = useRef<HTMLPreElement>(null);
+
+  // We don't need to fetch the theme here anymore, as the styles are injected globally via CodeHighlightStyle.tsx
+  // matching .tiptap-code-block selector.
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(node.textContent).then(() => {
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    });
+  };
+
+  const handleResizeMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const preElement = preRef.current;
+    if (!preElement) return;
+
+    const startY = e.clientY;
+    const startHeight = preElement.offsetHeight;
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      const newHeight = startHeight + (moveEvent.clientY - startY);
+      updateAttributes({ maxHeight: `${Math.max(80, newHeight)}px` });
     };
 
-    const handleResizeMouseDown = (e: React.MouseEvent) => {
-        e.preventDefault();
-        const preElement = preRef.current;
-        if (!preElement) return;
-
-        const startY = e.clientY;
-        const startHeight = preElement.offsetHeight;
-
-        const handleMouseMove = (moveEvent: MouseEvent) => {
-            const newHeight = startHeight + (moveEvent.clientY - startY);
-            updateAttributes({ maxHeight: `${Math.max(80, newHeight)}px` });
-        };
-
-        const handleMouseUp = () => {
-            window.removeEventListener('mousemove', handleMouseMove);
-            window.removeEventListener('mouseup', handleMouseUp);
-        };
-
-        window.addEventListener('mousemove', handleMouseMove);
-        window.addEventListener('mouseup', handleMouseUp);
+    const handleMouseUp = () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
     };
 
-    const languages = lowlight.listLanguages();
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+  };
 
-    return (
-        <NodeViewWrapper className="not-prose my-4 relative group/code-block">
-            <div 
-                className="relative border border-border rounded-lg overflow-hidden" 
+  const languages = extension.options.lowlight.listLanguages();
+
+  return (
+    <NodeViewWrapper className="not-prose my-4 relative group/code-block">
+      <div
+        className="relative border border-border rounded-lg overflow-hidden flex flex-col"
+      >
+        <div className="flex items-center justify-between bg-card-foreground/5 px-2 py-1.5 border-b border-border text-xs shrink-0 select-none">
+          <div className="flex items-center gap-2 flex-grow min-w-0">
+            <div className="cursor-grab hover:text-foreground/80 text-muted-foreground p-0.5 rounded" data-drag-handle contentEditable={false}>
+              <GripVertical className="h-4 w-4" />
+            </div>
+            <input
+              className="bg-transparent text-muted-foreground outline-none placeholder:text-muted-foreground/70 text-xs w-full min-w-0"
+              placeholder="Filename (optional)"
+              value={node.attrs.title || ''}
+              onChange={(e) => updateAttributes({ title: e.target.value })}
+            />
+          </div>
+          <div className="flex items-center gap-1 shrink-0">
+            <Select
+              value={node.attrs.language || 'auto'}
+              onValueChange={(language) => updateAttributes({ language })}
             >
-                <div className="flex items-center justify-between bg-card-foreground/5 px-2 py-1.5 border-b border-border text-xs">
-                    <div className="flex items-center gap-2 flex-grow">
-                        <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab shrink-0" data-drag-handle />
-                        <input 
-                            className="bg-transparent text-muted-foreground outline-none placeholder:text-muted-foreground/70 text-xs w-full" 
-                            placeholder="Filename (optional)"
-                            value={node.attrs.title || ''}
-                            onChange={(e) => updateAttributes({ title: e.target.value })}
-                        />
+              <SelectTrigger className="h-6 text-xs w-[100px] border-none bg-transparent hover:bg-muted/50 focus:ring-0 focus:ring-offset-0 px-2">
+                <SelectValue placeholder="Language" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="auto">Auto</SelectItem>
+                {languages.map((lang: string) => (
+                  <SelectItem key={lang} value={lang}>{lang}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button variant="ghost" size="icon" className="h-6 w-6 hover:bg-muted/50" onClick={handleCopy}>
+              {isCopied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <ClipboardCopy className="w-3.5 h-3.5 text-muted-foreground" />}
+            </Button>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-6 w-6 hover:bg-muted/50" title="Block settings">
+                  <Settings className="w-3.5 h-3.5 text-muted-foreground" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-2" side="bottom" align="end">
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="collapsible-check"
+                      checked={node.attrs.isCollapsible}
+                      onCheckedChange={(checked) => updateAttributes({ isCollapsible: checked })}
+                    />
+                    <Label htmlFor="collapsible-check">Enable collapsible</Label>
+                  </div>
+                  {node.attrs.isCollapsible && (
+                    <div className="flex items-center space-x-2 pl-4">
+                      <Checkbox
+                        id="collapsed-check"
+                        checked={node.attrs.isCollapsed}
+                        onCheckedChange={(checked) => updateAttributes({ isCollapsed: checked })}
+                      />
+                      <Label htmlFor="collapsed-check">Start collapsed</Label>
                     </div>
-                    <div className="flex items-center gap-1 shrink-0">
-                        <Select 
-                            value={node.attrs.language || 'auto'}
-                            onValueChange={(language) => updateAttributes({ language })}
-                        >
-                            <SelectTrigger className="h-6 text-xs w-28 border-0 bg-transparent focus:ring-0 focus:ring-offset-0">
-                                <SelectValue placeholder="Language"/>
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="auto">Auto</SelectItem>
-                                {languages.map(lang => (
-                                    <SelectItem key={lang} value={lang}>{lang}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleCopy}>
-                            {isCopied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <ClipboardCopy className="w-3.5 h-3.5" />}
-                        </Button>
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-6 w-6" title="Block settings">
-                                    <Settings className="h-3.5 h-3.5" />
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-2" side="bottom" align="end">
-                                <div className="space-y-2 text-sm">
-                                    <div className="flex items-center space-x-2">
-                                        <Checkbox
-                                            id="collapsible-check"
-                                            checked={node.attrs.isCollapsible}
-                                            onCheckedChange={(checked) => updateAttributes({ isCollapsible: checked })}
-                                        />
-                                        <Label htmlFor="collapsible-check">Enable collapsible</Label>
-                                    </div>
-                                    {node.attrs.isCollapsible && (
-                                        <div className="flex items-center space-x-2 pl-4">
-                                            <Checkbox
-                                                id="collapsed-check"
-                                                checked={node.attrs.isCollapsed}
-                                                onCheckedChange={(checked) => updateAttributes({ isCollapsed: checked })}
-                                            />
-                                            <Label htmlFor="collapsed-check">Start collapsed</Label>
-                                        </div>
-                                    )}
-                                </div>
-                            </PopoverContent>
-                        </Popover>
-                        <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive/70 hover:text-destructive" onClick={() => editor.chain().focus().deleteNode('customCodeBlock').run()} title="Delete block">
-                            <Trash2 className="w-3.5 w-3.5" />
-                        </Button>
-                    </div>
+                  )}
                 </div>
-                <pre 
-                    ref={preRef}
-                    className="tiptap-code-block m-0" 
-                    style={{ maxHeight: node.attrs.maxHeight, overflowY: 'auto' }}
-                >
-                    <NodeViewContent as="code" />
-                </pre>
-            </div>
-            <div
-                className="code-block-resizer"
-                onMouseDown={handleResizeMouseDown}
-                title="Drag to resize"
-            >
-              <div className="w-full h-full bg-primary/30 group-hover/code-block:bg-primary/50 transition-colors rounded-full" />
-            </div>
-        </NodeViewWrapper>
-    );
+              </PopoverContent>
+            </Popover>
+            <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive/70 hover:text-destructive hover:bg-destructive/10" onClick={() => editor.chain().focus().deleteNode('customCodeBlock').run()} title="Delete block">
+              <Trash2 className="w-3.5 h-3.5" />
+            </Button>
+          </div>
+        </div>
+        <pre
+          ref={preRef}
+          className="tiptap-code-block m-0 p-4 !bg-transparent"
+          style={{
+            maxHeight: node.attrs.maxHeight,
+            overflowY: 'auto',
+          }}
+        >
+          <NodeViewContent as="code" className="!whitespace-pre block" />
+        </pre>
+      </div>
+      <div
+        className="code-block-resizer"
+        onMouseDown={handleResizeMouseDown}
+        title="Drag to resize"
+      >
+        <div className="w-full h-full bg-primary/30 group-hover/code-block:bg-primary/50 transition-colors rounded-full" />
+      </div>
+    </NodeViewWrapper>
+  );
 };
 
 const CustomCodeBlock = CodeBlockLowlight.extend({
-    name: 'customCodeBlock',
-    group: 'block',
-    content: 'text*',
-    marks: '',
-    defining: true,
-    draggable: true,
+  name: 'customCodeBlock',
+  group: 'block',
+  content: 'text*',
+  marks: '',
+  defining: true,
+  draggable: true,
 
-    addAttributes() {
-        return {
-            ...this.parent?.(),
-            title: {
-                default: null,
-                parseHTML: element => element.getAttribute('data-title'),
-                renderHTML: attributes => (attributes.title ? { 'data-title': attributes.title } : {}),
-            },
-            language: {
-                default: null,
-                parseHTML: element => element.getAttribute('data-language'),
-                renderHTML: attributes => (attributes.language ? { 'data-language': attributes.language } : {}),
-            },
-            maxHeight: {
-                default: '400px',
-                parseHTML: element => element.getAttribute('data-max-height') || '400px',
-                renderHTML: attributes => (attributes.maxHeight ? { 'data-max-height': attributes.maxHeight } : {}),
-            },
-            isCollapsible: {
-                default: false,
-                parseHTML: element => element.getAttribute('data-is-collapsible') === 'true',
-                renderHTML: attributes => (attributes.isCollapsible ? { 'data-is-collapsible': 'true' } : {}),
-            },
-            isCollapsed: {
-                default: false,
-                parseHTML: element => element.getAttribute('data-is-collapsed') === 'true',
-                renderHTML: attributes => (attributes.isCollapsed ? { 'data-is-collapsed': 'true' } : {}),
-            },
-        };
-    },
-    
-    addCommands(): Partial<RawCommands> {
-        return {
-          ...this.parent?.(),
-          setCustomCodeBlock: (attributes) => ({ commands }) => {
-            return commands.setNode(this.name, attributes)
-          },
-          toggleCustomCodeBlock: (attributes) => ({ commands }) => {
-            return commands.toggleNode(this.name, 'paragraph', attributes)
-          },
-        }
-    },
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      title: {
+        default: null,
+        parseHTML: element => element.getAttribute('data-title'),
+        renderHTML: attributes => (attributes.title ? { 'data-title': attributes.title } : {}),
+      },
+      language: {
+        default: null,
+        parseHTML: element => element.getAttribute('data-language'),
+        renderHTML: attributes => (attributes.language ? { 'data-language': attributes.language } : {}),
+      },
+      maxHeight: {
+        default: '400px',
+        parseHTML: element => element.getAttribute('data-max-height') || '400px',
+        renderHTML: attributes => (attributes.maxHeight ? { 'data-max-height': attributes.maxHeight } : {}),
+      },
+      isCollapsible: {
+        default: false,
+        parseHTML: element => element.getAttribute('data-is-collapsible') === 'true',
+        renderHTML: attributes => (attributes.isCollapsible ? { 'data-is-collapsible': 'true' } : {}),
+      },
+      isCollapsed: {
+        default: false,
+        parseHTML: element => element.getAttribute('data-is-collapsed') === 'true',
+        renderHTML: attributes => (attributes.isCollapsed ? { 'data-is-collapsed': 'true' } : {}),
+      },
+    };
+  },
 
-    addKeyboardShortcuts() {
-        return {
-            ...this.parent?.(),
-            Backspace: () => {
-                const { empty, $anchor } = this.editor.state.selection
-                if (!empty || $anchor.parent.type.name !== this.name) {
-                    return false
-                }
-                if ($anchor.parentOffset === 0) {
-                    if ($anchor.parent.textContent.length > 0) {
-                        return true;
-                    }
-                }
-                return false
-            },
-        }
-    },
-
-    parseHTML() {
-      return [
-        {
-          tag: 'div[data-custom-code-block]',
-          preserveWhitespace: 'full',
-          getAttrs: element => {
-             const pre = element.querySelector('pre');
-             const code = pre?.querySelector('code');
-             if (!code) return false;
-             return {
-                language: element.getAttribute('data-language'),
-                title: element.getAttribute('data-title'),
-                maxHeight: element.getAttribute('data-max-height'),
-                isCollapsible: element.getAttribute('data-is-collapsible') === 'true',
-                isCollapsed: element.getAttribute('data-is-collapsed') === 'true',
-             }
-          }
-        },
-      ]
-    },
-
-    renderHTML({ node, HTMLAttributes }) {
-      return ['div', { 
-        'data-custom-code-block': '', 
-        'data-language': node.attrs.language,
-        'data-title': node.attrs.title, 
-        'data-max-height': node.attrs.maxHeight,
-        'data-is-collapsible': node.attrs.isCollapsible,
-        'data-is-collapsed': node.attrs.isCollapsed,
-      }, ['pre', HTMLAttributes, ['code', 0]]]
-    },
-
-    addNodeView() {
-        return ReactNodeViewRenderer(CodeBlockComponent);
+  addCommands(): Partial<RawCommands> {
+    return {
+      ...this.parent?.(),
+      setCustomCodeBlock: (attributes) => ({ commands }) => {
+        return commands.setNode(this.name, attributes)
+      },
+      toggleCustomCodeBlock: (attributes) => ({ commands }) => {
+        return commands.toggleNode(this.name, 'paragraph', attributes)
+      },
     }
+  },
+
+  addKeyboardShortcuts() {
+    return {
+      ...this.parent?.(),
+      Backspace: () => {
+        const { empty, $anchor } = this.editor.state.selection
+        if (!empty || $anchor.parent.type.name !== this.name) {
+          return false
+        }
+        if ($anchor.parentOffset === 0) {
+          if ($anchor.parent.textContent.length > 0) {
+            return true;
+          }
+        }
+        return false
+      },
+    }
+  },
+
+  parseHTML() {
+    return [
+      {
+        tag: 'div[data-custom-code-block]',
+        priority: 100, // Enforce priority to match the wrapper div
+        preserveWhitespace: 'full',
+        getAttrs: element => {
+          return {
+            language: element.getAttribute('data-language'),
+            title: element.getAttribute('data-title'),
+            maxHeight: element.getAttribute('data-max-height'),
+            isCollapsible: element.getAttribute('data-is-collapsible') === 'true',
+            isCollapsed: element.getAttribute('data-is-collapsed') === 'true',
+          }
+        }
+      },
+    ]
+  },
+
+  renderHTML({ node, HTMLAttributes }) {
+    return ['div',
+      mergeAttributes(HTMLAttributes, {
+        'data-custom-code-block': '',
+        // Ensure attributes are on the root div for proper serialization/deserialization
+      }),
+      ['pre', {}, ['code', 0]]
+    ]
+  },
+
+  addNodeView() {
+    return ReactNodeViewRenderer(CodeBlockComponent);
+  }
 }).configure({ lowlight });
 
 
 // --- Custom Image Carousel Node and Components ---
-const ImageCarouselModal = ({ 
-  isOpen, 
-  onOpenChange, 
-  initialImages = [], 
+const ImageCarouselModal = ({
+  isOpen,
+  onOpenChange,
+  initialImages = [],
   initialAspectRatio = '16/9',
   initialAutoplayInterval = 5000,
-  onSave 
-}: { 
-  isOpen: boolean, 
-  onOpenChange: (open: boolean) => void, 
-  initialImages?: string[], 
+  onSave
+}: {
+  isOpen: boolean,
+  onOpenChange: (open: boolean) => void,
+  initialImages?: string[],
   initialAspectRatio?: string,
   initialAutoplayInterval?: number,
-  onSave: (config: { images: string[], aspectRatio: string, autoplayInterval: number }) => void 
+  onSave: (config: { images: string[], aspectRatio: string, autoplayInterval: number }) => void
 }) => {
   const [images, setImages] = useState(initialImages);
   const [aspectRatio, setAspectRatio] = useState(initialAspectRatio);
@@ -798,7 +797,7 @@ const ImageCarouselModal = ({
   const [importText, setImportText] = useState('');
   const [draggingImageIndex, setDraggingImageIndex] = useState<number | null>(null);
   const { toast } = useToast();
-  
+
   const [autoplaySeconds, setAutoplaySeconds] = useState(initialAutoplayInterval === 999999999 ? 0 : initialAutoplayInterval / 1000);
 
   const [editingImageIndex, setEditingImageIndex] = useState<number | null>(null);
@@ -810,16 +809,16 @@ const ImageCarouselModal = ({
       setAspectRatio(initialAspectRatio);
       const initialSeconds = initialAutoplayInterval === 999999999 ? 0 : initialAutoplayInterval / 1000;
       setAutoplaySeconds(initialSeconds);
-      setAutoplayInterval(initialAutoplayInterval); 
+      setAutoplayInterval(initialAutoplayInterval);
       setIsImporting(false);
       setImportText('');
     }
   }, [isOpen, initialImages, initialAspectRatio, initialAutoplayInterval]);
 
   const handleSliderChange = (value: number[]) => {
-      const seconds = value[0];
-      setAutoplaySeconds(seconds);
-      setAutoplayInterval(seconds === 0 ? 999999999 : seconds * 1000);
+    const seconds = value[0];
+    setAutoplaySeconds(seconds);
+    setAutoplayInterval(seconds === 0 ? 999999999 : seconds * 1000);
   };
 
   const addImage = () => {
@@ -856,30 +855,30 @@ const ImageCarouselModal = ({
     setDraggingImageIndex(index);
   };
   const handleImageDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-      e.preventDefault(); 
+    e.preventDefault();
   };
   const handleImageDrop = (e: React.DragEvent<HTMLDivElement>, targetIndex: number) => {
-      e.preventDefault();
-      if (draggingImageIndex !== null && draggingImageIndex !== targetIndex) {
-          const newImages = [...images];
-          const [draggedItem] = newImages.splice(draggingImageIndex, 1);
-          newImages.splice(targetIndex, 0, draggedItem);
-          setImages(newImages);
-      }
-      setDraggingImageIndex(null);
+    e.preventDefault();
+    if (draggingImageIndex !== null && draggingImageIndex !== targetIndex) {
+      const newImages = [...images];
+      const [draggedItem] = newImages.splice(draggingImageIndex, 1);
+      newImages.splice(targetIndex, 0, draggedItem);
+      setImages(newImages);
+    }
+    setDraggingImageIndex(null);
   };
   const handleImageDragEnd = () => {
-      setDraggingImageIndex(null);
+    setDraggingImageIndex(null);
   };
-  
+
   const handleOpenImageEditor = (index: number) => {
     const url = images[index];
     const media = parseMediaUrl(url);
     const isGif = media?.isGif || false;
     const isVideo = media?.type === 'video';
     if (!url || !media || isVideo || isGif) {
-        toast({ title: "Editing Not Supported", description: "Only non-animated images can be edited.", variant: "destructive" });
-        return;
+      toast({ title: "Editing Not Supported", description: "Only non-animated images can be edited.", variant: "destructive" });
+      return;
     }
     setEditingImageIndex(index);
     setImageToCrop(url);
@@ -901,15 +900,15 @@ const ImageCarouselModal = ({
 
 
   const AspectRatioIcon = ({ ratio, className }: { ratio: '16:9' | '4:3' | '1:1', className?: string }) => {
-      const viewBox = { '16:9': '0 0 16 9', '4:3': '0 0 16 12', '1:1': '0 0 16 16' }[ratio];
-      const rectProps = { '16:9': { width: 16, height: 9 }, '4:3': { width: 16, height: 12 }, '1:1': { width: 16, height: 16 } }[ratio];
-      return (
-          <svg viewBox={viewBox} className={cn("fill-current", className)} xmlns="http://www.w3.org/2000/svg">
-              <rect {...rectProps} rx="1" />
-          </svg>
-      );
+    const viewBox = { '16:9': '0 0 16 9', '4:3': '0 0 16 12', '1:1': '0 0 16 16' }[ratio];
+    const rectProps = { '16:9': { width: 16, height: 9 }, '4:3': { width: 16, height: 12 }, '1:1': { width: 16, height: 16 } }[ratio];
+    return (
+      <svg viewBox={viewBox} className={cn("fill-current", className)} xmlns="http://www.w3.org/2000/svg">
+        <rect {...rectProps} rx="1" />
+      </svg>
+    );
   };
-  
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl h-[80vh] flex flex-col p-0">
@@ -921,150 +920,150 @@ const ImageCarouselModal = ({
           {/* Left Column: Editor */}
           <div className="flex flex-col min-h-0 space-y-4">
             {isImporting ? (
-                <div className="space-y-2 flex flex-col flex-grow">
-                    <Label htmlFor="import-urls">Paste Image/Video URLs (one per line)</Label>
-                    <Textarea id="import-urls" value={importText} onChange={e => setImportText(e.target.value)} className="flex-grow" />
-                    <div className="flex justify-end gap-2 shrink-0">
-                    <Button variant="ghost" onClick={() => setIsImporting(false)}>Cancel</Button>
-                    <Button onClick={handleImport}>Import URLs</Button>
-                    </div>
+              <div className="space-y-2 flex flex-col flex-grow">
+                <Label htmlFor="import-urls">Paste Image/Video URLs (one per line)</Label>
+                <Textarea id="import-urls" value={importText} onChange={e => setImportText(e.target.value)} className="flex-grow" />
+                <div className="flex justify-end gap-2 shrink-0">
+                  <Button variant="ghost" onClick={() => setIsImporting(false)}>Cancel</Button>
+                  <Button onClick={handleImport}>Import URLs</Button>
                 </div>
+              </div>
             ) : (
               <>
-                  <div>
-                      <div className="flex justify-between items-center mb-1">
-                          <h3 className="text-sm font-medium">Image/Video URLs</h3>
-                          <Button variant="outline" size="sm" onClick={() => setIsImporting(true)}>Import</Button>
-                      </div>
-                      <ScrollArea className="border rounded-md p-2 h-40">
-                          <div className="space-y-2">
-                          {images.map((image, index) => {
-                            const url = image;
-                            const media = parseMediaUrl(url);
-                            const isVideo = media?.type === 'video';
-                            const isGif = media?.isGif || false;
-                            const isEditable = url && (url.startsWith('http') || url.startsWith('data:image')) && !isVideo && !isGif;
-
-                            return (
-                              <div 
-                                key={index}
-                                draggable="true"
-                                onDragStart={(e) => handleImageDragStart(e, index)}
-                                onDragOver={handleImageDragOver}
-                                onDrop={(e) => handleImageDrop(e, index)}
-                                onDragEnd={handleImageDragEnd}
-                                className={cn(
-                                    "flex items-center gap-2 p-1 rounded-md bg-muted/50 group cursor-grab",
-                                    draggingImageIndex === index && "opacity-50 bg-primary/20"
-                                )}
-                              >
-                                <GripVertical className="h-5 w-5 text-muted-foreground shrink-0 opacity-50 group-hover:opacity-100" />
-                                <Input value={image} onChange={(e) => updateImage(index, e.target.value)} placeholder="https://..." className="h-8"/>
-                                <Button type="button" size="icon" variant="ghost" className="h-7 w-7 text-blue-500 hover:text-blue-400" onClick={() => handleOpenImageEditor(index)} disabled={!isEditable} title="Edit Image"><Edit className="h-4 w-4" /></Button>
-                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => removeImage(index)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
-                              </div>
-                            )
-                          })}
-                          {images.length === 0 && <p className="text-center text-xs text-muted-foreground py-4">No media yet. Add one below.</p>}
-                          </div>
-                      </ScrollArea>
-                      <Button variant="outline" size="sm" onClick={addImage} className="mt-2 w-full">Add Media URL</Button>
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <h3 className="text-sm font-medium">Image/Video URLs</h3>
+                    <Button variant="outline" size="sm" onClick={() => setIsImporting(true)}>Import</Button>
                   </div>
-                  
-                  <Separator />
+                  <ScrollArea className="border rounded-md p-2 h-40">
+                    <div className="space-y-2">
+                      {images.map((image, index) => {
+                        const url = image;
+                        const media = parseMediaUrl(url);
+                        const isVideo = media?.type === 'video';
+                        const isGif = media?.isGif || false;
+                        const isEditable = url && (url.startsWith('http') || url.startsWith('data:image')) && !isVideo && !isGif;
 
-                  <div>
-                    <div className="flex justify-between items-center">
-                        <Label htmlFor="autoplay-slider" className="text-sm font-medium">Autoplay Speed</Label>
-                        <span className="text-xs text-muted-foreground w-16 text-right">
-                            {autoplaySeconds === 0 ? 'Off' : `${autoplaySeconds.toFixed(1)}s`}
-                        </span>
+                        return (
+                          <div
+                            key={index}
+                            draggable="true"
+                            onDragStart={(e) => handleImageDragStart(e, index)}
+                            onDragOver={handleImageDragOver}
+                            onDrop={(e) => handleImageDrop(e, index)}
+                            onDragEnd={handleImageDragEnd}
+                            className={cn(
+                              "flex items-center gap-2 p-1 rounded-md bg-muted/50 group cursor-grab",
+                              draggingImageIndex === index && "opacity-50 bg-primary/20"
+                            )}
+                          >
+                            <GripVertical className="h-5 w-5 text-muted-foreground shrink-0 opacity-50 group-hover:opacity-100" />
+                            <Input value={image} onChange={(e) => updateImage(index, e.target.value)} placeholder="https://..." className="h-8" />
+                            <Button type="button" size="icon" variant="ghost" className="h-7 w-7 text-blue-500 hover:text-blue-400" onClick={() => handleOpenImageEditor(index)} disabled={!isEditable} title="Edit Image"><Edit className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => removeImage(index)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                          </div>
+                        )
+                      })}
+                      {images.length === 0 && <p className="text-center text-xs text-muted-foreground py-4">No media yet. Add one below.</p>}
                     </div>
-                    <p className="text-xs text-muted-foreground mb-2">Set to 0 to disable autoplay.</p>
-                    <Slider
-                        id="autoplay-slider"
-                        min={0}
-                        max={30}
-                        step={0.5}
-                        value={[autoplaySeconds]}
-                        onValueChange={handleSliderChange}
-                    />
+                  </ScrollArea>
+                  <Button variant="outline" size="sm" onClick={addImage} className="mt-2 w-full">Add Media URL</Button>
+                </div>
+
+                <Separator />
+
+                <div>
+                  <div className="flex justify-between items-center">
+                    <Label htmlFor="autoplay-slider" className="text-sm font-medium">Autoplay Speed</Label>
+                    <span className="text-xs text-muted-foreground w-16 text-right">
+                      {autoplaySeconds === 0 ? 'Off' : `${autoplaySeconds.toFixed(1)}s`}
+                    </span>
                   </div>
-                  <div>
-                      <Label className="text-sm font-medium">Aspect Ratio</Label>
-                      <p className="text-xs text-muted-foreground mb-2">Set the shape of the carousel.</p>
-                      <TooltipProvider>
-                          <div className="flex justify-start gap-2">
-                              <Tooltip>
-                                  <TooltipTrigger asChild>
-                                      <Button type="button" variant={aspectRatio === '16/9' ? 'default' : 'outline'} size="icon" onClick={() => setAspectRatio('16/9')}>
-                                          <AspectRatioIcon ratio="16:9" className="w-5 h-5" />
-                                      </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent><p>Widescreen (16:9)</p></TooltipContent>
-                              </Tooltip>
-                              <Tooltip>
-                                  <TooltipTrigger asChild>
-                                      <Button type="button" variant={aspectRatio === '4/3' ? 'default' : 'outline'} size="icon" onClick={() => setAspectRatio('4/3')}>
-                                          <AspectRatioIcon ratio="4:3" className="w-5 h-5" />
-                                      </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent><p>Standard (4:3)</p></TooltipContent>
-                              </Tooltip>
-                              <Tooltip>
-                                  <TooltipTrigger asChild>
-                                      <Button type="button" variant={aspectRatio === '1/1' ? 'default' : 'outline'} size="icon" onClick={() => setAspectRatio('1/1')}>
-                                          <AspectRatioIcon ratio="1:1" className="w-5 h-5" />
-                                      </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent><p>Square (1:1)</p></TooltipContent>
-                              </Tooltip>
-                          </div>
-                      </TooltipProvider>
-                  </div>
+                  <p className="text-xs text-muted-foreground mb-2">Set to 0 to disable autoplay.</p>
+                  <Slider
+                    id="autoplay-slider"
+                    min={0}
+                    max={30}
+                    step={0.5}
+                    value={[autoplaySeconds]}
+                    onValueChange={handleSliderChange}
+                  />
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">Aspect Ratio</Label>
+                  <p className="text-xs text-muted-foreground mb-2">Set the shape of the carousel.</p>
+                  <TooltipProvider>
+                    <div className="flex justify-start gap-2">
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button type="button" variant={aspectRatio === '16/9' ? 'default' : 'outline'} size="icon" onClick={() => setAspectRatio('16/9')}>
+                            <AspectRatioIcon ratio="16:9" className="w-5 h-5" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent><p>Widescreen (16:9)</p></TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button type="button" variant={aspectRatio === '4/3' ? 'default' : 'outline'} size="icon" onClick={() => setAspectRatio('4/3')}>
+                            <AspectRatioIcon ratio="4:3" className="w-5 h-5" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent><p>Standard (4:3)</p></TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button type="button" variant={aspectRatio === '1/1' ? 'default' : 'outline'} size="icon" onClick={() => setAspectRatio('1/1')}>
+                            <AspectRatioIcon ratio="1:1" className="w-5 h-5" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent><p>Square (1:1)</p></TooltipContent>
+                      </Tooltip>
+                    </div>
+                  </TooltipProvider>
+                </div>
               </>
             )}
           </div>
-          
+
           {/* Right Column: Preview */}
           <div className="flex flex-col sticky top-0">
             <h3 className="text-sm font-medium mb-2 shrink-0">Preview</h3>
             <div className={cn(
-                "border rounded-md p-2 bg-muted/30 relative w-full",
-                aspectRatio === '16/9' && 'aspect-[16/9]',
-                aspectRatio === '4/3' && 'aspect-[4/3]',
-                aspectRatio === '1/1' && 'aspect-square',
+              "border rounded-md p-2 bg-muted/30 relative w-full",
+              aspectRatio === '16/9' && 'aspect-[16/9]',
+              aspectRatio === '4/3' && 'aspect-[4/3]',
+              aspectRatio === '1/1' && 'aspect-square',
             )}>
-                {images.filter(url => url).length > 0 ? (
-                    <Carousel itemsToShow={1} showArrows={images.filter(url => url).length > 1} autoplay>
-                        {images.filter(url => url).map((url, i) => {
-                            const media = parseMediaUrl(url);
-                            if (!media) return null;
-                            return (
-                                <CarouselItem key={i}>
-                                    <div className="relative w-full h-full bg-black rounded-md overflow-hidden">
-                                        {media.type === 'video' ? (
-                                            <iframe
-                                                src={media.src}
-                                                title={`Preview ${i + 1}`}
-                                                className="w-full h-full object-cover"
-                                                frameBorder="0"
-                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                                allowFullScreen
-                                            />
-                                        ) : (
-                                            <img src={media.src || 'https://placehold.co/800x450/211F25/EBEAF2?text=Invalid+URL'} alt={`Preview ${i + 1}`} className="w-full h-full object-cover" />
-                                        )}
-                                    </div>
-                                </CarouselItem>
-                            );
-                        })}
-                    </Carousel>
-                ) : (
-                    <div className="flex items-center justify-center h-full text-muted-foreground text-xs">
-                        <p>Add image/video URLs to see a preview</p>
-                    </div>
-                )}
+              {images.filter(url => url).length > 0 ? (
+                <Carousel itemsToShow={1} showArrows={images.filter(url => url).length > 1} autoplay>
+                  {images.filter(url => url).map((url, i) => {
+                    const media = parseMediaUrl(url);
+                    if (!media) return null;
+                    return (
+                      <CarouselItem key={i}>
+                        <div className="relative w-full h-full bg-black rounded-md overflow-hidden">
+                          {media.type === 'video' ? (
+                            <iframe
+                              src={media.src}
+                              title={`Preview ${i + 1}`}
+                              className="w-full h-full object-cover"
+                              frameBorder="0"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                            />
+                          ) : (
+                            <img src={media.src || 'https://placehold.co/800x450/211F25/EBEAF2?text=Invalid+URL'} alt={`Preview ${i + 1}`} className="w-full h-full object-cover" />
+                          )}
+                        </div>
+                      </CarouselItem>
+                    );
+                  })}
+                </Carousel>
+              ) : (
+                <div className="flex items-center justify-center h-full text-muted-foreground text-xs">
+                  <p>Add image/video URLs to see a preview</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -1074,18 +1073,18 @@ const ImageCarouselModal = ({
         </DialogFooter>
 
         {imageToCrop && (
-            <ResourceImageEditor
-                isOpen={editingImageIndex !== null}
-                onOpenChange={(open) => {
-                    if (!open) {
-                        setEditingImageIndex(null);
-                        setImageToCrop(null);
-                    }
-                }}
-                imageSrc={imageToCrop}
-                onSave={handleImageSave}
-                aspectRatio={numericAspectRatio}
-            />
+          <ResourceImageEditor
+            isOpen={editingImageIndex !== null}
+            onOpenChange={(open) => {
+              if (!open) {
+                setEditingImageIndex(null);
+                setImageToCrop(null);
+              }
+            }}
+            imageSrc={imageToCrop}
+            onSave={handleImageSave}
+            aspectRatio={numericAspectRatio}
+          />
         )}
       </DialogContent>
     </Dialog>
@@ -1102,32 +1101,32 @@ const ImageCarouselComponent = (props: NodeViewProps) => {
   const float = node.attrs['data-float'];
   const width = node.attrs.width;
   const rotation = node.attrs.rotate || 0;
-  
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [menuPosition, setMenuPosition] = useState<'top' | 'bottom'>('top');
 
   useEffect(() => {
     if (selected && containerRef.current) {
-        const editorViewDom = editor.view.dom;
-        const editorRect = editorViewDom.getBoundingClientRect();
-        const nodeRect = containerRef.current.getBoundingClientRect();
-        
-        const toolbar = editorViewDom.parentElement?.querySelector('[data-testid="rte-toolbar"]');
-        const toolbarHeight = toolbar?.clientHeight || 45;
-        
-        const spaceAbove = nodeRect.top - editorRect.top;
-        const menuHeightEstimate = 40;
+      const editorViewDom = editor.view.dom;
+      const editorRect = editorViewDom.getBoundingClientRect();
+      const nodeRect = containerRef.current.getBoundingClientRect();
 
-        if (spaceAbove < toolbarHeight + menuHeightEstimate) {
-            setMenuPosition('bottom');
-        } else {
-            setMenuPosition('top');
-        }
+      const toolbar = editorViewDom.parentElement?.querySelector('[data-testid="rte-toolbar"]');
+      const toolbarHeight = toolbar?.clientHeight || 45;
+
+      const spaceAbove = nodeRect.top - editorRect.top;
+      const menuHeightEstimate = 40;
+
+      if (spaceAbove < toolbarHeight + menuHeightEstimate) {
+        setMenuPosition('bottom');
+      } else {
+        setMenuPosition('top');
+      }
     }
   }, [selected, editor.view.dom]);
 
   const handleSaveCarousel = (config: { images: string[], aspectRatio: string, autoplayInterval: number }) => {
-    updateAttributes({ 
+    updateAttributes({
       images: config.images,
       aspectRatio: config.aspectRatio,
       autoplayInterval: config.autoplayInterval,
@@ -1138,14 +1137,14 @@ const ImageCarouselComponent = (props: NodeViewProps) => {
   const setAlignment = (align: 'left' | 'center' | 'right' | null) => {
     updateAttributes({ 'data-float': align });
   };
-  
+
   const rotateByAxis = (degrees: number) => {
     updateAttributes({ rotate: (rotation + degrees) % 360 });
   };
 
   const handleStyles = useMemo(() => {
     return handles.map(handle => ({
-        cursor: getDynamicCursor(handle.direction, rotation)
+      cursor: getDynamicCursor(handle.direction, rotation)
     }));
   }, [rotation]);
 
@@ -1161,8 +1160,8 @@ const ImageCarouselComponent = (props: NodeViewProps) => {
     const startWidth = container.offsetWidth;
     const startHeight = container.offsetHeight;
     let effectiveAspectRatio = 16 / 9;
-    if(aspectRatio === '4/3') effectiveAspectRatio = 4 / 3;
-    if(aspectRatio === '1/1') effectiveAspectRatio = 1;
+    if (aspectRatio === '4/3') effectiveAspectRatio = 4 / 3;
+    if (aspectRatio === '1/1') effectiveAspectRatio = 1;
 
     const angleRad = rotation * (Math.PI / 180);
 
@@ -1182,7 +1181,7 @@ const ImageCarouselComponent = (props: NodeViewProps) => {
       if (direction.includes('left')) newWidth = startWidth - dxRot;
       if (direction.includes('bottom')) newHeight = startHeight + dyRot;
       if (direction.includes('top')) newHeight = startHeight - dyRot;
-      
+
       const isCorner = direction.includes('-');
       if (isCorner) {
         if (Math.abs(dxRot) > Math.abs(dyRot)) {
@@ -1212,7 +1211,7 @@ const ImageCarouselComponent = (props: NodeViewProps) => {
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
   };
-  
+
   const createRotationHandler = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -1251,7 +1250,7 @@ const ImageCarouselComponent = (props: NodeViewProps) => {
       draggable="true"
       data-drag-handle
     >
-      <div 
+      <div
         ref={containerRef}
         className={cn(
           "relative w-full",
@@ -1261,34 +1260,34 @@ const ImageCarouselComponent = (props: NodeViewProps) => {
           aspectRatio === '1/1' && 'aspect-square',
         )}
         style={{
-            transform: `rotate(${rotation}deg)`
+          transform: `rotate(${rotation}deg)`
         }}
       >
         <div className="w-full h-full bg-muted rounded-md overflow-hidden relative">
           {images.length > 0 ? (
             <Carousel itemsToShow={1} showArrows={images.length > 1} autoplay={!selected} autoplayInterval={autoplayInterval}>
               {images.map((url: string, i: number) => {
-                  const media = parseMediaUrl(url);
-                  if (!media) return null;
-                  return (
-                    <CarouselItem key={i}>
-                      <div className="relative w-full h-full bg-black">
-                        {media.type === 'video' ? (
-                            <iframe
-                                src={media.src}
-                                title={`Carousel item ${i + 1}`}
-                                className="w-full h-full object-cover"
-                                frameBorder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowFullScreen
-                            />
-                        ) : (
-                            <img src={media.src} alt={`Carousel image ${i + 1}`} className="w-full h-full object-cover" />
-                        )}
-                      </div>
-                    </CarouselItem>
-                  );
-                })}
+                const media = parseMediaUrl(url);
+                if (!media) return null;
+                return (
+                  <CarouselItem key={i}>
+                    <div className="relative w-full h-full bg-black">
+                      {media.type === 'video' ? (
+                        <iframe
+                          src={media.src}
+                          title={`Carousel item ${i + 1}`}
+                          className="w-full h-full object-cover"
+                          frameBorder="0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      ) : (
+                        <img src={media.src} alt={`Carousel image ${i + 1}`} className="w-full h-full object-cover" />
+                      )}
+                    </div>
+                  </CarouselItem>
+                );
+              })}
             </Carousel>
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
@@ -1300,7 +1299,7 @@ const ImageCarouselComponent = (props: NodeViewProps) => {
             <div className="absolute inset-0 z-10 cursor-move" />
           )}
         </div>
-        
+
         {selected && (
           <>
             {handles.map((handle, index) => (
@@ -1319,38 +1318,38 @@ const ImageCarouselComponent = (props: NodeViewProps) => {
               onMouseDown={createRotationHandler}
               title="Rotate Freely"
             >
-              <RotateCw className="w-4 h-4 text-primary"/>
+              <RotateCw className="w-4 h-4 text-primary" />
             </div>
           </>
         )}
       </div>
 
-       {selected && (
-          <div className={cn(
-            "absolute left-1/2 -translate-x-1/2 z-20 flex gap-1 bg-card p-1 rounded-md shadow-lg border border-border pointer-events-auto",
-            menuPosition === 'top' ? "top-0 -translate-y-[calc(100%+12px)]" : "bottom-0 translate-y-[calc(100%+12px)]"
-          )}>
-              <Button type="button" size="icon" variant="ghost" className="h-7 w-7" onClick={() => setIsModalOpen(true)} title="Edit Carousel">
-                <ImageIcon className="h-4 w-4" />
-              </Button>
-              <div className="w-px h-5 bg-border mx-1 self-center" />
-              <Button type="button" size="icon" variant={float === 'left' ? 'default' : 'ghost'} className="h-7 w-7" onClick={() => setAlignment('left')} title="Align left"><AlignLeft className="w-4 h-4" /></Button>
-              <Button type="button" size="icon" variant={!float || float === 'center' ? 'default' : 'ghost'} className="h-7 w-7" onClick={() => setAlignment('center')} title="Align center"><AlignCenter className="w-4 h-4" /></Button>
-              <Button type="button" size="icon" variant={float === 'right' ? 'default' : 'ghost'} className="h-7 w-7" onClick={() => setAlignment('right')} title="Align right"><AlignRight className="w-4 h-4" /></Button>
-              <div className="w-px h-5 bg-border mx-1 self-center" />
-              <Button type="button" size="icon" variant="ghost" className="h-7 w-7" onClick={() => rotateByAxis(90)} title="Rotate 90°">
-                  <RotateCw className="w-4 h-4" />
-              </Button>
-          </div>
+      {selected && (
+        <div className={cn(
+          "absolute left-1/2 -translate-x-1/2 z-20 flex gap-1 bg-card p-1 rounded-md shadow-lg border border-border pointer-events-auto",
+          menuPosition === 'top' ? "top-0 -translate-y-[calc(100%+12px)]" : "bottom-0 translate-y-[calc(100%+12px)]"
+        )}>
+          <Button type="button" size="icon" variant="ghost" className="h-7 w-7" onClick={() => setIsModalOpen(true)} title="Edit Carousel">
+            <ImageIcon className="h-4 w-4" />
+          </Button>
+          <div className="w-px h-5 bg-border mx-1 self-center" />
+          <Button type="button" size="icon" variant={float === 'left' ? 'default' : 'ghost'} className="h-7 w-7" onClick={() => setAlignment('left')} title="Align left"><AlignLeft className="w-4 h-4" /></Button>
+          <Button type="button" size="icon" variant={!float || float === 'center' ? 'default' : 'ghost'} className="h-7 w-7" onClick={() => setAlignment('center')} title="Align center"><AlignCenter className="w-4 h-4" /></Button>
+          <Button type="button" size="icon" variant={float === 'right' ? 'default' : 'ghost'} className="h-7 w-7" onClick={() => setAlignment('right')} title="Align right"><AlignRight className="w-4 h-4" /></Button>
+          <div className="w-px h-5 bg-border mx-1 self-center" />
+          <Button type="button" size="icon" variant="ghost" className="h-7 w-7" onClick={() => rotateByAxis(90)} title="Rotate 90°">
+            <RotateCw className="w-4 h-4" />
+          </Button>
+        </div>
       )}
       {createPortal(
         <ImageCarouselModal
-            isOpen={isModalOpen}
-            onOpenChange={setIsModalOpen}
-            initialImages={images}
-            initialAspectRatio={aspectRatio}
-            initialAutoplayInterval={autoplayInterval}
-            onSave={handleSaveCarousel}
+          isOpen={isModalOpen}
+          onOpenChange={setIsModalOpen}
+          initialImages={images}
+          initialAspectRatio={aspectRatio}
+          initialAutoplayInterval={autoplayInterval}
+          onSave={handleSaveCarousel}
         />,
         document.body
       )}
@@ -1424,10 +1423,10 @@ const ImageCarouselNode = Node.create({
     delete finalAttrs.width;
     delete finalAttrs.height;
     delete finalAttrs.rotate;
-    
+
     return ['div', { ...finalAttrs, 'data-image-carousel': '' }];
   },
-  
+
   addCommands() {
     return {
       setImageCarousel: (options: { images: string[], width?: string, aspectRatio?: string, autoplayInterval?: number }) => ({ commands }) => {
@@ -1463,7 +1462,7 @@ const CustomImage = TiptapImage.extend({
       height: {
         default: null,
         renderHTML: attributes => ({
-            style: `height: ${attributes.height};`,
+          style: `height: ${attributes.height};`,
         }),
         parseHTML: element => element.style.height || null,
       },
@@ -1475,18 +1474,18 @@ const CustomImage = TiptapImage.extend({
         parseHTML: element => element.getAttribute('data-float'),
       },
       rotate: {
-          default: 0,
-          renderHTML: attributes => ({
-              style: `transform: rotate(${attributes.rotate}deg)`
-          }),
-          parseHTML: element => {
-              const transform = element.style.transform;
-              if (transform && transform.includes('rotate')) {
-                  const match = transform.match(/rotate\(([^deg)]+)deg\)/);
-                  return match ? parseFloat(match[1]) : 0;
-              }
-              return 0;
+        default: 0,
+        renderHTML: attributes => ({
+          style: `transform: rotate(${attributes.rotate}deg)`
+        }),
+        parseHTML: element => {
+          const transform = element.style.transform;
+          if (transform && transform.includes('rotate')) {
+            const match = transform.match(/rotate\(([^deg)]+)deg\)/);
+            return match ? parseFloat(match[1]) : 0;
           }
+          return 0;
+        }
       },
       href: {
         default: null,
@@ -1502,31 +1501,31 @@ const CustomImage = TiptapImage.extend({
       {
         tag: 'a[href]:not([href^="javascript:"]) > img[src]:not([src^="data:"])',
         getAttrs: dom => {
-            const link = dom.parentElement as HTMLAnchorElement;
-            const img = dom as HTMLImageElement;
-            return {
-                src: img.getAttribute('src'),
-                alt: img.getAttribute('alt'),
-                title: img.getAttribute('title'),
-                href: link.getAttribute('href'),
-                target: link.getAttribute('target'),
-            };
+          const link = dom.parentElement as HTMLAnchorElement;
+          const img = dom as HTMLImageElement;
+          return {
+            src: img.getAttribute('src'),
+            alt: img.getAttribute('alt'),
+            title: img.getAttribute('title'),
+            href: link.getAttribute('href'),
+            target: link.getAttribute('target'),
+          };
         },
       },
       {
         tag: 'img[src]:not([src^="data:"])',
         getAttrs: dom => {
-            const img = dom as HTMLImageElement;
-            if (img.closest('a')) {
-                return false; 
-            }
-            return {
-                src: img.getAttribute('src'),
-                alt: img.getAttribute('alt'),
-                title: img.getAttribute('title'),
-                href: null,
-                target: null,
-            };
+          const img = dom as HTMLImageElement;
+          if (img.closest('a')) {
+            return false;
+          }
+          return {
+            src: img.getAttribute('src'),
+            alt: img.getAttribute('alt'),
+            title: img.getAttribute('title'),
+            href: null,
+            target: null,
+          };
         },
       },
     ];
@@ -1534,12 +1533,12 @@ const CustomImage = TiptapImage.extend({
 
   renderHTML({ HTMLAttributes }) {
     const { href, target, ...imgAttributes } = HTMLAttributes;
-    const imgTag: any = ['img', imgAttributes]; 
+    const imgTag: any = ['img', imgAttributes];
 
     if (href) {
-      return ['a', { href, target, rel: 'noopener noreferrer nofollow' }, imgTag]; 
+      return ['a', { href, target, rel: 'noopener noreferrer nofollow' }, imgTag];
     }
-    return imgTag; 
+    return imgTag;
   },
 
   addNodeView() {
@@ -1548,53 +1547,53 @@ const CustomImage = TiptapImage.extend({
 });
 
 const CustomYoutube = Youtube.extend({
-    draggable: true,
-    addAttributes() {
-        return {
-            ...this.parent?.(),
-            class: {
-              default: 'rich-text-media-node',
-            },
-            width: {
-                default: '640px',
-                renderHTML: attributes => ({
-                    style: `width: ${attributes.width};`
-                }),
-                parseHTML: element => element.style.width || '640px',
-            },
-            height: {
-                default: '480px',
-                renderHTML: attributes => ({
-                  style: `height: ${attributes.height};`,
-                }),
-                parseHTML: element => element.style.height || '480px',
-            },
-            'data-float': {
-                default: 'center',
-                renderHTML: attributes => ({
-                    'data-float': attributes['data-float']
-                }),
-                parseHTML: element => element.getAttribute('data-float'),
-            },
-            rotate: {
-                default: 0,
-                renderHTML: attributes => ({
-                    style: `transform: rotate(${attributes.rotate}deg)`
-                }),
-                parseHTML: element => {
-                    const transform = element.style.transform;
-                    if (transform && transform.includes('rotate')) {
-                        const match = transform.match(/rotate\(([^deg)]+)deg\)/);
-                        return match ? parseFloat(match[1]) : 0;
-                    }
-                    return 0;
-                }
-            }
+  draggable: true,
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      class: {
+        default: 'rich-text-media-node',
+      },
+      width: {
+        default: '640px',
+        renderHTML: attributes => ({
+          style: `width: ${attributes.width};`
+        }),
+        parseHTML: element => element.style.width || '640px',
+      },
+      height: {
+        default: '480px',
+        renderHTML: attributes => ({
+          style: `height: ${attributes.height};`,
+        }),
+        parseHTML: element => element.style.height || '480px',
+      },
+      'data-float': {
+        default: 'center',
+        renderHTML: attributes => ({
+          'data-float': attributes['data-float']
+        }),
+        parseHTML: element => element.getAttribute('data-float'),
+      },
+      rotate: {
+        default: 0,
+        renderHTML: attributes => ({
+          style: `transform: rotate(${attributes.rotate}deg)`
+        }),
+        parseHTML: element => {
+          const transform = element.style.transform;
+          if (transform && transform.includes('rotate')) {
+            const match = transform.match(/rotate\(([^deg)]+)deg\)/);
+            return match ? parseFloat(match[1]) : 0;
+          }
+          return 0;
         }
-    },
-    addNodeView() {
-        return ReactNodeViewRenderer(MediaResizeComponent)
+      }
     }
+  },
+  addNodeView() {
+    return ReactNodeViewRenderer(MediaResizeComponent)
+  }
 });
 
 const CustomModelViewer = Node.create({
@@ -1636,7 +1635,7 @@ const CustomModelViewer = Node.create({
       class: { default: 'rich-text-media-node' },
     };
   },
-  
+
   parseHTML() {
     return [{
       tag: 'model-viewer[src]',
@@ -1646,7 +1645,7 @@ const CustomModelViewer = Node.create({
   renderHTML({ HTMLAttributes }) {
     return ['model-viewer', mergeAttributes(this.options.HTMLAttributes, HTMLAttributes)];
   },
-  
+
   addCommands() {
     return {
       setModelViewer: (options: { src: string }) => ({ commands }) => {
@@ -1714,7 +1713,7 @@ const CustomIframe = Node.create({
   renderHTML({ HTMLAttributes }) {
     return ['iframe', mergeAttributes(this.options.HTMLAttributes, HTMLAttributes)];
   },
-  
+
   addCommands() {
     return {
       setIframe: (options: { src: string, width?: string, height?: string }) => ({ commands }) => {
@@ -1743,8 +1742,8 @@ const Toolbar = ({ editor }: { editor: Editor | null }) => {
 
   useEffect(() => {
     const handler = setTimeout(() => {
-        setDebouncedUrl(url);
-    }, 500); 
+      setDebouncedUrl(url);
+    }, 500);
     return () => clearTimeout(handler);
   }, [url]);
 
@@ -1765,24 +1764,24 @@ const Toolbar = ({ editor }: { editor: Editor | null }) => {
     if (match) return `https://www.youtube-nocookie.com/embed/${match[1]}`;
     return null;
   };
-  
+
   const getSketchfabEmbedUrl = (sfUrl: string) => {
-      const sketchfabPageRegex = /sketchfab\.com\/3d-models\/(?:[a-z0-9\-_]+-)?([a-fA-F0-9]{32})/;
-      const sketchfabEmbedRegex = /sketchfab\.com\/models\/[a-fA-F0-9]{32}\/embed/;
-  
-      const pageMatch = sfUrl.match(sketchfabPageRegex);
-      if (pageMatch) {
-        const modelId = pageMatch[1];
-        return `https://sketchfab.com/models/${modelId}/embed?autospin=1&autostart=1&ui_theme=dark`;
-      }
-      
-      if (sketchfabEmbedRegex.test(sfUrl)) {
-          return sfUrl;
-      }
-      
-      return null;
+    const sketchfabPageRegex = /sketchfab\.com\/3d-models\/(?:[a-z0-9\-_]+-)?([a-fA-F0-9]{32})/;
+    const sketchfabEmbedRegex = /sketchfab\.com\/models\/[a-fA-F0-9]{32}\/embed/;
+
+    const pageMatch = sfUrl.match(sketchfabPageRegex);
+    if (pageMatch) {
+      const modelId = pageMatch[1];
+      return `https://sketchfab.com/models/${modelId}/embed?autospin=1&autostart=1&ui_theme=dark`;
+    }
+
+    if (sketchfabEmbedRegex.test(sfUrl)) {
+      return sfUrl;
+    }
+
+    return null;
   };
-  
+
   const handleMediaModalOpen = (type: 'image' | 'video' | 'model' | 'carousel') => {
     setUrl('');
     setDebouncedUrl('');
@@ -1804,7 +1803,7 @@ const Toolbar = ({ editor }: { editor: Editor | null }) => {
     setDebouncedUrl(previousUrl || '');
     setIsLinkModalOpen(true);
   };
-  
+
   const handleClearLink = () => {
     const isImageActive = editor.isActive('image');
     if (isImageActive) {
@@ -1819,7 +1818,7 @@ const Toolbar = ({ editor }: { editor: Editor | null }) => {
 
   const setLink = () => {
     if (url === null) return;
-    
+
     if (url === '') {
       handleClearLink();
       return;
@@ -1854,10 +1853,10 @@ const Toolbar = ({ editor }: { editor: Editor | null }) => {
     setUrl('');
     setDebouncedUrl('');
   };
-  
+
   const addModelViewer = () => {
     if (!url || !editor) return;
-    
+
     const sketchfabUrl = getSketchfabEmbedUrl(url);
 
     if (sketchfabUrl) {
@@ -1865,7 +1864,7 @@ const Toolbar = ({ editor }: { editor: Editor | null }) => {
     } else if (url.match(/\.(glb|gltf)$/i)) {
       editor.chain().focus().setModelViewer({ src: url }).run();
     } else {
-        editor.chain().focus().setIframe({ src: url }).run();
+      editor.chain().focus().setIframe({ src: url }).run();
     }
 
     setIsModelModalOpen(false);
@@ -1875,14 +1874,14 @@ const Toolbar = ({ editor }: { editor: Editor | null }) => {
 
   const handleSaveCarousel = (config: { images: string[], aspectRatio: string, autoplayInterval: number }) => {
     if (config.images.length > 0) {
-        const { selection } = editor.state;
-        const node = selection.$anchor.node(selection.$anchor.depth);
+      const { selection } = editor.state;
+      const node = selection.$anchor.node(selection.$anchor.depth);
 
-        if (node.type.name === 'imageCarousel') {
-            editor.chain().focus().updateAttributes('imageCarousel', config).run();
-        } else {
-            editor.chain().focus().setImageCarousel(config).run();
-        }
+      if (node.type.name === 'imageCarousel') {
+        editor.chain().focus().updateAttributes('imageCarousel', config).run();
+      } else {
+        editor.chain().focus().setImageCarousel(config).run();
+      }
     }
   };
 
@@ -1905,46 +1904,46 @@ const Toolbar = ({ editor }: { editor: Editor | null }) => {
     { label: "Trebuchet MS", value: "'Trebuchet MS', sans-serif" },
     { label: "Cursive", value: "cursive" },
   ];
-  
+
   return (
     <>
       <div data-testid="rte-toolbar" className="flex flex-wrap items-center gap-1 p-1 border-b">
         <Select
-            value={editor.getAttributes('textStyle').fontFamily || '_default_font_'}
-            onValueChange={(value) => {
-                if (value === '_default_font_') {
-                    editor.chain().focus().unsetFontFamily().run();
-                } else {
-                    editor.chain().focus().setFontFamily(value).run();
-                }
-            }}
+          value={editor.getAttributes('textStyle').fontFamily || '_default_font_'}
+          onValueChange={(value) => {
+            if (value === '_default_font_') {
+              editor.chain().focus().unsetFontFamily().run();
+            } else {
+              editor.chain().focus().setFontFamily(value).run();
+            }
+          }}
         >
-            <SelectTrigger className="w-32 h-8 text-xs">
-                <SelectValue placeholder="Font" />
-            </SelectTrigger>
-            <SelectContent>
-                {fontFamilies.map(font => (
-                    <SelectItem key={font.label} value={font.value} className="text-xs" style={{ fontFamily: font.value === '_default_font_' ? 'inherit' : font.value }}>{font.label}</SelectItem>
-                ))}
-            </SelectContent>
-        </Select>
-        <Select
-            value={editor.getAttributes('textStyle').fontSize || '_default_size_'}
-            onValueChange={(value) => {
-                if (value === '_default_size_') {
-                    editor.chain().focus().unsetFontSize().run();
-                } else {
-                    editor.chain().focus().setFontSize(value).run();
-                }
-            }}
-        >
-          <SelectTrigger className="w-24 h-8 text-xs">
-              <SelectValue placeholder="Size" />
+          <SelectTrigger className="w-32 h-8 text-xs">
+            <SelectValue placeholder="Font" />
           </SelectTrigger>
           <SelectContent>
-              {fontSizes.map(size => (
-                  <SelectItem key={size.label} value={size.value} className="text-xs" style={{ fontSize: size.value === '_default_size_' ? '16px' : size.value }}>{size.label}</SelectItem>
-              ))}
+            {fontFamilies.map(font => (
+              <SelectItem key={font.label} value={font.value} className="text-xs" style={{ fontFamily: font.value === '_default_font_' ? 'inherit' : font.value }}>{font.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select
+          value={editor.getAttributes('textStyle').fontSize || '_default_size_'}
+          onValueChange={(value) => {
+            if (value === '_default_size_') {
+              editor.chain().focus().unsetFontSize().run();
+            } else {
+              editor.chain().focus().setFontSize(value).run();
+            }
+          }}
+        >
+          <SelectTrigger className="w-24 h-8 text-xs">
+            <SelectValue placeholder="Size" />
+          </SelectTrigger>
+          <SelectContent>
+            {fontSizes.map(size => (
+              <SelectItem key={size.label} value={size.value} className="text-xs" style={{ fontSize: size.value === '_default_size_' ? '16px' : size.value }}>{size.label}</SelectItem>
+            ))}
           </SelectContent>
         </Select>
         <Separator orientation="vertical" className="h-6" />
@@ -1958,7 +1957,7 @@ const Toolbar = ({ editor }: { editor: Editor | null }) => {
             const isGradient = value.includes('gradient');
             const { fontFamily, fontSize } = editor.getAttributes('textStyle');
 
-            const newAttrs: { 
+            const newAttrs: {
               fontFamily?: string;
               fontSize?: string;
               color?: string | null;
@@ -1975,176 +1974,176 @@ const Toolbar = ({ editor }: { editor: Editor | null }) => {
               newAttrs.textGradient = null;
               newAttrs.color = value;
             }
-            
+
             editor.chain().focus().setMark('textStyle', newAttrs).run();
           }}
         />
         <Button type="button" variant="ghost" size="icon" onClick={openLinkModal} className={cn("h-8 w-8", isLinkActive && "bg-muted text-primary")}><LinkIcon className="h-4 w-4" /></Button>
         <Separator orientation="vertical" className="h-6" />
-        
+
         <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8" title="Text Align">
-                    <AlignJustify className="h-4 w-4" />
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-                <DropdownMenuItem onClick={() => editor.chain().focus().setTextAlign('left').run()} className={cn(editor.isActive({ textAlign: 'left' }) && "bg-muted")}>
-                    <AlignLeft className="h-4 w-4 mr-2" /> Left
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => editor.chain().focus().setTextAlign('center').run()} className={cn(editor.isActive({ textAlign: 'center' }) && "bg-muted")}>
-                    <AlignCenter className="h-4 w-4 mr-2" /> Center
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => editor.chain().focus().setTextAlign('right').run()} className={cn(editor.isActive({ textAlign: 'right' }) && "bg-muted")}>
-                    <AlignRight className="h-4 w-4 mr-2" /> Right
-                </DropdownMenuItem>
-            </DropdownMenuContent>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8" title="Text Align">
+              <AlignJustify className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem onClick={() => editor.chain().focus().setTextAlign('left').run()} className={cn(editor.isActive({ textAlign: 'left' }) && "bg-muted")}>
+              <AlignLeft className="h-4 w-4 mr-2" /> Left
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => editor.chain().focus().setTextAlign('center').run()} className={cn(editor.isActive({ textAlign: 'center' }) && "bg-muted")}>
+              <AlignCenter className="h-4 w-4 mr-2" /> Center
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => editor.chain().focus().setTextAlign('right').run()} className={cn(editor.isActive({ textAlign: 'right' }) && "bg-muted")}>
+              <AlignRight className="h-4 w-4 mr-2" /> Right
+            </DropdownMenuItem>
+          </DropdownMenuContent>
         </DropdownMenu>
 
         <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8" title="Lists">
-                    <List className="h-4 w-4" />
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-                <DropdownMenuItem onClick={() => editor.chain().focus().toggleBulletList().run()} className={cn(editor.isActive('bulletList') && "bg-muted")}>
-                    <List className="h-4 w-4 mr-2" /> Bullet List
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => editor.chain().focus().toggleOrderedList().run()} className={cn(editor.isActive('orderedList') && "bg-muted")}>
-                    <ListOrdered className="h-4 w-4 mr-2" /> Numbered List
-                </DropdownMenuItem>
-            </DropdownMenuContent>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8" title="Lists">
+              <List className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem onClick={() => editor.chain().focus().toggleBulletList().run()} className={cn(editor.isActive('bulletList') && "bg-muted")}>
+              <List className="h-4 w-4 mr-2" /> Bullet List
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => editor.chain().focus().toggleOrderedList().run()} className={cn(editor.isActive('orderedList') && "bg-muted")}>
+              <ListOrdered className="h-4 w-4 mr-2" /> Numbered List
+            </DropdownMenuItem>
+          </DropdownMenuContent>
         </DropdownMenu>
-        
+
         <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8" title="Embed Media">
-                    <ImagePlus className="h-4 w-4" />
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-                <DropdownMenuItem onClick={() => editor.chain().focus().toggleCustomCodeBlock().run()} className={cn(editor.isActive('customCodeBlock') && 'bg-muted')}>
-                    <CodeIcon className="h-4 w-4 mr-2" /> Embed Code Block
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleMediaModalOpen('image')}>
-                    <ImageIcon className="h-4 w-4 mr-2" /> Embed Image
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleMediaModalOpen('video')}>
-                    <Video className="h-4 w-4 mr-2" /> Embed YouTube Video
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleMediaModalOpen('model')}>
-                    <Box className="h-4 w-4 mr-2" /> Embed 3D Model
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleMediaModalOpen('carousel')}>
-                    <GalleryHorizontal className="h-4 w-4 mr-2" /> Embed Image Carousel
-                </DropdownMenuItem>
-            </DropdownMenuContent>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8" title="Embed Media">
+              <ImagePlus className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem onClick={() => editor.chain().focus().toggleCustomCodeBlock().run()} className={cn(editor.isActive('customCodeBlock') && 'bg-muted')}>
+              <CodeIcon className="h-4 w-4 mr-2" /> Embed Code Block
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleMediaModalOpen('image')}>
+              <ImageIcon className="h-4 w-4 mr-2" /> Embed Image
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleMediaModalOpen('video')}>
+              <Video className="h-4 w-4 mr-2" /> Embed YouTube Video
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleMediaModalOpen('model')}>
+              <Box className="h-4 w-4 mr-2" /> Embed 3D Model
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleMediaModalOpen('carousel')}>
+              <GalleryHorizontal className="h-4 w-4 mr-2" /> Embed Image Carousel
+            </DropdownMenuItem>
+          </DropdownMenuContent>
         </DropdownMenu>
 
       </div>
-      
+
       {createPortal(
         <>
-            <Dialog open={isLinkModalOpen} onOpenChange={setIsLinkModalOpen}>
-                <DialogContent>
-                <DialogHeader><DialogTitle>Set Link URL</DialogTitle></DialogHeader>
-                <div className="space-y-2">
-                    <Label htmlFor="linkUrl">URL</Label>
-                    <Input id="linkUrl" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://example.com" />
+          <Dialog open={isLinkModalOpen} onOpenChange={setIsLinkModalOpen}>
+            <DialogContent>
+              <DialogHeader><DialogTitle>Set Link URL</DialogTitle></DialogHeader>
+              <div className="space-y-2">
+                <Label htmlFor="linkUrl">URL</Label>
+                <Input id="linkUrl" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://example.com" />
+              </div>
+              <DialogFooter className="flex-col-reverse sm:flex-row sm:justify-between sm:space-x-2">
+                <div>
+                  {isLinkActive && (
+                    <Button type="button" variant="ghost" className="w-full sm:w-auto justify-start text-destructive hover:text-destructive hover:bg-destructive/10" onClick={handleClearLink}>
+                      Clear Link
+                    </Button>
+                  )}
                 </div>
-                <DialogFooter className="flex-col-reverse sm:flex-row sm:justify-between sm:space-x-2">
-                    <div>
-                    {isLinkActive && (
-                        <Button type="button" variant="ghost" className="w-full sm:w-auto justify-start text-destructive hover:text-destructive hover:bg-destructive/10" onClick={handleClearLink}>
-                        Clear Link
-                        </Button>
-                    )}
-                    </div>
-                    <div className="flex justify-end gap-2">
-                        <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
-                        <Button type="button" onClick={setLink}>{url ? 'Update Link' : 'Set Link'}</Button>
-                    </div>
-                </DialogFooter>
-                </DialogContent>
-            </Dialog>
-            <Dialog open={isImageModalOpen} onOpenChange={setIsImageModalOpen}>
-                <DialogContent>
-                <DialogHeader><DialogTitle>Embed Image</DialogTitle></DialogHeader>
-                <div className="space-y-2">
-                    <Label htmlFor="imageUrl">Image URL</Label>
-                    <Input id="imageUrl" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://example.com/image.png" />
-                    {debouncedUrl && <img src={debouncedUrl} alt="Preview" className="rounded-md object-contain max-h-48 w-full border mt-2" />}
+                <div className="flex justify-end gap-2">
+                  <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
+                  <Button type="button" onClick={setLink}>{url ? 'Update Link' : 'Set Link'}</Button>
                 </div>
-                <DialogFooter>
-                    <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
-                    <Button type="button" onClick={addImage}>Add Image</Button>
-                </DialogFooter>
-                </DialogContent>
-            </Dialog>
-            <Dialog open={isVideoModalOpen} onOpenChange={setIsVideoModalOpen}>
-                <DialogContent>
-                <DialogHeader><DialogTitle>Embed YouTube Video</DialogTitle></DialogHeader>
-                <div className="space-y-2">
-                    <Label htmlFor="videoUrl">YouTube URL</Label>
-                    <Input id="videoUrl" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://youtube.com/watch?v=..." />
-                    {debouncedUrl && getYoutubeEmbedUrl(debouncedUrl) && (
-                        <iframe
-                            className="w-full aspect-video mt-2 rounded-md border"
-                            src={getYoutubeEmbedUrl(debouncedUrl)!}
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowFullScreen
-                            title="YouTube video preview"
-                        ></iframe>
-                    )}
-                </div>
-                <DialogFooter>
-                    <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
-                    <Button type="button" onClick={addYoutubeVideo}>Add Video</Button>
-                </DialogFooter>
-                </DialogContent>
-            </Dialog>
-            <Dialog open={isModelModalOpen} onOpenChange={setIsModelModalOpen}>
-                <DialogContent>
-                <DialogHeader><DialogTitle>Embed 3D Model</DialogTitle></DialogHeader>
-                <div className="space-y-2">
-                    <Label htmlFor="modelUrl">Model URL (.glb, .gltf, or Sketchfab link)</Label>
-                    <Input id="modelUrl" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="e.g., https://sketchfab.com/3d-models/..." />
-                    {debouncedUrl && (() => {
-                        const sketchfabUrl = getSketchfabEmbedUrl(debouncedUrl);
-                        if (sketchfabUrl) {
-                            return (
-                                <iframe
-                                    className="w-full aspect-video mt-2 rounded-md border"
-                                    src={sketchfabUrl}
-                                    allowFullScreen
-                                    title="Sketchfab preview"
-                                ></iframe>
-                            );
-                        }
-                        if (debouncedUrl.match(/\.(glb|gltf)$/i)) {
-                            return (
-                                <div className="mt-2 text-center text-sm text-muted-foreground p-4 border rounded-md">
-                                    <Box className="mx-auto h-8 w-8 mb-2" />
-                                    3D Model Preview (GLB/GLTF)
-                                </div>
-                            );
-                        }
-                        return null;
-                    })()}
-                </div>
-                <DialogFooter>
-                    <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
-                    <Button type="button" onClick={addModelViewer}>Add Model</Button>
-                </DialogFooter>
-                </DialogContent>
-            </Dialog>
-            <ImageCarouselModal
-                isOpen={isCarouselModalOpen}
-                onOpenChange={setIsCarouselModalOpen}
-                initialImages={[]}
-                onSave={handleSaveCarousel}
-            />
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+          <Dialog open={isImageModalOpen} onOpenChange={setIsImageModalOpen}>
+            <DialogContent>
+              <DialogHeader><DialogTitle>Embed Image</DialogTitle></DialogHeader>
+              <div className="space-y-2">
+                <Label htmlFor="imageUrl">Image URL</Label>
+                <Input id="imageUrl" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://example.com/image.png" />
+                {debouncedUrl && <img src={debouncedUrl} alt="Preview" className="rounded-md object-contain max-h-48 w-full border mt-2" />}
+              </div>
+              <DialogFooter>
+                <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
+                <Button type="button" onClick={addImage}>Add Image</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+          <Dialog open={isVideoModalOpen} onOpenChange={setIsVideoModalOpen}>
+            <DialogContent>
+              <DialogHeader><DialogTitle>Embed YouTube Video</DialogTitle></DialogHeader>
+              <div className="space-y-2">
+                <Label htmlFor="videoUrl">YouTube URL</Label>
+                <Input id="videoUrl" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://youtube.com/watch?v=..." />
+                {debouncedUrl && getYoutubeEmbedUrl(debouncedUrl) && (
+                  <iframe
+                    className="w-full aspect-video mt-2 rounded-md border"
+                    src={getYoutubeEmbedUrl(debouncedUrl)!}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    title="YouTube video preview"
+                  ></iframe>
+                )}
+              </div>
+              <DialogFooter>
+                <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
+                <Button type="button" onClick={addYoutubeVideo}>Add Video</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+          <Dialog open={isModelModalOpen} onOpenChange={setIsModelModalOpen}>
+            <DialogContent>
+              <DialogHeader><DialogTitle>Embed 3D Model</DialogTitle></DialogHeader>
+              <div className="space-y-2">
+                <Label htmlFor="modelUrl">Model URL (.glb, .gltf, or Sketchfab link)</Label>
+                <Input id="modelUrl" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="e.g., https://sketchfab.com/3d-models/..." />
+                {debouncedUrl && (() => {
+                  const sketchfabUrl = getSketchfabEmbedUrl(debouncedUrl);
+                  if (sketchfabUrl) {
+                    return (
+                      <iframe
+                        className="w-full aspect-video mt-2 rounded-md border"
+                        src={sketchfabUrl}
+                        allowFullScreen
+                        title="Sketchfab preview"
+                      ></iframe>
+                    );
+                  }
+                  if (debouncedUrl.match(/\.(glb|gltf)$/i)) {
+                    return (
+                      <div className="mt-2 text-center text-sm text-muted-foreground p-4 border rounded-md">
+                        <Box className="mx-auto h-8 w-8 mb-2" />
+                        3D Model Preview (GLB/GLTF)
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
+              </div>
+              <DialogFooter>
+                <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
+                <Button type="button" onClick={addModelViewer}>Add Model</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+          <ImageCarouselModal
+            isOpen={isCarouselModalOpen}
+            onOpenChange={setIsCarouselModalOpen}
+            initialImages={[]}
+            onSave={handleSaveCarousel}
+          />
         </>,
         document.body
       )}
@@ -2154,17 +2153,28 @@ const Toolbar = ({ editor }: { editor: Editor | null }) => {
 
 interface RichTextEditorProps {
   initialContent?: string;
+  readonly?: boolean;
   onChange: (html: string) => void;
 }
 
-export const RichTextEditor = ({ initialContent, onChange }: RichTextEditorProps) => {
+export const RichTextEditor = ({ initialContent, onChange, readonly }: RichTextEditorProps) => {
   const toolbarRef = useRef<HTMLDivElement>(null);
-  
+  const { theme } = useCodeHighlightTheme();
+
+  // Generate unique ID for scoping styles
+  const editorId = useMemo(() => `rte-${Math.random().toString(36).slice(2, 11)}`, []);
+
+  // Generate scoped CSS for this editor instance
+  const codeStyles = useMemo(() => {
+    return theme ? generateHighlightCss(theme.styles, `#${editorId} .tiptap-code-block`) : '';
+  }, [theme, editorId]);
+
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-         heading: false,
-         codeBlock: false, 
+        heading: false,
+        codeBlock: false,
       }),
       CustomCodeBlock,
       TextStyle,
@@ -2175,11 +2185,11 @@ export const RichTextEditor = ({ initialContent, onChange }: RichTextEditorProps
       TextGradient,
       TiptapLink.configure({ openOnClick: false, autolink: true, HTMLAttributes: { class: 'text-primary hover:text-accent transition-colors cursor-pointer underline' } }),
       CustomImage.configure({
-        inline: false, 
+        inline: false,
         allowBase64: true,
       }),
       CustomYoutube.configure({
-        inline: false, 
+        inline: false,
         controls: false,
         nocookie: true,
       }),
@@ -2203,9 +2213,10 @@ export const RichTextEditor = ({ initialContent, onChange }: RichTextEditorProps
   });
 
   return (
-    <div className="w-full rounded-md border border-input bg-background ring-offset-background focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+    <div id={editorId} className="w-full rounded-md border border-input bg-background ring-offset-background focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+      {codeStyles && <style>{codeStyles}</style>}
       {editor && (
-         <BubbleMenu 
+        <BubbleMenu
           editor={editor}
           tippyOptions={{ duration: 100, zIndex: 30 }}
           className="bg-card p-1 rounded-lg shadow-lg border border-border flex items-center gap-0.5"
@@ -2213,7 +2224,7 @@ export const RichTextEditor = ({ initialContent, onChange }: RichTextEditorProps
             if (!editor.isFocused) {
               return false;
             }
-            
+
             const { from: selectionFrom, to: selectionTo } = editor.state.selection;
             let isMediaSelection = false;
             editor.state.doc.nodesBetween(selectionFrom, selectionTo, (node) => {
@@ -2224,44 +2235,44 @@ export const RichTextEditor = ({ initialContent, onChange }: RichTextEditorProps
             if (isMediaSelection) {
               return false;
             }
-            
+
             return from !== to;
           }}
-         >
-            <Button type="button" variant="ghost" size="icon" onClick={() => editor.chain().focus().toggleBold().run()} className={cn("h-8 w-8", editor.isActive('bold') && "bg-muted text-primary")}><Bold className="h-4 w-4" /></Button>
-            <Button type="button" variant="ghost" size="icon" onClick={() => editor.chain().focus().toggleItalic().run()} className={cn("h-8 w-8", editor.isActive('italic') && "bg-muted text-primary")}><Italic className="h-4 w-4" /></Button>
-            <Button type="button" variant="ghost" size="icon" onClick={() => editor.chain().focus().toggleUnderline().run()} className={cn("h-8 w-8", editor.isActive('underline') && "bg-muted text-primary")}><UnderlineIcon className="h-4 w-4" /></Button>
-            <Separator orientation="vertical" className="h-6" />
-            <GradientPicker
-                value={editor.getAttributes('textStyle').textGradient || editor.getAttributes('textStyle').color || '#ffffff'}
-                onChange={(value) => {
-                    const isGradient = value.includes('gradient');
-                    const { fontFamily, fontSize } = editor.getAttributes('textStyle');
-        
-                    const newAttrs: { 
-                      fontFamily?: string;
-                      fontSize?: string;
-                      color?: string | null;
-                      textGradient?: string | null;
-                    } = {
-                      fontFamily: fontFamily,
-                      fontSize: fontSize,
-                    };
-        
-                    if (isGradient) {
-                      newAttrs.color = null;
-                      newAttrs.textGradient = value;
-                    } else {
-                      newAttrs.textGradient = null;
-                      newAttrs.color = value;
-                    }
-                    
-                    editor.chain().focus().setMark('textStyle', newAttrs).run();
-                }}
-            />
+        >
+          <Button type="button" variant="ghost" size="icon" onClick={() => editor.chain().focus().toggleBold().run()} className={cn("h-8 w-8", editor.isActive('bold') && "bg-muted text-primary")}><Bold className="h-4 w-4" /></Button>
+          <Button type="button" variant="ghost" size="icon" onClick={() => editor.chain().focus().toggleItalic().run()} className={cn("h-8 w-8", editor.isActive('italic') && "bg-muted text-primary")}><Italic className="h-4 w-4" /></Button>
+          <Button type="button" variant="ghost" size="icon" onClick={() => editor.chain().focus().toggleUnderline().run()} className={cn("h-8 w-8", editor.isActive('underline') && "bg-muted text-primary")}><UnderlineIcon className="h-4 w-4" /></Button>
+          <Separator orientation="vertical" className="h-6" />
+          <GradientPicker
+            value={editor.getAttributes('textStyle').textGradient || editor.getAttributes('textStyle').color || '#ffffff'}
+            onChange={(value) => {
+              const isGradient = value.includes('gradient');
+              const { fontFamily, fontSize } = editor.getAttributes('textStyle');
+
+              const newAttrs: {
+                fontFamily?: string;
+                fontSize?: string;
+                color?: string | null;
+                textGradient?: string | null;
+              } = {
+                fontFamily: fontFamily,
+                fontSize: fontSize,
+              };
+
+              if (isGradient) {
+                newAttrs.color = null;
+                newAttrs.textGradient = value;
+              } else {
+                newAttrs.textGradient = null;
+                newAttrs.color = value;
+              }
+
+              editor.chain().focus().setMark('textStyle', newAttrs).run();
+            }}
+          />
         </BubbleMenu>
       )}
-      
+
       <div ref={toolbarRef} className="sticky top-0 bg-card/95 backdrop-blur-sm z-10">
         <Toolbar editor={editor} />
       </div>

@@ -2,27 +2,16 @@
 
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useId } from 'react';
 import parse from 'html-react-parser';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Check, ClipboardCopy, ChevronUp, ChevronDown } from 'lucide-react';
-import { createLowlight } from 'lowlight';
 import { toHtml } from 'hast-util-to-html';
-
-import javascript from 'highlight.js/lib/languages/javascript';
-import typescript from 'highlight.js/lib/languages/typescript';
-import python from 'highlight.js/lib/languages/python';
-import xml from 'highlight.js/lib/languages/xml';
-import css from 'highlight.js/lib/languages/css';
-import json from 'highlight.js/lib/languages/json';
-import bash from 'highlight.js/lib/languages/bash';
-import javaLang from 'highlight.js/lib/languages/java';
-import cpp from 'highlight.js/lib/languages/cpp';
-import plaintext from 'highlight.js/lib/languages/plaintext';
+import { lowlight } from '@/lib/lowlight';
+import { generateHighlightCss } from '@/lib/code-theme-utils';
 import type { HighlightTheme } from '@/lib/types';
-
-const lowlight = createLowlight({ javascript, typescript, python, css, xml, json, bash, java: javaLang, cpp, plaintext });
+import { useCodeHighlightTheme } from '@/components/providers/CodeHighlightThemeProvider';
 
 interface RenderedCodeBlockProps {
   rawCodeContent: string;
@@ -37,7 +26,7 @@ interface RenderedCodeBlockProps {
 export const RenderedCodeBlock: React.FC<RenderedCodeBlockProps> = ({
   rawCodeContent,
   language,
-  theme,
+  theme: propTheme,
   title,
   maxHeight = '400px',
   isCollapsible = false,
@@ -45,6 +34,12 @@ export const RenderedCodeBlock: React.FC<RenderedCodeBlockProps> = ({
 }) => {
   const [isCopied, setIsCopied] = React.useState(false);
   const [collapsedState, setCollapsedState] = React.useState(isCollapsed);
+  const { theme: contextTheme } = useCodeHighlightTheme();
+
+  // Use prop theme if available, otherwise fall back to context theme
+  const activeTheme = propTheme || contextTheme?.styles;
+  const uniqueId = useId().replace(/:/g, '');
+  const wrapperClass = `rendered-code-${uniqueId}`;
 
   const highlightedHtml = useMemo(() => {
     try {
@@ -57,9 +52,13 @@ export const RenderedCodeBlock: React.FC<RenderedCodeBlockProps> = ({
       return toHtml(tree);
     } catch (error) {
       console.error("Syntax highlighting failed:", error);
-      return rawCodeContent; 
+      return rawCodeContent;
     }
   }, [rawCodeContent, language]);
+
+  const styles = useMemo(() => {
+    return activeTheme ? generateHighlightCss(activeTheme, `.${wrapperClass} .rendered-code-block`) : '';
+  }, [activeTheme, wrapperClass]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(rawCodeContent).then(() => {
@@ -68,37 +67,40 @@ export const RenderedCodeBlock: React.FC<RenderedCodeBlockProps> = ({
     });
   };
 
+
+
   const displayLanguage = title || language || 'code';
 
   return (
-      <div className="not-prose my-4 relative group/code-block rendered-code-block-wrapper">
-        <div className="relative border border-border rounded-lg overflow-hidden">
-          <div className="flex items-center justify-between bg-card-foreground/5 px-2 py-1.5 border-b border-border text-xs">
-            <span className="text-muted-foreground text-xs w-full mr-2 truncate">
-              {displayLanguage}
-            </span>
-            <div className="flex items-center">
-              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleCopy}>
-                {isCopied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <ClipboardCopy className="w-3.5 h-3.5" />}
+    <div className={cn("not-prose my-4 relative group/code-block rendered-code-block-wrapper", wrapperClass)}>
+      {styles && <style dangerouslySetInnerHTML={{ __html: styles }} />}
+      <div className="relative border border-border rounded-lg overflow-hidden">
+        <div className="flex items-center justify-between bg-card-foreground/5 px-2 py-1.5 border-b border-border text-xs">
+          <span className="text-muted-foreground text-xs w-full mr-2 truncate">
+            {displayLanguage}
+          </span>
+          <div className="flex items-center">
+            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleCopy}>
+              {isCopied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <ClipboardCopy className="w-3.5 h-3.5" />}
+            </Button>
+            {isCollapsible && (
+              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setCollapsedState(prev => !prev)}>
+                {collapsedState ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
               </Button>
-              {isCollapsible && (
-                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setCollapsedState(prev => !prev)}>
-                  {collapsedState ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
-                </Button>
-              )}
-            </div>
+            )}
           </div>
-          {!collapsedState && (
-            <pre
-              className="rendered-code-block m-0"
-              style={{ maxHeight: maxHeight, overflowY: 'auto' }}
-            >
-              <code className={`hljs language-${language}`}>
-                {parse(highlightedHtml)}
-              </code>
-            </pre>
-          )}
         </div>
+        {!collapsedState && (
+          <pre
+            className="rendered-code-block m-0"
+            style={{ maxHeight: maxHeight, overflowY: 'auto' }}
+          >
+            <code className={`hljs language-${language}`}>
+              {parse(highlightedHtml)}
+            </code>
+          </pre>
+        )}
       </div>
+    </div>
   );
 };
