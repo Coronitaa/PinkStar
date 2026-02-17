@@ -125,7 +125,7 @@ export function EditResourceButtonAndModal({ resource }: EditResourceButtonAndMo
               Update the details for this resource. You can manage file versions below.
             </DialogDescription>
           </DialogHeader>
-          <div className="flex-grow pr-2 -mr-2">
+          <div className="flex-grow overflow-hidden min-h-0 flex flex-col pr-2 -mr-2">
             {isLoadingData && (
               <div className="flex justify-center items-center h-64">
                 <Loader2 className="w-8 h-8 animate-spin text-primary" />

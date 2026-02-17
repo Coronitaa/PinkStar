@@ -63,38 +63,38 @@ export function CreateResourceButtonAndModal({
   }, [isOpen, itemSlug, itemType, categorySlug, onOpenChange, toast]);
 
   return (
-      <Dialog open={isOpen} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-2xl md:max-w-3xl lg:max-w-4xl max-h-[90vh] flex flex-col">
-          <DialogHeader>
-            <DialogTitle>Create New Resource in {categoryName}</DialogTitle>
-            <DialogDescription>
-              Fill in the details for your new resource for {itemName}.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex-grow overflow-y-auto pr-2 -mr-2 custom-scrollbar">
-            {isLoadingData ? (
-              <div className="flex justify-center items-center h-64">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                <p className="ml-3 text-muted-foreground">Loading form data...</p>
-              </div>
-            ) : parentDetails ? (
-              <ResourceForm
-                isNew={true}
-                itemType={itemType}
-                projectSlug={itemSlug}
-                categorySlug={categorySlug}
-                parentItemId={parentDetails.parentItemId}
-                categoryId={parentDetails.categoryId}
-                dynamicTagGroups={dynamicTagGroups}
-                onSuccess={onSuccess}
-              />
-            ) : (
-              <div className="flex justify-center items-center h-64">
-                <p className="text-destructive">Failed to load resource creation form. Please try again.</p>
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-2xl md:max-w-3xl lg:max-w-4xl max-h-[90vh] flex flex-col">
+        <DialogHeader>
+          <DialogTitle>Create New Resource in {categoryName}</DialogTitle>
+          <DialogDescription>
+            Fill in the details for your new resource for {itemName}.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex-grow overflow-hidden min-h-0 flex flex-col pr-2 -mr-2">
+          {isLoadingData ? (
+            <div className="flex justify-center items-center h-64">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              <p className="ml-3 text-muted-foreground">Loading form data...</p>
+            </div>
+          ) : parentDetails ? (
+            <ResourceForm
+              isNew={true}
+              itemType={itemType}
+              projectSlug={itemSlug}
+              categorySlug={categorySlug}
+              parentItemId={parentDetails.parentItemId}
+              categoryId={parentDetails.categoryId}
+              dynamicTagGroups={dynamicTagGroups}
+              onSuccess={onSuccess}
+            />
+          ) : (
+            <div className="flex justify-center items-center h-64">
+              <p className="text-destructive">Failed to load resource creation form. Please try again.</p>
+            </div>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

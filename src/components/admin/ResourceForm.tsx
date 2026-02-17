@@ -584,10 +584,10 @@ export function ResourceForm({
 
   return (
     <>
-      <form onSubmit={form.handleSubmit(onSubmit, (errors) => console.error("Form validation errors:", JSON.stringify(errors, null, 2)))} className="space-y-6">
-        <Card className="bg-card/80 backdrop-blur-sm shadow-lg border-none">
-          <Tabs defaultValue="general" className="w-full">
-            <div className="overflow-x-auto whitespace-nowrap px-6 pt-4">
+      <form onSubmit={form.handleSubmit(onSubmit, (errors) => console.error("Form validation errors:", JSON.stringify(errors, null, 2)))} className="flex flex-col flex-grow min-h-0">
+        <Card className="bg-card/80 backdrop-blur-sm shadow-lg border-none flex flex-col flex-grow min-h-0">
+          <Tabs defaultValue="general" className="w-full flex flex-col flex-grow min-h-0">
+            <div className="overflow-x-auto whitespace-nowrap px-6 pt-4 shrink-0">
               <TabsList className="grid w-full grid-cols-4 sm:grid-cols-7 mb-4 bg-card-foreground/5 rounded-lg shrink-0">
                 <TabsTrigger value="general"><IconForType className="w-4 h-4 mr-1 sm:mr-2" />General</TabsTrigger>
                 <TabsTrigger value="authors"><Users className="w-4 h-4 mr-1 sm:mr-2" />Authors</TabsTrigger>
@@ -599,7 +599,7 @@ export function ResourceForm({
               </TabsList>
             </div>
 
-            <div className="space-y-6 p-6 pt-2 overflow-y-auto max-h-[calc(90vh-180px)] custom-scrollbar">
+            <div className="space-y-6 p-6 pt-2 overflow-y-auto flex-grow min-h-0 custom-scrollbar">
               <TabsContent value="general" className="space-y-6 m-0">
                 <CardTitle className="text-xl mb-4 flex items-center"><IconForType className="w-5 h-5 mr-2 text-primary" />Basic Information</CardTitle>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
