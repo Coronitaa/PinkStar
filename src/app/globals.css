@@ -1,5 +1,3 @@
-
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -67,48 +65,6 @@
     --sidebar-border: 270 7% 25%; /* #3C3941 */
     --sidebar-ring: hsl(var(--ring));
   }
-
-  .dark {
-    /* For PinkStar, :root IS the dark theme. .dark can be identical or offer slight variations if needed later. */
-    --background: 270 10% 10%;
-    --foreground: 270 15% 95%;
-    --card: 270 9% 14%;
-    --card-foreground: 270 15% 92%;
-    --popover: 270 8% 12%;
-    --popover-foreground: 270 15% 95%;
-    --primary: 330 80% 55%; /* Magenta/Pink */
-    --primary-foreground: 0 0% 100%;
-    --secondary: 270 8% 20%;
-    --secondary-foreground: 270 10% 80%;
-    --muted: 270 6% 25%;
-    --muted-foreground: 270 8% 60%;
-    --accent: 325 85% 60%; /* Vivid Pink */
-    --accent-foreground: 325 60% 25%;
-    --pastel-pink: 330 80% 85%;
-    --pastel-green: 145 60% 80%;
-    --pastel-yellow: 50 100% 80%;
-    --pastel-lavender: 260 70% 88%;
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 270 8% 30%;
-    --input: 270 7% 28%;
-    --ring: hsl(var(--primary)); /* Magenta/Pink */
-    
-    --chart-1: hsl(var(--primary));
-    --chart-2: hsl(var(--accent));
-    --chart-3: hsl(var(--pastel-pink));
-    --chart-4: hsl(var(--pastel-green));
-    --chart-5: hsl(var(--pastel-yellow));
-
-    --sidebar-background: 270 8% 13%;
-    --sidebar-foreground: 270 12% 88%;
-    --sidebar-primary: hsl(var(--primary));
-    --sidebar-primary-foreground: hsl(var(--primary-foreground));
-    --sidebar-accent: hsl(var(--accent));
-    --sidebar-accent-foreground: hsl(var(--accent-foreground));
-    --sidebar-border: 270 7% 25%;
-    --sidebar-ring: hsl(var(--ring));
-  }
 }
 
 @layer base {
@@ -147,12 +103,12 @@
 
   /* Custom styles for Rich Text Editor Media */
   .ProseMirror .rich-text-media-node, .prose .rich-text-media-node {
-    display: inline-block; /* Changed to allow shrink-wrapping for rotation calculations */
+    display: inline-block;
     position: relative;
     line-height: 0;
-    margin: 1em 0; /* Add some vertical spacing */
+    margin: 1em 0;
     max-width: 100%;
-    clear: both; /* Ensure floated content doesn't wrap around it incorrectly */
+    clear: both;
   }
   .ProseMirror .rich-text-media-node[data-float="left"], .prose .rich-text-media-node[data-float="left"] {
     float: left;
@@ -165,12 +121,11 @@
     margin-right: 0;
   }
   .ProseMirror .rich-text-media-node[data-float="center"], .prose .rich-text-media-node[data-float="center"] {
-    display: block; /* Center needs to be block to use auto margins */
+    display: block;
     float: none;
     margin-left: auto;
     margin-right: auto;
   }
-  /* Ensure content after a floated element clears properly */
   .ProseMirror > :last-child::after, .prose > :last-child::after {
     content: "";
     display: table;
@@ -178,7 +133,6 @@
   }
 }
 
-/* General component enhancements */
 @layer components {
   .card-interactive {
     @apply bg-card/70 backdrop-blur-sm shadow-lg hover:shadow-primary/30 transition-all duration-300 ease-in-out border border-border/30 hover:border-primary/50 transform hover:-translate-y-px;
@@ -196,21 +150,24 @@
      h1, h2, h3, h4, h5, h6 { @apply text-primary; }
       a { @apply text-accent hover:text-accent/80; } 
      code:not([class*="language-"]) { @apply bg-muted text-accent px-1 py-0.5 rounded-sm text-sm; }
-     pre { @apply bg-muted p-4 rounded-md overflow-x-auto; }
+     
+     /* Crucial: Prevent prose from adding styles to custom code blocks */
+     pre:not(.tiptap-code-block):not(.rendered-code-block) { @apply bg-muted p-4 rounded-md overflow-x-auto; }
+     
      blockquote { @apply border-l-4 border-primary pl-4 italic text-muted-foreground; }
      ul { @apply list-disc pl-6 my-4; }
      ol { @apply list-decimal pl-6 my-4; }
      li { @apply my-2; }
     }
-    .prose .rich-text-media-node {
-       
-    }
+
     .dark .prose-invert {
       h1, h2, h3, h4, h5, h6 { @apply text-primary; } 
       a { @apply text-accent hover:text-accent/80; }
-      /* strong color removed to allow inheritance for gradients */
       code:not([class*="language-"]) { @apply bg-secondary text-accent; } 
-      pre:not([class*="language-"]) { @apply bg-secondary; }
+      
+      /* Crucial: Prevent prose from adding styles to custom code blocks */
+      pre:not([class*="language-"]):not(.tiptap-code-block):not(.rendered-code-block) { @apply bg-secondary; }
+      
       blockquote { @apply border-primary; }
       ul, ol {
         li::marker {
@@ -232,8 +189,6 @@
         text-decoration-thickness: 2px;
     }
 
-
-  /* Sheen effect for Follow button (and other buttons if class is applied) */
   .button-follow-sheen {
     @apply relative overflow-hidden;
   }
@@ -261,80 +216,59 @@
     animation: sh02 0.6s ease-in-out; 
   }
 
+  /* Enhanced Pink Glow effect for the download section */
   .download-card-glow {
-    @apply relative overflow-hidden shadow-lg;
-    animation: subtlePrimaryPulse 2.5s infinite ease-in-out;
+    @apply relative overflow-hidden transition-all duration-500 border border-primary/30;
+    box-shadow: 0 0 15px hsla(var(--primary) / 0.15);
   }
 
-  .download-card-glow::before {
+  .download-card-glow::after {
     content: '';
     position: absolute;
-    inset: 0;
+    inset: -1px;
+    padding: 1.5px;
     border-radius: inherit;
-    padding: 1px;
-    background: conic-gradient(from 180deg at 50% 50%, hsla(var(--primary),0.1) 0deg, hsla(var(--primary),0.7) 180deg, hsla(var(--primary),0.1) 360deg);
-    -webkit-mask: 
-        linear-gradient(#fff 0 0) content-box, 
-        linear-gradient(#fff 0 0);
-    mask: 
-        linear-gradient(#fff 0 0) content-box, 
-        linear-gradient(#fff 0 0);
+    background: conic-gradient(from 0deg, transparent, hsla(var(--primary) / 0.8), transparent 50%, hsla(var(--primary) / 0.8), transparent);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
-    opacity: 0;
-    animation: subtleBorderGlow 2.5s infinite ease-in-out;
-    animation-delay: 0.5s;
-    pointer-events: none; /* Added to prevent click interception */
-    z-index: -1; /* Added to ensure it's behind content */
+    opacity: 0.6;
+    animation: download-glow-rotate 4s linear infinite;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  @keyframes download-glow-rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .download-card-glow:hover {
+    box-shadow: 0 0 30px hsla(var(--primary) / 0.3);
+    border-color: hsla(var(--primary) / 0.6);
   }
 
   .button-3d-effect {
     @apply shadow-md hover:shadow-lg active:shadow-sm transition-all duration-150;
-    transform-style: preserve-3d; /* Needed for 3D effects */
+    transform-style: preserve-3d;
   }
   .button-3d-effect:hover {
-    transform: translateY(-1px) translateZ(1px); /* Slight lift */
+    transform: translateY(-1px) translateZ(1px);
   }
   .button-3d-effect:active {
-    transform: translateY(1px) translateZ(-1px); /* Simulate press */
+    transform: translateY(1px) translateZ(-1px);
     filter: brightness(0.95);
   }
 }
 
 @keyframes sh02 {
-  0% {
-    left: -75px;
-    opacity: 0;
-  }
-  20% { 
-    opacity: 1;
-  }
-  80% { 
-    opacity: 1;
-  }
-  100% {
-    left: calc(100% + 75px); 
-    opacity: 0; 
-  }
+  0% { left: -75px; opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { left: calc(100% + 75px); opacity: 0; }
 }
 
-@keyframes subtlePrimaryPulse {
-  0%, 100% { box-shadow: 0 0 10px hsla(var(--primary), 0.2), 0 0 20px hsla(var(--primary), 0.1); }
-  50% { box-shadow: 0 0 20px hsla(var(--primary), 0.4), 0 0 40px hsla(var(--primary), 0.2); }
-}
-
-@keyframes subtleBorderGlow {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 1; }
-}
-
-
-/* -- CUSTOM EDITOR STYLES -- */
-/* Resizer handle for custom code blocks */
-.ProseMirror-selectednode .code-block-resizer,
-.group-hover\/code-block .code-block-resizer {
-  @apply opacity-100;
-}
 .code-block-resizer {
   @apply absolute bottom-0 left-0 right-0 h-2 cursor-ns-resize z-20 opacity-0 transition-opacity p-0.5;
 }
@@ -343,5 +277,5 @@
 }
 
 .rendered-code-block, .tiptap-code-block {
-    @apply p-4 rounded-b-md;
+    @apply rounded-b-md;
 }

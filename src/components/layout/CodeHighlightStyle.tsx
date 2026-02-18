@@ -1,5 +1,3 @@
-
-
 import type { HighlightTheme } from '@/lib/types';
 import { getActiveCodeHighlightTheme } from '@/lib/data';
 import { unstable_noStore as noStore } from 'next/cache';
@@ -7,53 +5,44 @@ import { unstable_noStore as noStore } from 'next/cache';
 function generateHighlightCss(themeStyles: HighlightTheme, selectorPrefix: string): string {
     if (!themeStyles) return '';
 
-    const prefixWithBody = `body ${selectorPrefix}`;
+    // Increased specificity using html.dark body to override any prose defaults
+    const p = `html.dark body ${selectorPrefix}`;
 
     const styles: { [key: string]: string } = {
-        // Base
-        [`${prefixWithBody}`]: `background-color: ${themeStyles.background || 'transparent'}; color: ${themeStyles.text};`,
+        // Base - Force reset background and padding to avoid inconsistencies
+        [`${p}`]: `background-color: ${themeStyles.background || '#1e1e1e'} !important; color: ${themeStyles.text} !important; padding: 1rem !important; margin: 0 !important; border-radius: 0 0 0.5rem 0.5rem;`,
         
-        // Comments & Docstrings
-        [`${prefixWithBody} .hljs-comment, ${prefixWithBody} .hljs-quote`]: `color: ${themeStyles.comment}; font-style: italic;`,
-        
-        // Keywords & Control Flow
-        [`${prefixWithBody} .hljs-keyword, ${prefixWithBody} .hljs-selector-tag, ${prefixWithBody} .hljs-doctag, ${prefixWithBody} .hljs-meta-keyword, ${prefixWithBody} .hljs-subst, ${prefixWithBody} .hljs-section, ${prefixWithBody} .hljs-built_in[class*="self"], ${prefixWithBody} .hljs-keyword[class*="self"], ${prefixWithBody} .hljs-name, ${prefixWithBody} .hljs-strong`]: `color: ${themeStyles.keyword};`,
+        // Ensure the code tag inside doesn't have its own background or extra padding
+        [`${p} code`]: `background-color: transparent !important; padding: 0 !important; color: inherit !important; font-family: var(--font-geist-mono), monospace !important;`,
 
-        // Strings, Regex, etc.
-        [`${prefixWithBody} .hljs-string, ${prefixWithBody} .hljs-regexp, ${prefixWithBody} .hljs-meta-string, ${prefixWithBody} .hljs-selector-attr, ${prefixWithBody} .hljs-template-variable, ${prefixWithBody} .hljs-addition`]: `color: ${themeStyles.string};`,
+        // Token Styles
+        [`${p} .hljs-comment, ${p} .hljs-quote`]: `color: ${themeStyles.comment}; font-style: italic;`,
         
-        // Numbers & Literals (booleans, null, etc.)
-        [`${prefixWithBody} .hljs-number, ${prefixWithBody} .hljs-literal`]: `color: ${themeStyles.number};`,
-        
-        // Functions & Methods
-        [`${prefixWithBody} .hljs-title.function_, ${prefixWithBody} .hljs-title.function_.invoke__, ${prefixWithBody} .hljs-title[class*="function"]`]: `color: ${themeStyles.function};`,
-        
-        // Parameters of functions
-        [`${prefixWithBody} .hljs-params`]: `color: ${themeStyles.variable}; font-style: normal;`,
+        [`${p} .hljs-keyword, ${p} .hljs-selector-tag, ${p} .hljs-doctag, ${p} .hljs-meta-keyword, ${p} .hljs-subst, ${p} .hljs-section, ${p} .hljs-built_in[class*="self"], ${p} .hljs-keyword[class*="self"], ${p} .hljs-name, ${p} .hljs-strong`]: `color: ${themeStyles.keyword};`,
 
-        // Classes, Types, & Built-ins
-        [`${prefixWithBody} .hljs-title.class_, ${prefixWithBody} .hljs-type, ${prefixWithBody} .hljs-built_in, ${prefixWithBody} .hljs-class .hljs-title`]: `color: ${themeStyles.class};`,
+        [`${p} .hljs-string, ${p} .hljs-regexp, ${p} .hljs-meta-string, ${p} .hljs-selector-attr, ${p} .hljs-template-variable, ${p} .hljs-addition`]: `color: ${themeStyles.string};`,
         
-        // Decorators & Annotations (e.g., @decorator in Python/JS)
-        [`${prefixWithBody} .hljs-meta, ${prefixWithBody} .hljs-meta .hljs-keyword`]: `color: ${themeStyles.tag};`,
+        [`${p} .hljs-number, ${p} .hljs-literal`]: `color: ${themeStyles.number};`,
+        
+        [`${p} .hljs-title.function_, ${p} .hljs-title.function_.invoke__, ${p} .hljs-title[class*="function"]`]: `color: ${themeStyles.function};`,
+        
+        [`${p} .hljs-params`]: `color: ${themeStyles.variable}; font-style: normal;`,
 
-        // HTML/XML Tags and Component names
-        [`${prefixWithBody} .hljs-tag, ${prefixWithBody} .hljs-selector-id, ${prefixWithBody} .hljs-selector-class`]: `color: ${themeStyles.tag};`,
+        [`${p} .hljs-title.class_, ${p} .hljs-type, ${p} .hljs-built_in, ${p} .hljs-class .hljs-title`]: `color: ${themeStyles.class};`,
         
-        // Attributes
-        [`${prefixWithBody} .hljs-attribute, ${prefixWithBody} .hljs-attr`]: `color: ${themeStyles.attr};`,
-        
-        // Variables & Properties
-        [`${prefixWithBody} .hljs-variable, ${prefixWithBody} .hljs-property`]: `color: ${themeStyles.variable};`,
-        
-        // Punctuation & Operators
-        [`${prefixWithBody} .hljs-operator, ${prefixWithBody} .hljs-punctuation`]: `color: ${themeStyles.punctuation};`,
+        [`${p} .hljs-meta, ${p} .hljs-meta .hljs-keyword`]: `color: ${themeStyles.tag};`,
 
-        // Symbols and bullets
-        [`${prefixWithBody} .hljs-symbol, ${prefixWithBody} .hljs-bullet, ${prefixWithBody} .hljs-link`]: `color: ${themeStyles.operator};`,
+        [`${p} .hljs-tag, ${p} .hljs-selector-id, ${p} .hljs-selector-class`]: `color: ${themeStyles.tag};`,
+        
+        [`${p} .hljs-attribute, ${p} .hljs-attr`]: `color: ${themeStyles.attr};`,
+        
+        [`${p} .hljs-variable, ${p} .hljs-property`]: `color: ${themeStyles.variable};`,
+        
+        [`${p} .hljs-operator, ${p} .hljs-punctuation`]: `color: ${themeStyles.punctuation};`,
 
-        // Style
-        [`${prefixWithBody} .hljs-emphasis`]: `font-style: italic;`,
+        [`${p} .hljs-symbol, ${p} .hljs-bullet, ${p} .hljs-link`]: `color: ${themeStyles.operator};`,
+
+        [`${p} .hljs-emphasis`]: `font-style: italic;`,
     };
 
     return Object.entries(styles)
@@ -61,8 +50,6 @@ function generateHighlightCss(themeStyles: HighlightTheme, selectorPrefix: strin
       .join('\n');
 }
 
-// This is now a pure Server Component.
-// It fetches data and renders the <style> tag on the server.
 export async function CodeHighlightStyle() {
   noStore();
   const activeTheme = await getActiveCodeHighlightTheme();
