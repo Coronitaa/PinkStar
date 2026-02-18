@@ -5,25 +5,29 @@ import sqlite3 from 'sqlite3';
 import { open, type Database } from 'sqlite';
 import path from 'path';
 
-let dbInstance: Database | null = null;
+let dbPromise: Promise<Database> | null = null;
 
 const DB_FILE_PATH = path.join(process.cwd(), 'local.sqlite3');
 
 export async function getDb(): Promise<Database> {
-  if (dbInstance) {
-    return dbInstance;
+  if (dbPromise) {
+    return dbPromise;
   }
 
-  dbInstance = await open({
-    filename: DB_FILE_PATH,
-    driver: sqlite3.Database,
-  });
+  dbPromise = (async () => {
+    const db = await open({
+      filename: DB_FILE_PATH,
+      driver: sqlite3.Database,
+    });
 
-  // Enable WAL mode for better concurrency and to prevent locking issues.
-  await dbInstance.exec('PRAGMA journal_mode = WAL;');
+    // Enable WAL mode for better concurrency and to prevent locking issues.
+    await db.exec('PRAGMA journal_mode = WAL;');
 
-  await initDbSchema(dbInstance);
-  return dbInstance;
+    await initDbSchema(db);
+    return db;
+  })();
+
+  return dbPromise;
 }
 
 async function initDbSchema(db: Database): Promise<void> {
@@ -250,7 +254,7 @@ async function initDbSchema(db: Database): Promise<void> {
     if (pkColumns.length > 0) {
       const whereClause = pkColumns.map(pk => `${pk} = OLD.${pk}`).join(' AND ');
       await db.exec(
-        `CREATE TRIGGER ${triggerName}
+        `CREATE TRIGGER IF NOT EXISTS ${triggerName}
          AFTER UPDATE ON ${tableName}
          FOR EACH ROW
          WHEN OLD.updated_at = NEW.updated_at OR OLD.updated_at IS NULL
@@ -258,8 +262,6 @@ async function initDbSchema(db: Database): Promise<void> {
             UPDATE ${tableName} SET updated_at = CURRENT_TIMESTAMP WHERE ${whereClause};
          END;`
       );
-    } else {
-      console.warn(`Could not create update trigger for table ${tableName} as it has no primary key defined.`);
     }
   }
   
@@ -363,5 +365,3 @@ async function initDbSchema(db: Database): Promise<void> {
 
   console.log("SQLite database schema initialized/verified. Mock profiles ensured (with social links).");
 }
-
-    
