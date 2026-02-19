@@ -5,81 +5,118 @@
 @layer base {
   :root {
     /* Dark Violet Base & Core Text */
-    --background: 270 10% 10%; /* Slightly lighter dark violet #1A181C */
-    --foreground: 270 15% 95%; /* Brighter off-white for general text #F0EEF5 */
+    --background: 270 10% 10%;
+    /* Slightly lighter dark violet #1A181C */
+    --foreground: 270 15% 95%;
+    /* Brighter off-white for general text #F0EEF5 */
 
     /* Cards & Popovers - slightly differentiated from main background */
-    --card: 270 9% 14%; /* Darker violet for cards #211F25 */
-    --card-foreground: 270 15% 92%; /* Slightly softer white for card text #EBEAF2 */
+    --card: 270 9% 14%;
+    /* Darker violet for cards #211F25 */
+    --card-foreground: 270 15% 92%;
+    /* Slightly softer white for card text #EBEAF2 */
 
-    --popover: 270 8% 12%; /* Even darker for popovers for depth #1D1B20 */
-    --popover-foreground: 270 15% 95%; /* #F0EEF5 */
+    --popover: 270 8% 12%;
+    /* Even darker for popovers for depth #1D1B20 */
+    --popover-foreground: 270 15% 95%;
+    /* #F0EEF5 */
 
     /* Primary Color - Magenta/Pink */
-    --primary: 330 80% 55%; /* Magenta/Pink #E64A8B */
-    --primary-foreground: 0 0% 100%; /* Pure white #FFFFFF for max contrast on primary */
+    --primary: 330 80% 55%;
+    /* Magenta/Pink #E64A8B */
+    --primary-foreground: 0 0% 100%;
+    /* Pure white #FFFFFF for max contrast on primary */
 
     /* Secondary Elements - Muted Violet */
-    --secondary: 270 8% 20%; /* Mid-tone violet for secondary elements #2F2C35 */
-    --secondary-foreground: 270 10% 80%; /* #C7C3D1 */
+    --secondary: 270 8% 20%;
+    /* Mid-tone violet for secondary elements #2F2C35 */
+    --secondary-foreground: 270 10% 80%;
+    /* #C7C3D1 */
 
     /* Muted States - Desaturated Violet */
-    --muted: 270 6% 25%; /* Softer violet for muted backgrounds/elements #3C3941 */
-    --muted-foreground: 270 8% 60%; /* #928DA0 - Muted text color */
+    --muted: 270 6% 25%;
+    /* Softer violet for muted backgrounds/elements #3C3941 */
+    --muted-foreground: 270 8% 60%;
+    /* #928DA0 - Muted text color */
 
     /* Accent Colors - Vibrant Pink (Magenta family) */
-    --accent: 325 85% 60%; /* Vivid Pink #F252A2 */
-    --accent-foreground: 325 60% 25%; /* Darker Pink/Magenta for text on accent #8C2A5C */
-    
-    --pastel-pink: 330 80% 85%; /* #F8C4D8 */
-    --pastel-green: 145 60% 80%; /* #B7E4C7 */
-    --pastel-yellow: 50 100% 80%; /* #FFE599 */
-    --pastel-lavender: 260 70% 88%; /* #D9D0F3 */
+    --accent: 325 85% 60%;
+    /* Vivid Pink #F252A2 */
+    --accent-foreground: 325 60% 25%;
+    /* Darker Pink/Magenta for text on accent #8C2A5C */
+
+    --pastel-pink: 330 80% 85%;
+    /* #F8C4D8 */
+    --pastel-green: 145 60% 80%;
+    /* #B7E4C7 */
+    --pastel-yellow: 50 100% 80%;
+    /* #FFE599 */
+    --pastel-lavender: 260 70% 88%;
+    /* #D9D0F3 */
 
     /* Destructive States - Standard Red */
-    --destructive: 0 72% 51%; /* #E53E3E */
-    --destructive-foreground: 0 0% 98%; /* #FAFAFA */
+    --destructive: 0 72% 51%;
+    /* #E53E3E */
+    --destructive-foreground: 0 0% 98%;
+    /* #FAFAFA */
 
     /* Borders, Inputs, Rings */
-    --border: 270 8% 30%; /* Violet-tinted border #484450 */
-    --input: 270 7% 28%; /* Slightly lighter input background #43404A */
-    --ring: hsl(var(--primary)); /* Primary color for focus rings (Magenta/Pink) */
+    --border: 270 8% 30%;
+    /* Violet-tinted border #484450 */
+    --input: 270 7% 28%;
+    /* Slightly lighter input background #43404A */
+    --ring: hsl(var(--primary));
+    /* Primary color for focus rings (Magenta/Pink) */
 
     /* Corner Radius */
-    --radius: 0.85rem; /* Slightly more rounded corners */
+    --radius: 0.85rem;
+    /* Slightly more rounded corners */
 
     /* Chart Colors - Using new primary, accent, and pastels */
-    --chart-1: hsl(var(--primary));      /* Magenta/Pink */
-    --chart-2: hsl(var(--accent));       /* Vivid Pink */
-    --chart-3: hsl(var(--pastel-pink));  /* Pastel Pink */
-    --chart-4: hsl(var(--pastel-green)); /* Pastel Green */
-    --chart-5: hsl(var(--pastel-yellow));/* Pastel Yellow */
+    --chart-1: hsl(var(--primary));
+    /* Magenta/Pink */
+    --chart-2: hsl(var(--accent));
+    /* Vivid Pink */
+    --chart-3: hsl(var(--pastel-pink));
+    /* Pastel Pink */
+    --chart-4: hsl(var(--pastel-green));
+    /* Pastel Green */
+    --chart-5: hsl(var(--pastel-yellow));
+    /* Pastel Yellow */
 
     /* Sidebar specific colors - can inherit or be distinct */
-    --sidebar-background: 270 8% 13%; /* #1F1D23 */
-    --sidebar-foreground: 270 12% 88%; /* #DCD8E6 */
-    --sidebar-primary: hsl(var(--primary)); /* Use main primary */
+    --sidebar-background: 270 8% 13%;
+    /* #1F1D23 */
+    --sidebar-foreground: 270 12% 88%;
+    /* #DCD8E6 */
+    --sidebar-primary: hsl(var(--primary));
+    /* Use main primary */
     --sidebar-primary-foreground: hsl(var(--primary-foreground));
-    --sidebar-accent: hsl(var(--accent)); /* Use main accent */
+    --sidebar-accent: hsl(var(--accent));
+    /* Use main accent */
     --sidebar-accent-foreground: hsl(var(--accent-foreground));
-    --sidebar-border: 270 7% 25%; /* #3C3941 */
+    --sidebar-border: 270 7% 25%;
+    /* #3C3941 */
     --sidebar-ring: hsl(var(--ring));
   }
 }
 
 @layer base {
   * {
-    @apply border-border transition-colors duration-200 ease-in-out; 
+    @apply border-border transition-colors duration-200 ease-in-out;
   }
+
   body {
     @apply text-foreground antialiased;
     font-family: var(--font-geist-sans), sans-serif;
-    background-image: linear-gradient(160deg, hsl(var(--background)) 0%, hsl(265, 12%, 7%) 100%); /* Darker violet gradient */
+    background-image: linear-gradient(160deg, hsl(var(--background)) 0%, hsl(265, 12%, 7%) 100%);
+    /* Darker violet gradient */
     background-attachment: fixed;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    caret-color: hsl(var(--primary)); /* Make caret visible on gradient text */
+    caret-color: hsl(var(--primary));
+    /* Make caret visible on gradient text */
   }
 
   /* Improved scrollbar aesthetics */
@@ -87,22 +124,28 @@
     width: 10px;
     height: 10px;
   }
+
   ::-webkit-scrollbar-track {
     background: hsl(var(--background) / 0.5);
     border-radius: var(--radius);
   }
+
   ::-webkit-scrollbar-thumb {
-    background: hsl(var(--primary) / 0.6); /* Primary color scrollbar thumb */
+    background: hsl(var(--primary) / 0.6);
+    /* Primary color scrollbar thumb */
     border-radius: var(--radius);
     border: 2px solid transparent;
     background-clip: content-box;
   }
+
   ::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--primary)); /* Brighter primary on hover */
+    background: hsl(var(--primary));
+    /* Brighter primary on hover */
   }
 
   /* Custom styles for Rich Text Editor Media */
-  .ProseMirror .rich-text-media-node, .prose .rich-text-media-node {
+  .ProseMirror .rich-text-media-node,
+  .prose .rich-text-media-node {
     display: inline-block;
     position: relative;
     line-height: 0;
@@ -110,23 +153,31 @@
     max-width: 100%;
     clear: both;
   }
-  .ProseMirror .rich-text-media-node[data-float="left"], .prose .rich-text-media-node[data-float="left"] {
+
+  .ProseMirror .rich-text-media-node[data-float="left"],
+  .prose .rich-text-media-node[data-float="left"] {
     float: left;
     margin-right: 1em;
     margin-left: 0;
   }
-  .ProseMirror .rich-text-media-node[data-float="right"], .prose .rich-text-media-node[data-float="right"] {
+
+  .ProseMirror .rich-text-media-node[data-float="right"],
+  .prose .rich-text-media-node[data-float="right"] {
     float: right;
     margin-left: 1em;
     margin-right: 0;
   }
-  .ProseMirror .rich-text-media-node[data-float="center"], .prose .rich-text-media-node[data-float="center"] {
+
+  .ProseMirror .rich-text-media-node[data-float="center"],
+  .prose .rich-text-media-node[data-float="center"] {
     display: block;
     float: none;
     margin-left: auto;
     margin-right: auto;
   }
-  .ProseMirror > :last-child::after, .prose > :last-child::after {
+
+  .ProseMirror> :last-child::after,
+  .prose> :last-child::after {
     content: "";
     display: table;
     clear: both;
@@ -137,57 +188,106 @@
   .card-interactive {
     @apply bg-card/70 backdrop-blur-sm shadow-lg hover:shadow-primary/30 transition-all duration-300 ease-in-out border border-border/30 hover:border-primary/50 transform hover:-translate-y-px;
   }
-  .button-primary-glow {
-     @apply bg-primary text-primary-foreground hover:bg-primary/90 shadow-md hover:shadow-primary/50 focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background transition-all duration-200;
-  }
-   .button-outline-glow {
-     @apply border border-primary/60 text-primary hover:bg-primary/10 hover:text-primary/90 shadow-sm hover:shadow-primary/20 focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background transition-all duration-200;
-   }
 
-   /* Prose styles for markdown content */
-    .prose {
-     @apply overflow-x-hidden break-words;
-     h1, h2, h3, h4, h5, h6 { @apply text-primary; }
-      a { @apply text-accent hover:text-accent/80; } 
-     code:not([class*="language-"]) { @apply bg-muted text-accent px-1 py-0.5 rounded-sm text-sm; }
-     
-     /* Crucial: Prevent prose from adding styles to custom code blocks */
-     pre:not(.tiptap-code-block):not(.rendered-code-block) { @apply bg-muted p-4 rounded-md overflow-x-auto; }
-     
-     blockquote { @apply border-l-4 border-primary pl-4 italic text-muted-foreground; }
-     ul { @apply list-disc pl-6 my-4; }
-     ol { @apply list-decimal pl-6 my-4; }
-     li { @apply my-2; }
+  .button-primary-glow {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 shadow-md hover:shadow-primary/50 focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background transition-all duration-200;
+  }
+
+  .button-outline-glow {
+    @apply border border-primary/60 text-primary hover:bg-primary/10 hover:text-primary/90 shadow-sm hover:shadow-primary/20 focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background transition-all duration-200;
+  }
+
+  /* Prose styles for markdown content */
+  .prose {
+    @apply overflow-x-hidden break-words;
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      @apply text-primary;
     }
 
-    .dark .prose-invert {
-      h1, h2, h3, h4, h5, h6 { @apply text-primary; } 
-      a { @apply text-accent hover:text-accent/80; }
-      code:not([class*="language-"]) { @apply bg-secondary text-accent; } 
-      
-      /* Crucial: Prevent prose from adding styles to custom code blocks */
-      pre:not([class*="language-"]):not(.tiptap-code-block):not(.rendered-code-block) { @apply bg-secondary; }
-      
-      blockquote { @apply border-primary; }
-      ul, ol {
-        li::marker {
-          @apply text-foreground/80;
-        }
+    a {
+      @apply text-accent hover:text-accent/80;
+    }
+
+    code:not([class*="language-"]) {
+      @apply bg-muted text-accent px-1 py-0.5 rounded-sm text-sm;
+    }
+
+    /* Crucial: Prevent prose from adding styles to custom code blocks */
+    pre:not(.tiptap-code-block):not(.rendered-code-block) {
+      @apply bg-muted p-4 rounded-md overflow-x-auto;
+    }
+
+    blockquote {
+      @apply border-l-4 border-primary pl-4 italic text-muted-foreground;
+    }
+
+    ul {
+      @apply list-disc pl-6 my-4;
+    }
+
+    ol {
+      @apply list-decimal pl-6 my-4;
+    }
+
+    li {
+      @apply my-2;
+    }
+  }
+
+  .dark .prose-invert {
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      @apply text-primary;
+    }
+
+    a {
+      @apply text-accent hover:text-accent/80;
+    }
+
+    code:not([class*="language-"]) {
+      @apply bg-secondary text-accent;
+    }
+
+    /* Crucial: Prevent prose from adding styles to custom code blocks */
+    pre:not([class*="language-"]):not(.tiptap-code-block):not(.rendered-code-block) {
+      @apply bg-secondary;
+    }
+
+    blockquote {
+      @apply border-primary;
+    }
+
+    ul,
+    ol {
+      li::marker {
+        @apply text-foreground/80;
       }
     }
-    
-    .dark .prose-invert .has-text-gradient[style*="background-image"] u,
-    .dark .prose-invert .has-text-gradient[style*="background-image"] s {
-        text-decoration-color: var(--first-gradient-color, hsl(var(--accent)));
-        text-decoration-thickness: 1px;
-    }
+  }
 
-    .dark .prose-invert .has-text-gradient[style*="background-image"] strong u,
-    .dark .prose-invert .has-text-gradient[style*="background-image"] b u,
-    .dark .prose-invert .has-text-gradient[style*="background-image"] strong s,
-    .dark .prose-invert .has-text-gradient[style*="background-image"] b s {
-        text-decoration-thickness: 2px;
-    }
+  .dark .prose-invert .has-text-gradient[style*="background-image"] u,
+  .dark .prose-invert .has-text-gradient[style*="background-image"] s {
+    text-decoration-color: var(--first-gradient-color, hsl(var(--accent)));
+    text-decoration-thickness: 1px;
+  }
+
+  .dark .prose-invert .has-text-gradient[style*="background-image"] strong u,
+  .dark .prose-invert .has-text-gradient[style*="background-image"] b u,
+  .dark .prose-invert .has-text-gradient[style*="background-image"] strong s,
+  .dark .prose-invert .has-text-gradient[style*="background-image"] b s {
+    text-decoration-thickness: 2px;
+  }
 
   .button-follow-sheen {
     @apply relative overflow-hidden;
@@ -198,22 +298,20 @@
     display: block;
     position: absolute;
     top: 0;
-    left: -75px; 
-    width: 60px; 
+    left: -75px;
+    width: 60px;
     height: 100%;
-    background: linear-gradient(
-      to right,
-      hsla(var(--primary-foreground), 0) 0%,
-      hsla(var(--primary-foreground), 0.6) 50%, 
-      hsla(var(--primary-foreground), 0) 100%
-    );
+    background: linear-gradient(to right,
+        hsla(var(--primary-foreground), 0) 0%,
+        hsla(var(--primary-foreground), 0.6) 50%,
+        hsla(var(--primary-foreground), 0) 100%);
     transform: skewX(-25deg);
-    opacity: 0; 
+    opacity: 0;
     pointer-events: none;
   }
 
   .button-follow-sheen:hover::before {
-    animation: sh02 0.6s ease-in-out; 
+    animation: sh02 0.6s ease-in-out;
   }
 
   /* Enhanced Pink Glow effect for the download section */
@@ -222,27 +320,7 @@
     box-shadow: 0 0 15px hsla(var(--primary) / 0.15);
   }
 
-  .download-card-glow::after {
-    content: '';
-    position: absolute;
-    inset: -1px;
-    padding: 1.5px;
-    border-radius: inherit;
-    background: conic-gradient(from 0deg, transparent, hsla(var(--primary) / 0.8), transparent 50%, hsla(var(--primary) / 0.8), transparent);
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    opacity: 0.6;
-    animation: download-glow-rotate 4s linear infinite;
-    pointer-events: none;
-    z-index: 1;
-  }
 
-  @keyframes download-glow-rotate {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-  }
 
   .download-card-glow:hover {
     box-shadow: 0 0 30px hsla(var(--primary) / 0.3);
@@ -253,9 +331,11 @@
     @apply shadow-md hover:shadow-lg active:shadow-sm transition-all duration-150;
     transform-style: preserve-3d;
   }
+
   .button-3d-effect:hover {
     transform: translateY(-1px) translateZ(1px);
   }
+
   .button-3d-effect:active {
     transform: translateY(1px) translateZ(-1px);
     filter: brightness(0.95);
@@ -263,19 +343,34 @@
 }
 
 @keyframes sh02 {
-  0% { left: -75px; opacity: 0; }
-  20% { opacity: 1; }
-  80% { opacity: 1; }
-  100% { left: calc(100% + 75px); opacity: 0; }
+  0% {
+    left: -75px;
+    opacity: 0;
+  }
+
+  20% {
+    opacity: 1;
+  }
+
+  80% {
+    opacity: 1;
+  }
+
+  100% {
+    left: calc(100% + 75px);
+    opacity: 0;
+  }
 }
 
 .code-block-resizer {
   @apply absolute bottom-0 left-0 right-0 h-2 cursor-ns-resize z-20 opacity-0 transition-opacity p-0.5;
 }
-.code-block-resizer > div {
+
+.code-block-resizer>div {
   @apply w-full h-full;
 }
 
-.rendered-code-block, .tiptap-code-block {
-    @apply rounded-b-md;
+.rendered-code-block,
+.tiptap-code-block {
+  @apply rounded-b-md;
 }
