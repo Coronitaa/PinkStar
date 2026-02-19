@@ -31,9 +31,10 @@ interface YouTubeThumbnailProps {
   videoId: string;
   alt: string;
   className?: string;
+  priority?: boolean;
 }
 
-const YouTubeThumbnail: React.FC<YouTubeThumbnailProps> = ({ videoId, alt, className }) => {
+const YouTubeThumbnail: React.FC<YouTubeThumbnailProps> = ({ videoId, alt, className, priority = false }) => {
   // Using hqdefault (480x360) by default to avoid 404 errors common with maxresdefault.
   // maxresdefault is not available for all videos.
   const [imgSrc, setImgSrc] = useState(`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`);
@@ -46,6 +47,8 @@ const YouTubeThumbnail: React.FC<YouTubeThumbnailProps> = ({ videoId, alt, class
       style={{ objectFit: "cover" }}
       className={className}
       unoptimized
+      priority={priority}
+      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
       onError={() => {
         // Fallback to minimal quality if even hq fails (unlikely)
         if (imgSrc.includes('hqdefault')) {
@@ -193,6 +196,7 @@ export const ImageGalleryCarousel: React.FC<ImageGalleryCarouselProps> = ({
                           videoId={media.videoId || ''}
                           alt={`Video thumbnail ${idx + 1}`}
                           className="rounded-md opacity-80"
+                          priority={idx === 0}
                         />
                         <div className="absolute inset-0 flex items-center justify-center">
                           <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/50">
@@ -212,6 +216,7 @@ export const ImageGalleryCarousel: React.FC<ImageGalleryCarouselProps> = ({
                     style={{ objectFit: "cover" }}
                     className="rounded-md"
                     priority={idx === 0}
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 100vw"
                     data-ai-hint="gallery showcase image"
                   />
                 )}
@@ -299,6 +304,7 @@ export const ImageGalleryCarousel: React.FC<ImageGalleryCarouselProps> = ({
                         style={{ objectFit: "contain" }}
                         className="rounded-lg shadow-2xl"
                         priority
+                        sizes="90vw"
                         onDragStart={(e) => e.preventDefault()}
                       />
                     );
