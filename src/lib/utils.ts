@@ -10,32 +10,32 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function mapConfigToTagInterface(config: TagInGroupConfig, group: { id: string; groupDisplayName: string }): Tag {
-    const groupName = group.groupDisplayName || '';
-    const tagName = config.name || '';
-    return {
-        id: config.id,
-        name: config.name,
-        slug: groupName.toLowerCase().replace(/\s+/g, '-') + '-' + tagName.toLowerCase().replace(/\s+/g, '-') + '-' + config.id.substring(0,4),
-        description: undefined,
-        color: config.color,
-        text_color: config.text_color,
-        border_color: config.border_color,
-        hover_bg_color: config.hover_bg_color,
-        hover_text_color: config.hover_text_color,
-        hover_border_color: config.hover_border_color,
-        icon_svg: config.icon_svg,
-        type: 'misc', // Default type, can be overridden if group info is available
-        groupId: group.id,
-        groupName: group.groupDisplayName,
-    };
+  const groupName = group.groupDisplayName || '';
+  const tagName = config.name || '';
+  return {
+    id: config.id,
+    name: config.name,
+    slug: groupName.toLowerCase().replace(/\s+/g, '-') + '-' + tagName.toLowerCase().replace(/\s+/g, '-') + '-' + config.id.substring(0, 4),
+    description: undefined,
+    color: config.color,
+    text_color: config.text_color,
+    border_color: config.border_color,
+    hover_bg_color: config.hover_bg_color,
+    hover_text_color: config.hover_text_color,
+    hover_border_color: config.hover_border_color,
+    icon_svg: config.icon_svg,
+    type: 'misc', // Default type, can be overridden if group info is available
+    groupId: group.id,
+    groupName: group.groupDisplayName,
+  };
 }
 
 export function getItemTypePlural(itemType: ItemType): string {
-    if (itemType === 'art-music') return 'art-music';
-    if (itemType === 'game') return 'games';
-    if (itemType === 'web') return 'web';
-    if (itemType === 'app') return 'apps';
-    return `${itemType}s`; // Fallback, though should not be hit with defined types
+  if (itemType === 'art-music') return 'art-music';
+  if (itemType === 'game') return 'games';
+  if (itemType === 'web') return 'web';
+  if (itemType === 'app') return 'apps';
+  return `${itemType}s`; // Fallback, though should not be hit with defined types
 }
 
 export function formatNumberWithSuffix(num: number | undefined | null): string {
@@ -53,20 +53,20 @@ export function formatNumberWithSuffix(num: number | undefined | null): string {
 
   let numStr: string;
 
-  if (i === 0) { 
+  if (i === 0) {
     if (Math.abs(scaledNum) > 0 && Math.abs(scaledNum) < 1) {
-      numStr = parseFloat(scaledNum.toFixed(2)).toString(); 
+      numStr = parseFloat(scaledNum.toFixed(2)).toString();
     } else {
-      const rounded = Math.round(scaledNum * 100) / 100; 
+      const rounded = Math.round(scaledNum * 100) / 100;
       if (Number.isInteger(rounded) || (!Number.isInteger(rounded) && rounded.toFixed(1).endsWith('.0'))) {
         numStr = Math.trunc(rounded).toString();
       } else if (!Number.isInteger(rounded)) {
-        numStr = rounded.toFixed(1); 
+        numStr = rounded.toFixed(1);
       } else {
         numStr = rounded.toString();
       }
     }
-  } else { 
+  } else {
     const roundedScaledNum = Math.round(scaledNum * 10) / 10;
     if (Number.isInteger(roundedScaledNum) || roundedScaledNum.toFixed(1).endsWith('.0')) {
       numStr = Math.trunc(roundedScaledNum).toString();
@@ -90,7 +90,7 @@ export const formatTimeAgo = (dateString: string | undefined | null): string => 
   }
   // If it's already ISO with T but no Z (less likely from SQLite CURRENT_TIMESTAMP but possible)
   else if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?$/.test(dateString) && !dateString.endsWith('Z')) {
-     processedDateString = dateString + 'Z';
+    processedDateString = dateString + 'Z';
   }
 
 
@@ -101,7 +101,7 @@ export const formatTimeAgo = (dateString: string | undefined | null): string => 
       console.error(`[formatTimeAgo ERROR] Invalid date after processing: "${processedDateString}" from input: "${dateString}"`);
       return "Invalid date";
     }
-    
+
     // Detailed logging
     // console.log(`[formatTimeAgo DEBUG] Input: "${dateString}" -> Processed: "${processedDateString}" -> Parsed (UTC): "${parsedDate.toISOString()}"`);
 
@@ -149,7 +149,7 @@ export const calculateGenericItemSearchScore = (item: GenericListItem, query: st
   if (item.tags) {
     item.tags.forEach(tag => {
       if (tag.name.toLowerCase().includes(lowerQuery)) {
-        score += 1; 
+        score += 1;
       }
     });
   }
@@ -158,58 +158,59 @@ export const calculateGenericItemSearchScore = (item: GenericListItem, query: st
 
 
 export const parseMediaUrl = (url: string): { type: 'image' | 'video', src: string, videoId: string | null, isGif: boolean } | null => {
-    if (!url || typeof url !== 'string') return null;
+  if (!url || typeof url !== 'string') return null;
 
-    // YouTube URL patterns
-    const youtubeRegexes = [
-        /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
-        /(?:https?:\/\/)?youtu\.be\/([a-zA-Z0-9_-]{11})/,
-        /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/
-    ];
+  // YouTube URL patterns
+  const youtubeRegexes = [
+    /(?:https?:)?(?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
+    /(?:https?:)?(?:\/\/)?youtu\.be\/([a-zA-Z0-9_-]{11})/,
+    /(?:https?:)?(?:\/\/)?(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
+    /(?:https?:)?(?:\/\/)?(?:www\.)?youtube-nocookie\.com\/embed\/([a-zA-Z0-9_-]{11})/
+  ];
 
-    for (const regex of youtubeRegexes) {
-        const match = url.match(regex);
-        if (match && match[1]) {
-            return { type: 'video', src: `https://www.youtube-nocookie.com/embed/${match[1]}`, videoId: match[1], isGif: false };
-        }
+  for (const regex of youtubeRegexes) {
+    const match = url.match(regex);
+    if (match && match[1]) {
+      return { type: 'video', src: `https://www.youtube-nocookie.com/embed/${match[1]}`, videoId: match[1], isGif: false };
     }
+  }
 
-    if (url.startsWith('data:image')) {
-        const isGif = url.startsWith('data:image/gif');
+  if (url.startsWith('data:image')) {
+    const isGif = url.startsWith('data:image/gif');
+    return { type: 'image', src: url, videoId: null, isGif };
+  }
+
+  if (url.startsWith('http')) {
+    try {
+      let urlToCheck = url;
+      // Handle proxy URLs like DuckDuckGo by looking at the 'u' query param
+      const proxiedUrl = new URL(url);
+      if (proxiedUrl.searchParams.has('u')) {
+        const innerUrl = proxiedUrl.searchParams.get('u');
+        if (innerUrl) {
+          // Recurse with the actual URL, this will handle nested proxies too
+          return parseMediaUrl(innerUrl);
+        }
+      }
+
+      // For regular URLs, just check the pathname
+      const pathname = new URL(urlToCheck).pathname;
+      const isGif = pathname.toLowerCase().endsWith('.gif');
+
+      const imageRegex = /\.(jpeg|jpg|gif|png|webp|svg)$/i;
+      if (imageRegex.test(pathname)) {
         return { type: 'image', src: url, videoId: null, isGif };
+      }
+    } catch (e) {
+      // If URL parsing fails, it's not a standard URL.
+      // We can't safely determine its type or if it's a GIF.
+      return null;
     }
-    
-    if (url.startsWith('http')) {
-        try {
-            let urlToCheck = url;
-            // Handle proxy URLs like DuckDuckGo by looking at the 'u' query param
-            const proxiedUrl = new URL(url);
-            if (proxiedUrl.searchParams.has('u')) {
-                const innerUrl = proxiedUrl.searchParams.get('u');
-                if (innerUrl) {
-                    // Recurse with the actual URL, this will handle nested proxies too
-                    return parseMediaUrl(innerUrl);
-                }
-            }
-            
-            // For regular URLs, just check the pathname
-            const pathname = new URL(urlToCheck).pathname;
-            const isGif = pathname.toLowerCase().endsWith('.gif');
-            
-            const imageRegex = /\.(jpeg|jpg|gif|png|webp|svg)$/i;
-            if (imageRegex.test(pathname)) {
-                return { type: 'image', src: url, videoId: null, isGif };
-            }
-        } catch (e) {
-            // If URL parsing fails, it's not a standard URL.
-            // We can't safely determine its type or if it's a GIF.
-            return null;
-        }
 
-        // If it's a valid URL but has no image extension in the pathname, assume it's a non-GIF image.
-        // This maintains the previous behavior for things like `https://placehold.co/600x400`.
-        return { type: 'image', src: url, videoId: null, isGif: false };
-    }
-    
-    return null;
+    // If it's a valid URL but has no image extension in the pathname, assume it's a non-GIF image.
+    // This maintains the previous behavior for things like `https://placehold.co/600x400`.
+    return { type: 'image', src: url, videoId: null, isGif: false };
+  }
+
+  return null;
 };

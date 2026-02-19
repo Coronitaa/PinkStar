@@ -6,7 +6,7 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import { motion, useMotionValue, PanInfo, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight, X as XIconLucide } from "lucide-react";
+import { ChevronLeft, ChevronRight, X as XIconLucide, Play } from "lucide-react";
 import { createPortal } from "react-dom";
 import { parseMediaUrl } from '@/lib/utils';
 
@@ -27,8 +27,37 @@ interface ImageGalleryCarouselProps {
   aspectRatio?: string;
 }
 
-export const ImageGalleryCarousel: React.FC<ImageGalleryCarouselProps> = ({ 
-  images, 
+interface YouTubeThumbnailProps {
+  videoId: string;
+  alt: string;
+  className?: string;
+}
+
+const YouTubeThumbnail: React.FC<YouTubeThumbnailProps> = ({ videoId, alt, className }) => {
+  // Using hqdefault (480x360) by default to avoid 404 errors common with maxresdefault.
+  // maxresdefault is not available for all videos.
+  const [imgSrc, setImgSrc] = useState(`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`);
+
+  return (
+    <Image
+      src={imgSrc}
+      alt={alt}
+      fill
+      style={{ objectFit: "cover" }}
+      className={className}
+      unoptimized
+      onError={() => {
+        // Fallback to minimal quality if even hq fails (unlikely)
+        if (imgSrc.includes('hqdefault')) {
+          setImgSrc(`https://img.youtube.com/vi/${videoId}/default.jpg`);
+        }
+      }}
+    />
+  );
+};
+
+export const ImageGalleryCarousel: React.FC<ImageGalleryCarouselProps> = ({
+  images,
   className,
   autoplayInterval = 5000,
   aspectRatio = '16/9'
@@ -43,7 +72,7 @@ export const ImageGalleryCarousel: React.FC<ImageGalleryCarouselProps> = ({
 
   const numImages = images.length;
   const isAutoplayDisabled = autoplayInterval === 999999999;
-  
+
   useEffect(() => {
     setIsMounted(true);
   }, []);
@@ -72,7 +101,7 @@ export const ImageGalleryCarousel: React.FC<ImageGalleryCarouselProps> = ({
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [dragX, numImages, lightboxOpen, autoplayInterval, isAutoplayDisabled, startAutoPlay]); 
+  }, [dragX, numImages, lightboxOpen, autoplayInterval, isAutoplayDisabled, startAutoPlay]);
 
   const onDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const x = info.offset.x;
@@ -107,7 +136,7 @@ export const ImageGalleryCarousel: React.FC<ImageGalleryCarouselProps> = ({
     e.stopPropagation();
     setSelectedImageIndex((prevIndex) => (prevIndex - 1 + numImages) % numImages);
   };
-  
+
   if (numImages === 0) {
     return (
       <div className={cn("relative aspect-video w-full bg-muted rounded-lg flex items-center justify-center", className)}>
@@ -149,21 +178,38 @@ export const ImageGalleryCarousel: React.FC<ImageGalleryCarouselProps> = ({
                 {!media ? (
                   <div className="w-full h-full flex items-center justify-center text-destructive-foreground bg-destructive/50 text-xs p-2">Invalid URL</div>
                 ) : media.type === 'video' ? (
-                  <iframe
-                    src={`${media.src}?autoplay=${isActive ? 1 : 0}&mute=1&controls=0&loop=1&playlist=${media.videoId}&rel=0&iv_load_policy=3`}
-                    className="w-full h-full block object-cover pointer-events-none"
-                    frameBorder="0"
-                    allow="autoplay; encrypted-media;"
-                    title={`Gallery video ${idx + 1}`}
-                  />
+                  <div className="relative w-full h-full bg-black group-hover:opacity-90 transition-opacity">
+                    {isActive ? (
+                      <iframe
+                        src={`${media.src}?autoplay=1&mute=1&controls=0&loop=1&playlist=${media.videoId}&rel=0`}
+                        className="w-full h-full absolute inset-0 pointer-events-none"
+                        frameBorder="0"
+                        allow="autoplay; encrypted-media;"
+                        title={`Gallery video ${idx + 1}`}
+                      />
+                    ) : (
+                      <>
+                        <YouTubeThumbnail
+                          videoId={media.videoId || ''}
+                          alt={`Video thumbnail ${idx + 1}`}
+                          className="rounded-md opacity-80"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/50">
+                            <Play className="w-5 h-5 text-white fill-white ml-0.5" />
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
                 ) : (
-                  <Image 
-                    src={media.src} 
-                    alt={`Gallery image ${idx + 1}`} 
+                  <Image
+                    src={media.src}
+                    alt={`Gallery image ${idx + 1}`}
                     draggable={false}
                     onDragStart={(e) => e.preventDefault()}
                     fill
-                    style={{objectFit: "cover"}}
+                    style={{ objectFit: "cover" }}
                     className="rounded-md"
                     priority={idx === 0}
                     data-ai-hint="gallery showcase image"
@@ -173,7 +219,7 @@ export const ImageGalleryCarousel: React.FC<ImageGalleryCarouselProps> = ({
             )
           })}
         </motion.div>
-        
+
         {numImages > 1 && <Dots imgIndex={imgIndex} setImgIndex={setImgIndex} numImages={numImages} />}
         <GradientEdges />
       </div>
@@ -187,7 +233,7 @@ export const ImageGalleryCarousel: React.FC<ImageGalleryCarouselProps> = ({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 sm:p-10"
-              onClick={closeLightbox} 
+              onClick={closeLightbox}
             >
               <button
                 type="button"
@@ -199,65 +245,65 @@ export const ImageGalleryCarousel: React.FC<ImageGalleryCarouselProps> = ({
               </button>
 
               {numImages > 1 && (
-                  <>
+                <>
                   <button
-                      type="button"
-                      onClick={goToPrevImage}
-                      className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-[101] p-2 sm:p-3 rounded-full bg-black/30 text-white hover:bg-black/50 transition-all focus:outline-none opacity-70 hover:opacity-100"
-                      aria-label="Previous image"
+                    type="button"
+                    onClick={goToPrevImage}
+                    className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-[101] p-2 sm:p-3 rounded-full bg-black/30 text-white hover:bg-black/50 transition-all focus:outline-none opacity-70 hover:opacity-100"
+                    aria-label="Previous image"
                   >
-                      <ChevronLeft size={32} />
+                    <ChevronLeft size={32} />
                   </button>
                   <button
-                      type="button"
-                      onClick={goToNextImage}
-                      className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-[101] p-2 sm:p-3 rounded-full bg-black/30 text-white hover:bg-black/50 transition-all focus:outline-none opacity-70 hover:opacity-100"
-                      aria-label="Next image"
+                    type="button"
+                    onClick={goToNextImage}
+                    className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-[101] p-2 sm:p-3 rounded-full bg-black/30 text-white hover:bg-black/50 transition-all focus:outline-none opacity-70 hover:opacity-100"
+                    aria-label="Next image"
                   >
-                      <ChevronRight size={32} />
+                    <ChevronRight size={32} />
                   </button>
-                  </>
+                </>
               )}
-              
+
               <motion.div
                 key={selectedImageIndex}
                 initial={{ opacity: 0.8, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.2, ease: "easeOut" }}
                 className="relative w-full h-full flex items-center justify-center"
-                onClick={(e) => e.stopPropagation()} 
+                onClick={(e) => e.stopPropagation()}
               >
                 {(() => {
-                      const media = parseMediaUrl(images[selectedImageIndex]);
-                      if (!media) return <div className="text-white">Invalid Media URL</div>;
+                  const media = parseMediaUrl(images[selectedImageIndex]);
+                  if (!media) return <div className="text-white">Invalid Media URL</div>;
 
-                      if (media.type === 'video') {
-                          return (
-                            <div className="relative w-full h-full max-w-4xl aspect-video bg-black rounded-lg">
-                                  <iframe
-                                      src={`${media.src}?autoplay=1&rel=0`}
-                                      className="w-full h-full"
-                                      frameBorder="0"
-                                      allow="autoplay; encrypted-media; picture-in-picture"
-                                      allowFullScreen
-                                      title={`Enlarged video ${selectedImageIndex + 1}`}
-                                  />
-                            </div>
-                          );
-                      } else {
-                          return (
-                              <Image
-                                  src={media.src}
-                                  alt={`Enlarged image ${selectedImageIndex + 1}`}
-                                  fill
-                                  style={{ objectFit: "contain" }}
-                                  className="rounded-lg shadow-2xl"
-                                  priority 
-                                  onDragStart={(e) => e.preventDefault()}
-                              />
-                          );
-                      }
-                  })()}
+                  if (media.type === 'video') {
+                    return (
+                      <div className="relative w-full h-full max-w-4xl aspect-video bg-black rounded-lg">
+                        <iframe
+                          src={`${media.src}?autoplay=1&rel=0`}
+                          className="w-full h-full"
+                          frameBorder="0"
+                          allow="autoplay; encrypted-media; picture-in-picture"
+                          allowFullScreen
+                          title={`Enlarged video ${selectedImageIndex + 1}`}
+                        />
+                      </div>
+                    );
+                  } else {
+                    return (
+                      <Image
+                        src={media.src}
+                        alt={`Enlarged image ${selectedImageIndex + 1}`}
+                        fill
+                        style={{ objectFit: "contain" }}
+                        className="rounded-lg shadow-2xl"
+                        priority
+                        onDragStart={(e) => e.preventDefault()}
+                      />
+                    );
+                  }
+                })()}
               </motion.div>
               {numImages > 1 && (
                 <div className="absolute bottom-5 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-full bg-black/50 text-white text-sm z-[101]">

@@ -19,7 +19,8 @@ import { ResourceCard } from '@/components/resource/ResourceCard';
 import { Carousel, CarouselItem } from '@/components/shared/Carousel';
 import { EditResourceButtonAndModal } from '@/components/resource/EditResourceButtonAndModal';
 import { getAvailableFilterTags, getActiveCodeHighlightTheme } from '@/lib/data';
-import { getItemTypePlural } from '@/lib/utils';
+import { getItemTypePlural, parseMediaUrl } from '@/lib/utils';
+import { YouTubeLiteEmbed } from '@/components/shared/YouTubeLiteEmbed';
 import parse, { domToReact, Element } from 'html-react-parser';
 import { cn } from '@/lib/utils';
 import { RenderedCodeBlock } from '@/components/shared/RenderedCodeBlock';
@@ -174,6 +175,23 @@ export function ResourcePageContent({ resource, relatedResources }: ResourcePage
               isCollapsible={isCollapsible}
               isCollapsed={isCollapsed}
             />;
+          }
+        }
+
+        // YouTube Lite Embed parser
+        if (domNode.name === 'iframe' && domNode.attribs.src) {
+          const mediaInfo = parseMediaUrl(domNode.attribs.src);
+          if (mediaInfo && mediaInfo.type === 'video' && mediaInfo.videoId) {
+            const { style, class: className, width, height, title } = domNode.attribs;
+            return (
+              <div className={cn("rich-text-media-node", className)} style={{ width: width || '100%', height: height || 'auto', aspectRatio: '16/9' }}>
+                <YouTubeLiteEmbed
+                  videoId={mediaInfo.videoId}
+                  title={title || 'YouTube Video'}
+                  className="w-full h-full rounded-md"
+                />
+              </div>
+            );
           }
         }
       }
