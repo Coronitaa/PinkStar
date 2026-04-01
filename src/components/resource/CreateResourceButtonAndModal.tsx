@@ -7,7 +7,7 @@ import { ResourceForm } from '@/components/admin/ResourceForm';
 import type { ItemType, DynamicAvailableFilterTags, RawCategoryProjectDetails } from '@/lib/types';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { getAvailableFilterTags, getRawCategoryDetailsForForm } from '@/lib/data';
+import { getAvailableFilterTagsAction, getRawCategoryDetailsForFormAction } from '@/app/actions/resourceActions';
 import { useToast } from '@/hooks/use-toast';
 
 interface CreateResourceModalProps {
@@ -41,7 +41,7 @@ export function CreateResourceButtonAndModal({
       setIsLoadingData(true);
       const fetchData = async () => {
         try {
-          const fetchedParentDetails = await getRawCategoryDetailsForForm(itemSlug, itemType, categorySlug);
+          const fetchedParentDetails = await getRawCategoryDetailsForFormAction(itemSlug, itemType, categorySlug);
           if (!fetchedParentDetails) {
             toast({ title: "Error", description: "Could not load data to create resource.", variant: "destructive" });
             onOpenChange(false);
@@ -49,7 +49,7 @@ export function CreateResourceButtonAndModal({
           }
           setParentDetails(fetchedParentDetails);
 
-          const fetchedDynamicTags = await getAvailableFilterTags(itemSlug, itemType, categorySlug);
+          const fetchedDynamicTags = await getAvailableFilterTagsAction(itemSlug, itemType, categorySlug);
           setDynamicTagGroups(fetchedDynamicTags);
         } catch (error) {
           toast({ title: "Error", description: "An error occurred while preparing the form.", variant: "destructive" });

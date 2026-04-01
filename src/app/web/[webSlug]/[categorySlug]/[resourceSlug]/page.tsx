@@ -1,6 +1,6 @@
 
 import { notFound } from 'next/navigation';
-import { getResourceBySlug, getResources } from '@/lib/data';
+import { getResourceBySlug, getResources, getAvailableFilterTags, getActiveCodeHighlightTheme } from '@/lib/data';
 import { ResourcePageContent } from '@/components/resource/ResourcePageContent';
 
 interface WebResourcePageProps {
@@ -19,13 +19,28 @@ export default async function WebResourcePage({ params: paramsPromise }: WebReso
     notFound();
   }
 
-  const { resources: relatedResources } = await getResources({
-    parentItemSlug: resource.parentItemSlug,
-    parentItemType: resource.parentItemType,
-    categorySlug: resource.categorySlug,
-    limit: 6
-  });
+  const [
+    { resources: relatedResources },
+    filterTagGroups,
+    activeTheme,
+  ] = await Promise.all([
+    getResources({
+      parentItemSlug: resource.parentItemSlug,
+      parentItemType: resource.parentItemType,
+      categorySlug: resource.categorySlug,
+      limit: 6,
+    }),
+    getAvailableFilterTags(resource.parentItemSlug, resource.parentItemType, resource.categorySlug),
+    getActiveCodeHighlightTheme(),
+  ]);
   const filteredRelated = relatedResources.filter(r => r.id !== resource.id).slice(0, 5);
 
-  return <ResourcePageContent resource={resource} relatedResources={filteredRelated} />;
+  return (
+    <ResourcePageContent
+      resource={resource}
+      relatedResources={filteredRelated}
+      initialFilterTagGroups={filterTagGroups}
+      initialActiveTheme={activeTheme}
+    />
+  );
 }

@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { notFound, useRouter, useSearchParams as useNextSearchParams, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import type { Resource, ItemType, DynamicAvailableFilterTags, CodeHighlightTheme } from '@/lib/types';
@@ -18,7 +18,7 @@ import { ImageGalleryCarousel } from '@/components/shared/ImageGalleryCarousel';
 import { ResourceCard } from '@/components/resource/ResourceCard';
 import { Carousel, CarouselItem } from '@/components/shared/Carousel';
 import { EditResourceButtonAndModal } from '@/components/resource/EditResourceButtonAndModal';
-import { getAvailableFilterTags, getActiveCodeHighlightTheme } from '@/lib/data';
+
 import { getItemTypePlural, parseMediaUrl } from '@/lib/utils';
 import { YouTubeLiteEmbed } from '@/components/shared/YouTubeLiteEmbed';
 import parse, { domToReact, Element } from 'html-react-parser';
@@ -29,6 +29,8 @@ import { RenderedCodeBlock } from '@/components/shared/RenderedCodeBlock';
 interface ResourcePageContentProps {
   resource: Resource;
   relatedResources: Resource[];
+  initialFilterTagGroups: DynamicAvailableFilterTags;
+  initialActiveTheme: CodeHighlightTheme | null;
 }
 
 function getText(node: any): string {
@@ -39,14 +41,17 @@ function getText(node: any): string {
   return '';
 }
 
-export function ResourcePageContent({ resource, relatedResources }: ResourcePageContentProps) {
+export function ResourcePageContent({ resource, relatedResources, initialFilterTagGroups, initialActiveTheme }: ResourcePageContentProps) {
   const resolvedSearchParamsHook = useNextSearchParams();
   const router = useRouter();
   const pathname = usePathname();
 
   const [carouselAllowOverflow, setCarouselAllowOverflow] = useState(false);
-  const [dynamicAvailableFileTagGroups, setDynamicAvailableFileTagGroups] = useState<DynamicAvailableFilterTags>([]);
-  const [activeTheme, setActiveTheme] = useState<CodeHighlightTheme | null>(null);
+  const dynamicAvailableFileTagGroups = useMemo(
+    () => initialFilterTagGroups.filter(group => group.appliesToFiles),
+    [initialFilterTagGroups]
+  );
+  const activeTheme = initialActiveTheme;
 
   const initialTabFromUrl = resolvedSearchParamsHook.get('tab') || 'overview';
   const [activeTab, setActiveTab] = useState<string>(initialTabFromUrl);
@@ -58,21 +63,6 @@ export function ResourcePageContent({ resource, relatedResources }: ResourcePage
     }
   }, [resolvedSearchParamsHook, activeTab]);
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const [tags, theme] = await Promise.all([
-          getAvailableFilterTags(resource.parentItemSlug, resource.parentItemType, resource.categorySlug),
-          getActiveCodeHighlightTheme()
-        ]);
-        setDynamicAvailableFileTagGroups(tags.filter(group => group.appliesToFiles));
-        setActiveTheme(theme);
-      } catch (error) {
-        console.error("Error fetching initial data for resource page:", error);
-      }
-    }
-    fetchData();
-  }, [resource.parentItemSlug, resource.parentItemType, resource.categorySlug]);
 
   const itemTypePlural = getItemTypePlural(resource.parentItemType);
   const parentItemSectionPath = `/${itemTypePlural}`;

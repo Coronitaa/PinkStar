@@ -3,8 +3,8 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { getResources, getBestMatchForCategoryAction as getBestMatchForCategoryFromLib, getResourceBySlug as getResourceBySlugFromLib, incrementResourceDownloadCount, incrementResourceFileDownloadCount, getAuthorPublishedResources } from '@/lib/data';
-import type { GetResourcesParams, PaginatedResourcesResponse, Resource, ItemType } from '@/lib/types';
+import { getResources, getBestMatchForCategoryAction as getBestMatchForCategoryFromLib, getResourceBySlug as getResourceBySlugFromLib, incrementResourceDownloadCount, incrementResourceFileDownloadCount, getAuthorPublishedResources, getAvailableFilterTags, getRawCategoryDetailsForForm } from '@/lib/data';
+import type { GetResourcesParams, PaginatedResourcesResponse, Resource, ItemType, DynamicAvailableFilterTags, RawCategoryProjectDetails } from '@/lib/types';
 import { getDb } from '@/lib/db'; // Import getDb to fetch resource details for revalidation
 import { getItemTypePlural } from '@/lib/utils';
 
@@ -106,4 +106,21 @@ export async function fetchPaginatedAuthorResourcesAction(
     order: params.sortBy === 'name' ? 'ASC' : 'DESC', // Sort by name ascending, others descending
   });
   return result;
+}
+
+
+export async function getAvailableFilterTagsAction(
+  parentItemSlug: string,
+  parentItemType: ItemType,
+  categorySlug: string
+): Promise<DynamicAvailableFilterTags> {
+  return getAvailableFilterTags(parentItemSlug, parentItemType, categorySlug);
+}
+
+export async function getRawCategoryDetailsForFormAction(
+  projectSlug: string,
+  itemType: ItemType,
+  categorySlug: string
+): Promise<RawCategoryProjectDetails | undefined> {
+  return getRawCategoryDetailsForForm(projectSlug, itemType, categorySlug);
 }

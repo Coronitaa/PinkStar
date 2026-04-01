@@ -9,7 +9,7 @@ import { ResourceForm } from '@/components/admin/ResourceForm';
 import type { Resource, ItemType, DynamicAvailableFilterTags, UserAppRole, RawCategoryProjectDetails, ResourceAuthor } from '@/lib/types';
 import { Edit3, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { getAvailableFilterTags, getRawCategoryDetailsForForm } from '@/lib/data';
+import { getAvailableFilterTagsAction } from '@/app/actions/resourceActions';
 import { toast } from '@/hooks/use-toast';
 
 interface EditResourceButtonAndModalProps {
@@ -76,7 +76,7 @@ export function EditResourceButtonAndModal({ resource }: EditResourceButtonAndMo
       };
       setParentDetails(fetchedParentDetails);
 
-      const fetchedDynamicTags = await getAvailableFilterTags(resource.parentItemSlug, resource.parentItemType, resource.categorySlug);
+      const fetchedDynamicTags = await getAvailableFilterTagsAction(resource.parentItemSlug, resource.parentItemType, resource.categorySlug);
       setDynamicTagGroups(fetchedDynamicTags);
 
     } catch (error) {
