@@ -73,7 +73,7 @@ export default async function GamePage({ params: paramsPromise }: GamePageProps)
       <section className="relative group -mt-8">
         <div className="relative h-64 md:h-80 lg:h-96 w-screen -translate-x-1/2 left-1/2 overflow-hidden">
           <Image
-            src={game.bannerUrl}
+            src={game.bannerUrl || ''}
             alt={`${game.name} banner`}
             fill
             style={{objectFit:"cover"}}
@@ -86,7 +86,7 @@ export default async function GamePage({ params: paramsPromise }: GamePageProps)
         <div className="container max-w-screen-2xl relative -mt-16 md:-mt-20 px-4">
           <div className="flex flex-col md:flex-row items-end gap-4">
             <Image
-              src={game.iconUrl}
+              src={game.iconUrl || ''}
               alt={`${game.name} icon`}
               width={172}
               height={172}

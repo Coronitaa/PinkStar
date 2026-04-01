@@ -73,7 +73,7 @@ export default async function WebItemPage({ params: paramsPromise }: WebItemPage
       <section className="relative -mx-4 -mt-4 group">
         <div className="relative h-64 md:h-80 lg:h-96 w-full overflow-hidden">
           <Image
-            src={webItem.bannerUrl}
+            src={webItem.bannerUrl || ''}
             alt={`${webItem.name} banner`}
             fill
             style={{objectFit:"cover"}}
@@ -86,7 +86,7 @@ export default async function WebItemPage({ params: paramsPromise }: WebItemPage
         <div className="container max-w-screen-2xl relative -mt-16 md:-mt-20 px-4">
           <div className="flex flex-col md:flex-row items-end gap-4">
             <Image
-              src={webItem.iconUrl}
+              src={webItem.iconUrl || ''}
               alt={`${webItem.name} icon`}
               width={172}
               height={172}
