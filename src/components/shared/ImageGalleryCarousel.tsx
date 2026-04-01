@@ -14,7 +14,7 @@ const ONE_SECOND = 1000;
 const DRAG_BUFFER = 50;
 
 const SPRING_OPTIONS = {
-  type: "spring",
+  type: "spring" as const,
   mass: 3,
   stiffness: 400,
   damping: 50,
@@ -152,16 +152,16 @@ export const ImageGalleryCarousel: React.FC<ImageGalleryCarouselProps> = ({
     <>
       <div className={cn(
         "relative overflow-hidden bg-card/50 w-full rounded-lg shadow-inner group",
-        aspectRatio === '16/9' && 'aspect-[16/9]',
-        aspectRatio === '4/3' && 'aspect-[4/3]',
-        aspectRatio === '1/1' && 'aspect-square',
+        (aspectRatio === '16/9' || aspectRatio === '16:9') && 'aspect-[16/9]',
+        (aspectRatio === '4/3' || aspectRatio === '4:3') && 'aspect-[4/3]',
+        (aspectRatio === '1/1' || aspectRatio === '1:1') && 'aspect-square',
         className
       )}>
         <motion.div
           drag="x"
           dragConstraints={{ left: 0, right: 0 }}
           style={{ x: dragX }}
-          animate={{ translateX: `-${imgIndex * 100}%` }}
+          animate={{ x: `-${imgIndex * 100}%` }}
           transition={SPRING_OPTIONS}
           onDragEnd={onDragEnd}
           className="flex items-center h-full cursor-grab active:cursor-grabbing"
