@@ -26,24 +26,35 @@ export default async function ArtMusicItemPage({ params: paramsPromise }: ArtMus
     notFound();
   }
 
-  // Use artMusicItem.id to fetch categories
-  const categories = await getCategoriesForItemGeneric(artMusicItem.id, 'art-music');
-  const stats = await getItemStatsGeneric(artMusicItem.id, 'art-music'); // Also use artMusicItem.id for consistency
+  // ── Fetch categories + stats in parallel ──────────────────────────────────
+  const [categories, stats] = await Promise.all([
+    getCategoriesForItemGeneric(artMusicItem.id, 'art-music'),
+    getItemStatsGeneric(artMusicItem.id, 'art-music'),
+  ]);
 
+  // ── Fetch all category resources in parallel ───────────────────────────────
   const initialCategoryResources: Record<string, Resource[]> = {};
   if (Array.isArray(categories)) {
-    for (const category of categories) {
-      if (category && typeof category.slug === 'string') {
+    const validCategories = categories.filter(
+      (c): c is NonNullable<typeof c> => c != null && typeof c.slug === 'string'
+    );
+
+    const resourceResults = await Promise.all(
+      validCategories.map(async (category) => {
         try {
-          // Pass artMusicItem.slug for parentItemSlug as getHighlightedResources expects slug
-          initialCategoryResources[category.slug] = await getHighlightedResources(artMusicItem.slug, 'art-music', category.slug, FETCH_ITEMS_FOR_ITEM_PAGE_CAROUSEL);
+          const resources = await getHighlightedResources(
+            artMusicItem.slug, 'art-music', category.slug, FETCH_ITEMS_FOR_ITEM_PAGE_CAROUSEL
+          );
+          return { slug: category.slug, resources };
         } catch (error) {
           console.error(`Error fetching highlighted resources for category ${category.slug} in art/music item ${artMusicItem.slug}:`, error);
-          initialCategoryResources[category.slug] = [];
+          return { slug: category.slug, resources: [] as Resource[] };
         }
-      } else {
-        console.warn('Skipping invalid category object for art/music item:', category);
-      }
+      })
+    );
+
+    for (const { slug, resources } of resourceResults) {
+      initialCategoryResources[slug] = resources;
     }
   }
 

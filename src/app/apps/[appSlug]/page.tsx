@@ -26,24 +26,35 @@ export default async function AppItemPage({ params: paramsPromise }: AppItemPage
     notFound();
   }
 
-  // Use appItem.id to fetch categories
-  const categories = await getCategoriesForItemGeneric(appItem.id, 'app');
-  const stats = await getItemStatsGeneric(appItem.id, 'app'); // Also use appItem.id for consistency
+  // ── Fetch categories + stats in parallel ──────────────────────────────────
+  const [categories, stats] = await Promise.all([
+    getCategoriesForItemGeneric(appItem.id, 'app'),
+    getItemStatsGeneric(appItem.id, 'app'),
+  ]);
 
+  // ── Fetch all category resources in parallel ───────────────────────────────
   const initialCategoryResources: Record<string, Resource[]> = {};
   if (Array.isArray(categories)) {
-    for (const category of categories) {
-      if (category && typeof category.slug === 'string') {
+    const validCategories = categories.filter(
+      (c): c is NonNullable<typeof c> => c != null && typeof c.slug === 'string'
+    );
+
+    const resourceResults = await Promise.all(
+      validCategories.map(async (category) => {
         try {
-          // Pass appItem.slug for parentItemSlug as getHighlightedResources expects slug
-          initialCategoryResources[category.slug] = await getHighlightedResources(appItem.slug, 'app', category.slug, FETCH_ITEMS_FOR_ITEM_PAGE_CAROUSEL);
+          const resources = await getHighlightedResources(
+            appItem.slug, 'app', category.slug, FETCH_ITEMS_FOR_ITEM_PAGE_CAROUSEL
+          );
+          return { slug: category.slug, resources };
         } catch (error) {
           console.error(`Error fetching highlighted resources for category ${category.slug} in app item ${appItem.slug}:`, error);
-          initialCategoryResources[category.slug] = [];
+          return { slug: category.slug, resources: [] as Resource[] };
         }
-      } else {
-        console.warn('Skipping invalid category object for app item:', category);
-      }
+      })
+    );
+
+    for (const { slug, resources } of resourceResults) {
+      initialCategoryResources[slug] = resources;
     }
   }
 

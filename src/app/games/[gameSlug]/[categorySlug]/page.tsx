@@ -28,8 +28,12 @@ export default async function GameCategoryPage({ params: paramsPromise, searchPa
     notFound();
   }
   const itemType: ItemType = 'game';
-  const currentCategory = await getCategoryDetails(params.gameSlug, itemType, params.categorySlug);
-  const allItemCategories = await getCategoriesForItemGeneric(game.id, itemType);
+
+  // ── Step 1: Need category + allCategories before we can fetch resources ────
+  const [currentCategory, allItemCategories] = await Promise.all([
+    getCategoryDetails(params.gameSlug, itemType, params.categorySlug),
+    getCategoriesForItemGeneric(game.id, itemType),
+  ]);
 
   if (!currentCategory) {
     notFound();
@@ -49,18 +53,23 @@ export default async function GameCategoryPage({ params: paramsPromise, searchPa
   const defaultSort = searchQuery ? 'relevance' : (itemType === 'game' ? 'downloads' : 'updatedAt');
   const sortBy = (typeof searchParams.sort === 'string' ? searchParams.sort : defaultSort) as SortByType;
 
-  const { resources: initialResources, total: initialTotal, hasMore: initialHasMore } = await getResources({
-    parentItemSlug: params.gameSlug,
-    parentItemType: itemType,
-    categorySlug: params.categorySlug,
-    selectedTagIds: activeTagFilters.length > 0 ? activeTagFilters : undefined,
-    searchQuery,
-    sortBy,
-    page: 1,
-    limit: RESOURCES_PER_PAGE,
-  });
-
-  const dynamicAvailableFilterGroups: DynamicAvailableFilterTags = await getAvailableFilterTags(params.gameSlug, itemType, params.categorySlug);
+  // ── Step 2: resources + filterTags in parallel ─────────────────────────────
+  const [
+    { resources: initialResources, total: initialTotal, hasMore: initialHasMore },
+    dynamicAvailableFilterGroups,
+  ] = await Promise.all([
+    getResources({
+      parentItemSlug: params.gameSlug,
+      parentItemType: itemType,
+      categorySlug: params.categorySlug,
+      selectedTagIds: activeTagFilters.length > 0 ? activeTagFilters : undefined,
+      searchQuery,
+      sortBy,
+      page: 1,
+      limit: RESOURCES_PER_PAGE,
+    }),
+    getAvailableFilterTags(params.gameSlug, itemType, params.categorySlug),
+  ]);
 
   return (
     <div className="space-y-8">

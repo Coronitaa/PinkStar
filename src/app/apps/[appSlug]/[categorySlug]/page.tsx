@@ -32,8 +32,12 @@ export default async function AppCategoryPage({ params: paramsPromise, searchPar
     notFound();
   }
   const itemType: ItemType = 'app';
-  const currentCategory = await getCategoryDetails(params.appSlug, itemType, params.categorySlug);
-  const allItemCategories = await getCategoriesForItemGeneric(appItem.id, itemType);
+
+  // ── Step 1: category + allCategories in parallel ───────────────────────────
+  const [currentCategory, allItemCategories] = await Promise.all([
+    getCategoryDetails(params.appSlug, itemType, params.categorySlug),
+    getCategoriesForItemGeneric(appItem.id, itemType),
+  ]);
 
   if (!currentCategory) {
     notFound();
@@ -53,18 +57,23 @@ export default async function AppCategoryPage({ params: paramsPromise, searchPar
   const defaultSort = searchQuery ? 'relevance' : 'updatedAt';
   const sortBy = (typeof searchParams.sort === 'string' ? searchParams.sort : defaultSort) as SortByType;
 
-  const { resources: initialResources, total: initialTotal, hasMore: initialHasMore } = await getResources({
-    parentItemSlug: params.appSlug,
-    parentItemType: itemType,
-    categorySlug: params.categorySlug,
-    selectedTagIds: activeTagFilters.length > 0 ? activeTagFilters : undefined,
-    searchQuery,
-    sortBy,
-    page: 1,
-    limit: RESOURCES_PER_PAGE,
-  });
-
-  const dynamicAvailableFilterGroups: DynamicAvailableFilterTags = await getAvailableFilterTags(params.appSlug, itemType, params.categorySlug);
+  // ── Step 2: resources + filterTags in parallel ─────────────────────────────
+  const [
+    { resources: initialResources, total: initialTotal, hasMore: initialHasMore },
+    dynamicAvailableFilterGroups,
+  ] = await Promise.all([
+    getResources({
+      parentItemSlug: params.appSlug,
+      parentItemType: itemType,
+      categorySlug: params.categorySlug,
+      selectedTagIds: activeTagFilters.length > 0 ? activeTagFilters : undefined,
+      searchQuery,
+      sortBy,
+      page: 1,
+      limit: RESOURCES_PER_PAGE,
+    }),
+    getAvailableFilterTags(params.appSlug, itemType, params.categorySlug),
+  ]);
 
   const visibleCategories = allItemCategories.length > MAX_VISIBLE_CATEGORY_TABS
     ? allItemCategories.slice(0, MAX_VISIBLE_CATEGORY_TABS)

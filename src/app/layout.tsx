@@ -9,6 +9,8 @@ import { cn } from '@/lib/utils';
 import { createSupabaseClient } from '@/lib/supabase/client'; // For potential server-side session access
 import Script from 'next/script';
 import { CodeHighlightStyle } from '@/components/layout/CodeHighlightStyle';
+import { NavigationProgress } from '@/components/layout/NavigationProgress';
+import { Suspense } from 'react';
 
 import { getActiveCodeHighlightTheme } from '@/lib/data';
 import { CodeHighlightThemeProvider } from '@/components/providers/CodeHighlightThemeProvider';
@@ -62,6 +64,10 @@ export default async function RootLayout({
         // Conditional background for auth pages will be handled by AuthLayout itself
       )}>
         <CodeHighlightThemeProvider theme={activeTheme}>
+          {/* Navigation progress bar: activates on click before routing starts */}
+          <Suspense fallback={null}>
+            <NavigationProgress />
+          </Suspense>
           <Header />
           <main className={cn(
             "flex-grow",

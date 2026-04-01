@@ -32,8 +32,12 @@ export default async function ArtMusicCategoryPage({ params: paramsPromise, sear
     notFound();
   }
   const itemType: ItemType = 'art-music';
-  const currentCategory = await getCategoryDetails(params.artMusicSlug, itemType, params.categorySlug);
-  const allItemCategories = await getCategoriesForItemGeneric(artMusicItem.id, itemType);
+
+  // ── Step 1: category + allCategories in parallel ───────────────────────────
+  const [currentCategory, allItemCategories] = await Promise.all([
+    getCategoryDetails(params.artMusicSlug, itemType, params.categorySlug),
+    getCategoriesForItemGeneric(artMusicItem.id, itemType),
+  ]);
 
   if (!currentCategory) {
     notFound();
@@ -53,18 +57,23 @@ export default async function ArtMusicCategoryPage({ params: paramsPromise, sear
   const defaultSort = searchQuery ? 'relevance' : 'updatedAt';
   const sortBy = (typeof searchParams.sort === 'string' ? searchParams.sort : defaultSort) as SortByType;
 
-  const { resources: initialResources, total: initialTotal, hasMore: initialHasMore } = await getResources({
-    parentItemSlug: params.artMusicSlug,
-    parentItemType: itemType,
-    categorySlug: params.categorySlug,
-    selectedTagIds: activeTagFilters.length > 0 ? activeTagFilters : undefined,
-    searchQuery,
-    sortBy,
-    page: 1,
-    limit: RESOURCES_PER_PAGE,
-  });
-
-  const dynamicAvailableFilterGroups: DynamicAvailableFilterTags = await getAvailableFilterTags(params.artMusicSlug, itemType, params.categorySlug);
+  // ── Step 2: resources + filterTags in parallel ─────────────────────────────
+  const [
+    { resources: initialResources, total: initialTotal, hasMore: initialHasMore },
+    dynamicAvailableFilterGroups,
+  ] = await Promise.all([
+    getResources({
+      parentItemSlug: params.artMusicSlug,
+      parentItemType: itemType,
+      categorySlug: params.categorySlug,
+      selectedTagIds: activeTagFilters.length > 0 ? activeTagFilters : undefined,
+      searchQuery,
+      sortBy,
+      page: 1,
+      limit: RESOURCES_PER_PAGE,
+    }),
+    getAvailableFilterTags(params.artMusicSlug, itemType, params.categorySlug),
+  ]);
 
   return (
     <div className="space-y-8">

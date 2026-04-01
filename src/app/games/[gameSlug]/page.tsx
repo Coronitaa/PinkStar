@@ -26,22 +26,35 @@ export default async function GamePage({ params: paramsPromise }: GamePageProps)
     notFound();
   }
 
-  const categories = await getCategoriesForItemGeneric(game.id, 'game');
-  const stats = await getItemStatsGeneric(game.id, 'game');
+  // ── Fetch categories + stats in parallel (no dependency between them) ──────
+  const [categories, stats] = await Promise.all([
+    getCategoriesForItemGeneric(game.id, 'game'),
+    getItemStatsGeneric(game.id, 'game'),
+  ]);
 
+  // ── Fetch all category resources in parallel ───────────────────────────────
   const initialCategoryResources: Record<string, Resource[]> = {};
   if (Array.isArray(categories)) {
-    for (const category of categories) {
-      if (category && typeof category.slug === 'string') {
+    const validCategories = categories.filter(
+      (c): c is NonNullable<typeof c> => c != null && typeof c.slug === 'string'
+    );
+
+    const resourceResults = await Promise.all(
+      validCategories.map(async (category) => {
         try {
-          initialCategoryResources[category.slug] = await getHighlightedResources(game.slug, 'game', category.slug, FETCH_ITEMS_FOR_ITEM_PAGE_CAROUSEL);
+          const resources = await getHighlightedResources(
+            game.slug, 'game', category.slug, FETCH_ITEMS_FOR_ITEM_PAGE_CAROUSEL
+          );
+          return { slug: category.slug, resources };
         } catch (error) {
-          console.error(`Error fetching highlighted resources for category ${category.slug} in game ${game.slug}:`, error);
-          initialCategoryResources[category.slug] = [];
+          console.error(`Error fetching highlighted resources for category ${category.slug}:`, error);
+          return { slug: category.slug, resources: [] as Resource[] };
         }
-      } else {
-        console.warn('Skipping invalid category object:', category);
-      }
+      })
+    );
+
+    for (const { slug, resources } of resourceResults) {
+      initialCategoryResources[slug] = resources;
     }
   }
 

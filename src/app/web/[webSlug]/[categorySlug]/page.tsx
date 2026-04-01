@@ -28,8 +28,12 @@ export default async function WebCategoryPage({ params: paramsPromise, searchPar
     notFound();
   }
   const itemType: ItemType = 'web';
-  const currentCategory = await getCategoryDetails(params.webSlug, itemType, params.categorySlug);
-  const allItemCategories = await getCategoriesForItemGeneric(webItem.id, itemType);
+
+  // ── Step 1: category + allCategories in parallel ───────────────────────────
+  const [currentCategory, allItemCategories] = await Promise.all([
+    getCategoryDetails(params.webSlug, itemType, params.categorySlug),
+    getCategoriesForItemGeneric(webItem.id, itemType),
+  ]);
 
   if (!currentCategory) {
     notFound();
@@ -49,18 +53,23 @@ export default async function WebCategoryPage({ params: paramsPromise, searchPar
   const defaultSort = searchQuery ? 'relevance' : 'updatedAt';
   const sortBy = (typeof searchParams.sort === 'string' ? searchParams.sort : defaultSort) as SortByType;
 
-  const { resources: initialResources, total: initialTotal, hasMore: initialHasMore } = await getResources({
-    parentItemSlug: params.webSlug,
-    parentItemType: itemType,
-    categorySlug: params.categorySlug,
-    selectedTagIds: activeTagFilters.length > 0 ? activeTagFilters : undefined,
-    searchQuery,
-    sortBy,
-    page: 1,
-    limit: RESOURCES_PER_PAGE,
-  });
-
-  const dynamicAvailableFilterGroups: DynamicAvailableFilterTags = await getAvailableFilterTags(params.webSlug, itemType, params.categorySlug);
+  // ── Step 2: resources + filterTags in parallel ─────────────────────────────
+  const [
+    { resources: initialResources, total: initialTotal, hasMore: initialHasMore },
+    dynamicAvailableFilterGroups,
+  ] = await Promise.all([
+    getResources({
+      parentItemSlug: params.webSlug,
+      parentItemType: itemType,
+      categorySlug: params.categorySlug,
+      selectedTagIds: activeTagFilters.length > 0 ? activeTagFilters : undefined,
+      searchQuery,
+      sortBy,
+      page: 1,
+      limit: RESOURCES_PER_PAGE,
+    }),
+    getAvailableFilterTags(params.webSlug, itemType, params.categorySlug),
+  ]);
 
   return (
     <div className="space-y-8">
